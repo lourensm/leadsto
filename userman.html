@@ -1,0 +1,988 @@
+<HTML>
+<TITLE>The LEADSTO/TTL Software Environment Users Manual</TITLE>
+<BODY BGCOLOR="white">
+<H1>The LEADSTO/TTL Software Environment Users Manual</H1>
+
+
+
+
+<H1>Contents</H1>
+<UL>
+<lI><A href="#model">LATEST: specifying multiple traces in one specification</A>
+	<LI><A href="#comvis">LATEST: communication visualisation</A>
+	<LI><A href="#intro">Introduction</A>
+	<LI><a href="#install">Installation</a>
+	<LI><A href="#lteditor">Getting Started with the Leadsto editor (lteditor)</A>
+<LI><A href="#checker">Getting Started with the Checker (ttleditor/ttlchecker)</A>
+        <LI><a href="#checkerform">Checker details</a>
+	<LI><a href="#leadstodetails">Leadsto details</a>
+        <LI><a href="#appendix">Appendix</a>
+	<LI><A href="ChangeLog">Most recent changes</A>
+	<LI><a href="issues.html">Issues/To Do/Bugs</a>
+</UL>
+<H1><A name="intro">Introduction</A></H1>
+
+<h2>Documentation</h2>
+
+The separate "getting started" pdf documents introduce the tools:
+<ul>
+<li>LEADSTO:  <a href="getting_started_LEADSTO.pdf">getting_started_LEADSTO.pdf</a>
+<li>TTL: <a href="getting_started_TTL.pdf">getting_started_TTL.pdf</a>
+</ul>
+
+<H2><A>Introduction to the Software</A></H2>
+
+
+<DL>
+<DT>Leadsto Software
+<dd>
+A graphical editor is available for creating leadsto specifications. It
+is called <b><code>lteditor</code></b>.
+</dl>
+<P>
+The leadsto simulation program may be used to perform the following operations:
+<DL>
+<DT>Generate trace
+<DD>Generate a trace from a loaded specification.
+<DT>Load trace
+<DD>Load a trace from an earlier session
+<DT>Show trace
+<DD>Show a trace in a graph.
+</DL>
+<P>
+There are two versions of the simulation program:
+<DL>
+<DT><b><code>leadsto</code></b>
+<DD>A version with a more advanced GUI, allowing for loading/simulating/displaying
+multiple specifications
+<DT><b><code>ltbare</code></b>
+<DD>A version which performs one operation controlled by command 
+line options.
+</DL>
+<dt>TTL Checker Software
+<dd>
+The ttlchecker program is a combined graphical editor and checker for
+TTL-formulae.
+</DL>
+
+All programs have lots of command line options. Running 
+<pre>ltbare --help</pre>
+or
+<pre>leadsto --help</pre>
+or
+<pre>ttlchecker --help</pre>
+will output information on command line options.
+<h1><a name="install">Installation</a></h1>
+
+Currently the software is available for Windows, Linux (Redhat 7.1) and 
+Solaris.
+<P>
+<A name="installwin"><H3>Installation Instructions for Windows</H3></A>
+
+Install the leadsto software by running the setup executable
+<code>install_leadsto.exe</code>. 
+
+<H4>Working at the Vrije Universiteit on Windows</H4>
+
+<OL>
+<LI>Make sure you have a correctly mapped network drive T:
+pointing to <b><code>\\tornado\practica</code></b>.
+<LI>Make sure you have a correctly mapped network drive H:
+pointing to your UNIX home directory
+<LI>Make sure you don't mind if a directory <b><code>ltwrk</code></b> is created in your home directory.
+<LI>Double click on <b><code>T:\AI\projects\setupltsim</code></b>: This
+creates a directory <b><code>ltwrk</code></b> with an <b><code>ltwrk/examples</code></b> sub-directory. It also places shortcuts on your desktop.
+<LI>Double click on the 
+<uL>
+<LI><code>leadsto</code></b> icon on
+the desktop to run a simulation,
+<LI><code>ttlchecker</code></b> icon on
+the desktop to create/edit or check TTL-formulae.
+</UL>
+</OL>
+
+<H3>Instructions at the Vrije Universiteit on Solaris</H3>
+
+
+Execute 
+<ul>
+<li><b><code>/usr/local/ai/lt/bin/lteditor [leadstofile]</code></b> to 
+run a simulation (the argument is optional, but then the file must exist)
+<li><b><code>/usr/local/ai/lt/bin/leadsto [leadstofile]</code></b> to 
+run a simulation
+<li><b><code>/usr/local/ai/lt/bin/ttlchecker [fm-file]</code></b> to 
+create/edit or check ttl-formulae of a formula specification file.
+(The file argument is optional).
+</ul>
+Run in a directory where you have write permission, as the program will
+create several log files.
+<p>
+If you add <code>/usr/local/ai/lt/bin</code> to your environment variable
+<code>PATH</code>, you may simply type <code>lteditor</code>, 
+<code>leadsto</code>, <code>ttlchecker</code>.
+(How to do that depends on the Unix-shell you have (execute : echo $SHELL)
+and what environment file you normally put your environment variables in.
+For $SHELL = */bash: Edit your <code>.bashrc</code> or <code>.bash_profile</code>
+file: look for a line "export PATH= ..." and add <code>:/usr/local/ai/lt/bin</code>)
+
+
+<A name="installlinux"><H3>Installation Instructions for Linux</H3></A>
+
+<em>We do not update and test new versions of the Linux version of the software
+as we do the windows version.</em>
+<p>
+<OL>
+<LI>
+Download the file <b><code>ltrhlinux71.tgz</code></b> or another obviously linux installation tgz file. 
+<LI>Install its contents
+somewhere conveniently:
+<pre>
+  $ tar -zxf ltrhlinux71.tgz
+</pre>
+<LI>This will create a subdirectory  <b><code>lt/</code></b>. 
+<LI><bf><em>Do not forget:</em></bf> 
+<pre>
+  $ cd lt/plrt/bin;./chplhd
+</pre>
+<LI>Run <b><code>leadsto</code></b> by executing <b><code>lt/bin/leadsto</code></b>. Other programs are available in the <b><code>lt/bin/</code></b> directory. You should probably
+add <b><code>lt/bin/</code></b> to your <b><code>PATH</code></b> environment
+variable. <br>
+</OL>
+The ltrhlinux71.tgz (old) software has been tested only on different installations
+of Redhat 7.1. 
+There are other more recent/other version linux installations avalaible. Try
+the most recent ones first.
+
+(Please e-mail lourens@cs.vu.nl with your experiences with
+installing on Linux)
+
+<H4>Known problems installing on Linux</H4>
+One known problem is that you may get an error: undefined symbol rl_readline_state. You may try to upgrade your "readline" library to version 4.2.
+Otherwise you could try:
+<pre>
+$ export LD_LIBRARY_PATH=your_install_dir/lt/lib:$LD_LIBRARY_PATH
+$ your_install_dir/lt/bin/leadsto
+</pre>
+This will load the readline library in the lt directory instead of the one
+in your linux installation. You could write a script that contains
+this setting of <b><code>LD_LIBRARY_PATH</code></b>.
+
+
+
+<A name="lteditor"><H1>Getting Started with the Leadsto editor (lteditor)</H1>
+</A>
+
+On Windows, double click the <b><code>lteditor</code></b> icon on your desktop.
+On unix, execute <b><code>lteditor</code></b>.
+<P>
+The white canvas will contain the tree representation of your specification.
+Initially there is one node, named <b>ROOT</b>. Manipulation of nodes is 
+possible by right clicking with your mouse pointing to the node.
+All elements of your specification will be branches of this <b>ROOT</b> node.
+<P>
+Suppose you wish to specify that atom <b>seed</b> is true between times 0 and 
+10:
+<OL>
+<LI>Mouse over <b>ROOT</b>, click right mouse button; a menu will appear.
+<LI>While holding down the mouse button, point to the entry <b>Interval</b>.
+Release the mouse button. A subtree will appear, representing an interval rule.
+
+<LI>To fill in the range, click right mouse button  on the node "R: range([time],[time])". 
+Release the button when over edit. A window with name <b>"Range Editor"</b>
+will appear.
+<LI>Edit the line "range([time],[time])". Replace both times, i.e. result
+should be "range(0,10)". Press button <b>Ok</b>. In the canvas you will see the change.
+<LI>Next edit the entry representing the formula, marked <b>F [formula]</b> by
+placing the mouse over that text, right click and release over entry 
+<b>Change atom</b>. The node will be changed into <b>F [atom]</b>
+<LI>Edit this atom by right mouse button click over <b>F [atom]</b>, and release when
+over entry <b>Edit</b>. Change the value in the white text area into
+<b>seed</b>
+<LI>To save the specification entered, click on the second icon below the <b>File</b>
+entry (looks like a floppy) and specify a file name (without extension), say
+<b>savedseed</b>.
+<LI>To run the simulation at this stage, (leave the lteditor open),
+double click on the icon <b>leadsto</b>.
+A new window with header "Leads To Simulation Tool" will appear.
+<LI>To load the just saved file, click on the first icon below File 
+(folder icon). A file chooser window will appear, select the file you saved
+two steps ago.
+<LI>Back to the editor: Suppose you wish the simulation to run from time 0 to time 50 (instead of the default time 200). You need to add a child node of
+kind <b>end_time</b> to <b>ROOT</b>. 
+<br>Right click on the <b>interval</b> node and release over <b>insert above</b>.
+<br>
+A <b>[specification_element]</b> node will appear.
+<LI>Right click on this node and select <b>end_time</b>.
+Node changes into <b>end_time([time])</b>
+<LI>
+Edit <b>end_time([time])</b> by right clicking and selecting the <b>Edit</b>
+entry. Change <b>[time]</b> into <b>50</b>, press button <b>Ok</b>.
+<LI>You could save and run again as described about five steps before.
+<LI>Suppose you wish to add a rule <b><code>seed o-->> tree</code></b> with
+parameters e= 0, f = 0, g = 1, h = 1:
+<br>
+Right click select <b>insert below</b> over <b>interval</b> node.
+<LI>Change new <b>[specification_element]</b> into <b>Leadsto</b> node.
+<LI>The  <b>Leadsto</b> node has two children <b>A:[formula]</b> (A for antecedent) and <b>C:[formula]</b> (C for consequent).
+<br>
+Change the <b>A:</b> node into an atom and edit it to change it into <B>seed</B>.
+(Due to a bug the <B>A:</b>, <B>C:</b> labeling may become confused).
+<LI>
+Change the <b>C:</b> node into an atom  <b>tree</b>
+<LI>Add the parameters: Right click on the <b>leadsto</b> node and select
+add delay.
+<LI>Edit the <b>EFGH: efgh([time],[time],[time],[time])</b>
+node (right click on it and select edit). Replace the <b>[time]</b> strings with
+our delays, i.e. the result should be <b>efgh(0,0,10,30)</b>.
+<LI>Save the specification and reload it in the <b>Simulation Maker</b>
+</OL>
+The <b>saveseed</b> example will look like
+<p ALIGH=CENTER>
+<IMG SRC="seedtree.gif" ALT="Missing Picture of Tree">
+</p>
+
+
+<A name="checker"><H1>Getting Started with the  Checker (ttleditor/ttlchecker)</H1></A>
+
+The checker software allows one to check whether a given <em>ttl-formula</em> 
+is satisfied for a set of traces.
+<P>
+A separate editor for <em>ttl-formula</em> called <b><code>ttleditor</b></code>is available, but the ttl-formula checker <b><code>ttlchecker</b></code> itself allows you to create and check formula
+in one GUI.
+<OL>
+<LI>Be careful when checking a formula: lots of errors in your specification
+may lead to exiting the checker program. If you do not wish your editing
+work to get lost, save your ttl specification before checking.
+<LI>A trace is needed if you wish to check trace properties. The traces 
+generated by <b><code>leadsto</code></b> may be loaded into the checker.
+If you wish to load different traces, after doing a simulation, rename the
+generated trace file <b><code>trace.tr</code></b> to some other file,
+such as <b><code>sugarscape.tr</code></b>
+<LI>Start up <b><code>ttlchecker</b></code>(by double clicking the shortcut 
+on windows or executing <code>ttlchecker</code> on unix/linux).
+<LI>Edit properties and sorts functions in the same way as editing
+nodes in the leadsto editor described above.
+<LI>You may define sorts and properties in the ttlchecker/ttleditor.
+<LI>You may check a formula by right clicking on a property and selecting
+<b>"Check property verbose"</b> or <b>"Check property quiet"</b>.
+<br>This will compile the formula the property represents and will start
+checking. The "verbose" variant will give lots of output on the background 
+window which may provide you with some information on why a  <em>ttl-formula</em> is not satisfied.
+<br>
+Only properties containing no variable arguments with all generic parts filled
+in may be checked.
+<LI>You may reuse sort definitions from your <b><code>.lt</b></code> 
+specifications by copying such files into <b><code>.fm</b></code> files
+and reading them in. Unrecognised leadsto elements will then be ignored and
+when you save the loaded ttl-specification, only ttl-elements will remain.
+<LI>Loading traces:
+<OL>
+<LI>Select <b>File => Trace Management...</b>: a "Checker Trace Management"
+window should appear.
+<LI>Press the <b>Add trace</b> button: a File chooser window should appear.
+<LI>Select a trace file to add (double click, or open)
+<LI>If you do not like the default name, select the added trace name
+(trace1,trace2,..) and edit the <b>Trace name:</b> entry.
+</OL>
+<LI>The traces as generated by the leadsto software are "compacted", i.e.
+only distinct time intervals are used with integer values starting at 0.
+This means that you should not use absolute times as occurring in the
+leadsto specification in ttl-formulae. You may inspect the "compacted"
+trace by pressing the button <b>"Save compacted traces"</b> which will create 
+files <code>generated_compacted_trace_trace1.tr</code>,
+<code>generated_compacted_trace_trace2.tr</code> etc.
+Reload these trace files into leadsto by selecting load in <code>leadsto</code>
+and changing <b>Filter:</b> into <b>Trace</b> in the file chooser window.
+<LI>For better error messaging, use <b><code>var:sort</code></b> everywhere in your formulae where you would use <b><code>var</code></b>.
+<LI>Take care that arithmetic expressions are recognised automatically.
+This implies that  <b><code>a(e, pi)</code></b> will be interpreted as  <b><code>a(2.718.., 3.141..)</code></b>.
+</OL>
+
+<h1><A name="model">Specifying multiple traces in one specification</A></h1>
+
+<h2>Getting started</h2>
+
+<OL>
+<LI>
+Load and inspect <code>model1.lt</code> (from the examples) into your lteditor.
+<pre>
+MODEL m1(D:between(10,12)) 
+</pre>
+introduces a constant <code>D</code> in the leadsto specification.
+Three traces will be produced for <code>D=10,D=11,D=12</code>.
+<code>D</code> may be used as a constant almost everywhere. Detection is not
+complete yet (probably not detected in sort definitions), if you miss
+some substitution, e-mail lourens please.
+In this example <code>D</code> is used as the delay parameter in a leadsto 
+rule.
+<LI>
+Load <code>model1.lt</code> into leadsto. Traces will be generated and all
+traces are gathered in one trace file (defaulting to <code>trace.tr</code>).
+<br>
+The implementation is incomplete in so far that you cannot inspect the different traces yet.
+<LI>
+Load <code>model1.fm</code> into <code>ttlchecker</code>.
+Next load the trace file (<code>trace.tr</code>) through the GUI:
+<code>File->TraceManagement</code>. As first trace you will now see
+<code>m1(D:between(10,12))</code>. But this is a set of traces.
+Sort TRACE will contain <code>m1(10),m1(11), m1(12)</code>.
+</OL>
+
+<h2>More details</h2>
+By defining an entry <code>model(modelname(Name1:Sort1,Name2:Sort2,..,NameN))</code> in your leadsto specification, constants 
+<code>Name1, Name2,.. NameN</code> may be used in your leadsto specification.
+The value of <code>NameI</code> will be instantiated to an element in
+<code>SortI</code>. Th3e leadsto program will generate just as much traces
+as there are instantiations of <code>Name1,..NameN</code>.
+The name of a specific trace will be <code>modelname(Value1,Value2,..ValueN)</code>.
+<P>
+There is no magical improvement in performance! Generating N traces still 
+takes N times as much time as generating a single trace.
+<p>
+<bf>Example:</bf>
+<pre>
+model(m1(Delay:between(10, 12))).
+interval([], range(0, 1), a).
+leadsto([], a, b, efgh(Delay, Delay, 1, 1)).
+</pre>
+In trace <code>m1(10)</code> constant <code>Delay</code> will have value 10,
+in <code>m1(11)</code> constant  <code>Delay</code> is 11.
+<p>
+Loading the trace file into a ttl specification will add objects/terms
+<code>m1(10),m1(11),m1(12)</code> to sort <code>TRACE</code> and have those 
+three traces loaded.
+
+<h1><A name="comvis">Communication Visualisation</A></h1>
+
+<h2>Most recent added features and explanations</h2>
+
+<ul>
+<li>Remark:
+Once the communication visualisation window becomes visible, step or leap
+may be chosen. If commtrace ends, you need to press reset, to reset the state to the initial state/time. At the end of a trace step or leap simply do nothing.
+(Is a small bug).
+<li><em>Beware</em>: In Windows there is a bug in the handling of showing graphicals having the pen property > 1. So avoid that or at least do not do in on windows.
+<li>Added a new program called commdemo1, in the solaris vu executable directory and Windows as a shortcut: it startsup leadsto and loads a graph comm demo.
+<li><h3>Suggestions for use</h3>
+<h4>Relating to demos</h4>
+<OL><LI>
+First, you could copy the leadsto link and add a number of arguments. I often use (in Unix or cygwin:)
+<pre>
+leadsto -noshow -graphview g1 -graphinit spec/highlevel2a.nl -displaytrace highlevel2.tr
+</pre>
+<pre>
+-noshow suppresses the leadsto window(although the trace remains visible),
+-graphview g1 currently only results in showing the graph
+-graphinit FILE ensures that a previously saved initial situation is restored.
+-displaytrace File ensures that a certain trace will be loaded.
+</pre>
+<LI>Later on we may save settings with a trace. But for now, if you save the
+properties you set, they will be saved in a sub directory <code>.xpce</code> 
+of your working directory in a file LeadsTo.cnf. You may perform different experiments in different directories and so have different stored settings. 
+</OL>
+<li>Made lots of graph alignment constants editable: Select Settings -> Properties.<p>
+Some properties do not function yet. all Graph Sub Properties will have effect.
+There is a minimal amount of documentation with each property.
+<
+<p>
+Some details:
+<DL>
+<DT><b>half time fraction</b><DD>Currently a global property that is a measure for how long one communication keeps a node or a communication link busy.
+<DT><b>Link Properties</b><dd>
+The width and length of a link is determined by the CommunicationStrength: sigma(commevent, 2^((Tcommevent-Tcurrent)/Half_time_fraction))
+If CommunicationStrength >= MinimumLengthStrength then the ideal connection length is MinLength. If CommunicationStrength approaches 0 the ideallength will
+approach MaxLength. The link width will be UnitWidth*CommunicationLength.
+Two nodes will stop being attracted to each other as soon as the link width becomes 1.
+<DT><b>Node Properties</b>
+<DD>The CommunicationStrength of nodes is defined by a similar expression, sum over all communications involving the node. For the time being the 
+Diameter of a node is determined by DiameterProperty*(1 + CommunicationStrength*CommunicationFactor)
+</DL>
+<li>
+Added buttons <code>STEP</code>, <code>LEAP</code> and <code>RESET</code>
+to the communication analysis window: Once a trace is loaded into the
+communication tool, you may activate all communications step by step
+one after another by repeatedly pressing <code>STEP</code>. If you wish to
+run through the rest of the communication, press <code>LEAP</code>. If you wish
+to go back to the intial communication situation, press <code>RESET</code>.
+<li>In between steps you may move nodes and press File->Layout. The
+current layout will change and the run will proceed from the changed geometry;
+this has limited use as long as we cannot save runs.
+</ul>
+<h2>introduction</h2>
+Very experimental.
+After loading and running a simulation or after loading a trace the communication between roles may be visualised by a changing graph. Currently only
+atoms of the form <code>output(From)|communication_from_to(From, To, T1, T2)</code>
+are considered and the contents of <code>T1</code> and <code>T2</code> are 
+ignored. In principle as soon as such an atom becomes true, a connection is made between two nodes named <code>From</code> and <code>To</code>.
+
+<h2>Getting started</h2>
+
+<ol>
+<li>Load and run a simulation or load a trace. You could start out with the
+<code>highlevel2.lt</code> example.
+<li>Select <b>File->Show Communication Graph</b>
+<li>A graph is shown containing all nodes and all occurring communications.
+The window will probably be too small to comfortably hold all nodes, so
+resize the "Communication Analysis Tool" window and in this window
+select <b>File->Layout</b>
+<li>Next, optionally, move around nodes by left mouse button dragging them around, so that the node/links become more pleasing to the eye.
+<li>If you wish to save that pleasing initial configuration, select
+<b>File->Save As Initial Position</b>. Later on you may reload this 
+configuration by selecting <b>Load Initial Position</b>. For demonstration purposes you could try loading the <code>highlevel2a.nl</code> initial settings.
+<li>Next, select <b>File->Show communication..</b>
+</ol>
+
+<h2>Activities</h2>
+
+<ol>
+<li>Arrows better visible if link becomes wider
+<li>busy roles more intense
+<li>Make constants more accessible
+<li>Change colour and/or size of nodes when more involved with communication.
+<li>Saving a communication visualisation run and rerunning it from saved
+state and allowing editing.
+<li>Attract most recent, most busy nodes to center.
+<li>Make nodes bigger when they have been more busy recently.
+<li>SVG replay?
+</ol>
+Finished:
+<ol>
+<li>Make constants more accessible.
+<li>Make nodes bigger when they have been more busy recently.
+<li>Is a bug:the distance now has a maximum strength 1, and decays. This should
+be start out with one after comm , decay some, add one after next comm, etc.
+<li>Keep all communication links in the visualisation.
+</ol>
+
+<H1><a name="checkerform">Checker details</a></H1>
+
+<H3>Countably infinite sorts</H3>
+
+Sorts dealing with time will be dealt with in the next section.
+<p>
+Under certain restrictions you may use variables of countably infinite sorts
+in formulae.
+In existential quantifiers
+<pre>
+         exists([..X:infinite_sort,..], Formula)
+</pre>
+the first occurrence of <code>X</code> in <code>Formula</code> should be in 
+a positive holds subformula.
+Any other occurrences, such as in comparisons should be after that
+first occurrence.
+<p>
+In universal quantifiers
+<pre>
+         forall([..X:infinite_sort,..], Formula)
+</pre>
+<code>Formula</code> must be an implication: 
+<code>Formula = implies(F1, F2)</code> and first occurrence of <code>X</code> in <code>F1</code> should be in 
+a positive holds subformula.
+<p>
+The <em>"first-occurrence-of-variable-in-positiveholds"</em> of variable 
+<code>X</code> in formula <code>F</code> says that if <code>F</code> is a conjunction of subformulae, that
+if there is a subformula where <code>X</code> occurs first (from left to 
+right), it must be in a holds term. Within this subformula the same 
+property should hold(recursively).
+<p>
+A subformula could also be an existential quantification. In that case
+if X occurs in the existential quantification sub formula, its
+first occurrence there should be in a positive holds subformula (recursively).
+<p>
+A subformula could also be a unification, consisting of a toplevel
+implication, i.e.
+<pre>
+forall(... , implies(F1, F2))
+</pre>
+Here if X occurs in implies(F1, F2) then the first occurrence of X in formula should be in a positive holds subformula of F1.
+<p>
+
+Any variable having the first-occurrence-in-positive-holds property
+will be much more efficiently coded. For infinite sorts the property must
+hold.
+<p>
+For the time being we do not allow the first-occurrence-in-positive-holds 
+occurrence to be preceeded by a disjunction of which one branch binds
+<code>X</code>, but the other one does not.
+
+<H3>Sorts dealing with time</H3>
+
+The leadsto software associates sort REAL with the time axis.
+<p>
+The checker has as input a trace of holds facts that are true/false for
+finite REAL time intervals.
+<p>
+The checker does not allow using REALS as time parameters to test
+properties, as there are infinitely many times that a holds fact is true
+if there are any holds facts in the trace.
+<p>
+The checker analyses the formula and determines what holds facts are present in
+the formula. After that the checker determines what REAL time intervals
+occur in the trace. The intervals are made maximal, i.e. all consecutive
+intervals that have identical holds values are taken together.
+<p>
+This leads to a number of intervals NI. A builtin sort has a range
+between 0 and NI - 1. There are different names for this sort. 
+The preferred one is "interval".
+<p>
+In formulae there are functions available for values of the lower and upper bounds:
+<DL>
+<DT><b>begin(i:interval)</b>
+<DD>gives the REAL value of the starting time of the interval in the trace.
+<DT><b>end(i:interval) </B>
+<DD>gives the REAL value of the end time of the interval in the trace.
+<DT><b>last_interval</B>
+<DD>Sort <b>interval</b> ranges from 0 to (including) <b>last_interval</b>.
+
+<DT>Another function is:
+
+<DT><b>interval(T:REAL)</b> 
+<DD>giving the interval in which time T is. The interval is defined as
+[begin,end)
+
+<DT><b>time(i:interval)</b>
+<DD>In holds facts in the state argument times may be REAL values, integers or the
+special function time(i:interval). This function is only defined at the correct
+position in holds formulae.
+</DL>
+In quantifiers it is always allowed to use variables of sort interval, as that is
+a finite sort.
+
+It is also allowed to use integers representing time in quantifiers if
+you take care that such integer time quantifier variables have the
+first-occurrence-in-positive-holds property as defined in the previous section.
+
+Example:
+<pre>denotes(ep2s,
+    forall([t:interval >= interval(24), e3:integer],
+           implies(holds(state(trace1,time(t:interval)), 
+                         day_used_energy(e3:integer),true),
+		   e3:integer = 8
+           )
+          )
+).
+</pre>
+<H1><a name="leadstodetails">leadsto specifications/details</A></H2>
+<H3>General aspects of leadsto specifications</h3>
+There are two ways of producing a "leadsto specification":
+<OL>
+<LI>Use the graphical editor to produce a file.
+<LI>Using your own text editor, create a specification consisting of
+  terms as described in  section <a href="#constructs"><b>Allowed constructs</b></a>
+</OL>
+Even if you use the graphical editor, browse section 
+<a href="#constructs"><b>Allowed constructs</b></a> to get an impression of 
+what constructs are available.
+<P>
+In case you prepare your own text file:
+The specification has a prolog-like syntax and 
+is read from this file (the graphical editor writes such text files).
+<br>
+Major characteristics of this prolog syntax are:
+<UL>
+<LI>
+Names starting with uppercase letters must be quoted.
+<LI>
+All syntactical constructs end with a full stop (".").
+<LI>
+All syntactical constructs are Prolog terms.
+</UL>
+
+The current software requires all atoms to be well-formed Prolog terms.
+
+<H3><a name="constructs">Allowed constructs</a></H3>
+<UL>
+<LI><b><code>constant(&lt;Name-Term&gt;, &lt;Value-Term&gt;).</code></b>:
+<BR>
+Replace <code>&lt;Name-Term&gt;</code> by <code>&lt;Value-Term&gt;</code>
+wherever it occurs in the specification. 
+<br>Please do not use recursive 
+replacements and do not use prolog variables here.
+<br>Constants are currently not substituted in <code>cwa</code>,
+<code>display*</code>, <code>model</code>, <code>start_time</code>, <code>end_time</code>, <code>global_lambda</code> specification elements.
+<LI><b><code>start_time(&lt;Time&gt;).</code></b>
+<br>Simulation start time(default 0).
+<LI><b><code>end_time(&lt;Time&gt;).</code></b>
+<br>Simulation end time.
+
+<LI><b><code>interval(&lt;Vars&gt;,range(&lt;Start-Time&gt;, &lt;End-Time&gt), 
+&lt;AndLiterals&gt;).</code></b>
+<br>Make literals true in range <code>&lt;Start-Time&gt</code> - <code>&lt;End-Time&gt;</code>
+for all instances of <code>&lt;Vars&gt</code>, for example<pre>
+interval([x:between(1,10), y:between(1,10)&lt;x],0, 10, and(f(x,y),not(g(x,x)))).
+</pre>
+<P>
+Remarks:
+<UL>
+<LI>Note that we used a sort <code>between(1,10)</code> here. So sorts 
+may have parameters. <code>between(L:INTEGER,H:INTEGER)</code>
+<P>
+<LI>This is the preferred notation. It is allowed to define one constant for
+the <code>&lt;Range&gt</code> argument, or even use a variable, as long as it
+simplifies/instantiates to <codE>range(&lt;Start-Time&gt;, &lt;End-Time&gt)</code>
+<LI>The variables occurring in <code>&lt;Vars&gt</code> may occur anywhere in the
+rest of the interval specification.
+</UL>
+<LI><b><code>interval(&lt;Vars&gt;, &lt;Start-Time&gt;, &lt;End-Time&gt, 
+&lt;AndLiterals&gt;).</code></b>
+<br>Same as above.
+<LI>           <b><code>interval( &lt;Start-Time&gt;,&lt;End-Time&gt, &lt;AndLiterals&gt;).</code></b>
+<br>Same as above but no variables.
+<LI><b><code>periodic(&lt;Vars&gt;, range(&lt;Start-Time&gt;, &lt;End-Time&gt),&lt;Period-Time&gt,&lt;AndLiterals&gt;).</code></b>
+<LI><b><code>periodic(&lt;Vars&gt;, &lt;Start-Time&gt;, &lt;End-Time&gt,&lt;Period-Time&gt,&lt;AndLiterals&gt;).</code></b>
+<BR>
+In the graphical editor the only distinction between a periodic and non-periodic interval is that a period node is present or not.
+<LI><b><code>cwa(&lt;VarAtom&gt;).</code></b>
+<br>Is still incomplete, should contain variable specification, for now
+use prolog variables to specify a pattern for CWA atoms.
+<LI><b><code>global_lambda(&lt;Factor&gt;).</code></b>
+<LI><b><code>leadsto(&lt;Global-Vars&gt;, &lt;LHS-Formula&gt;, &lt;RHS-Formula&gt;, &lt;Delay&gt;).</code></b>
+<br>where
+<UL>
+<LI>&lt;Formula&gt; : not(&lt;Formula&gt) <b>|</b> and(&lt;Formula&gt;[,&lt;Formula&gt;,...]) <b>|</b> forall(&lt;Local-Vars&gt;, &lt;Formula&gt)
+<LI>&lt;Delay&gt; : efgh(&lt;E-Time&gt;,&lt;F-Time&gt;,&lt;G-Time&gt;,&lt;H-Time&gt;)  <b>|</b> unit
+</UL>
+<br>Remarks: 
+<UL><LI>The <code>forall(&lt;Local-Vars&gt;, &lt;Formula&gt)</code> construct 
+will be completely instantiated and replaced by an <b><code>and</code></b> construct. 
+<LI>If the <code>&lt;Local-Vars&gt</code> construct refers 
+to a variable in <code>&lt;Global-Vars&gt;</code> then these global-variables 
+will also lead to partially instantiated rules.
+<LI><code>&lt;Global-Vars&gt;</code> says that there is a rule for each
+instantiation of <code>&lt;Global-Vars&gt;</code>.
+<LI>All variables in <code>&lt;Global-Vars&gt;</code> should preferably occur
+    in <code>&lt;LHS-Formula&gt;</code> as well as in <code>&lt;RHS-Formula&gt;</code>.
+<LI>Disjunction and existential quantification are not yet supported.
+</UL>
+<LI><b><code>leadsto(&lt;Formula&gt;, &lt;Formula&gt;, &lt;Delay&gt;).</code></b><br>same as above, but no global variables.
+<LI><b><code>sortdef(&lt;Sort-Name&gt;, [&lt;Ground-Term&gt;,...]).</code></b><br>
+(where the <b><code>[</code></b> and <b><code>]</code></b> are list delimiters,
+not optional grammar meta info):Define sort as list of elements (sort name and objects may contain arguments, but for the time being they better not contain variables.
+<LI><b><code>display_number_range(&lt;VarAtom&gt;,&lt;PrologVar&gt;, &lt;Relation-Tag-Name&gt;, &lt;Variable-Tag-Name&gt;)</code></b>
+<br>
+if you wish to display a set of atoms that have a common numerical argument in 1 graph. See the specification
+<b><code>examples/test/expfn.lt</code></b>.
+The first versions of the leadsto editor will not support <b><code>display_number_range</code></b>.
+<LI>Display control
+<br>
+Entries of the form <b><code>display(ViewTag,Data)</code></b>
+control what to show how. ViewTag is a tag that determines what view
+is active. It may be controlled by the commandline option 
+<code>-view ViewTag</code>.
+<UL>
+<LI><b><code>display(ViewTag, show_atoms(SomeAtom))</code></b>
+<br>
+If at least one such entry is present,
+     only show those atoms matching SomeAtom.
+     More than one entry "show_atoms(SomeAtom)" are allowed.
+     The order in which the atoms are shown is the
+     order that the "show_atoms(SomeAtom)" occur in the
+     specification file. All atoms within one "show_atoms(SomeAtom)"
+     will be sorted(see <A href="#sorting">remark on alphabetical sorting</a>). Take care: multiple "show_atoms(SomeAtom)" matching
+     one atom will lead to multiple displays of this atom.
+<LI><b><code>display(ViewTag, no_show_atoms(SomeAtom))</code></b>
+<br>
+Do not show atoms matching SomeAtom.
+<LI><b><code>display(ViewTag,sort_atoms_global)</code></b>
+<br>
+     Do not follow the order described for "show_atoms(SomeAtom)",
+     but sort all atoms "globally"(see <A href="#sorting">remark on alphabetical sorting</a>).
+<LI><b><code>display(ViewTag,sort_atoms_time_global)</code></b>
+<br>
+Sort all atoms in the trace according to their time of first occurrence in
+the trace with a truth value other than their default value(=unknown or false if cwa).
+<LI><b><code>display(ViewTag,sort_atoms_time_abc_global)</code></b>
+<br>
+Sort all atoms in the trace according to their time of first occurrence in
+the trace with a truth value other than their default value(=unknown or false if cwa), sort atom names alphabetically for same times(see <A href="#sorting">remark on alphabetical sorting</a>).
+<LI><b><code>display(ViewTag,sort_atoms_time)</code></b>
+<br>
+Sort atoms within each set of  <code>display(ViewTag, show_atoms(SomeAtom))</code> internally in time order as defined in <b><code>display(ViewTag,sort_atoms_time_global)</code></b>.
+</UL>
+</UL>
+The specification may also contain Prolog code such as for sort definitions.
+(Not supported by the graphical editor).
+<hr><h4><a name="sorting">Remark on alphabetical sorting</a></h4>
+Alphabetical sorting is based on ordering of terms in the Prolog programming language: Terms with a lower number of arguments (irrespective of their name) have a lower order than terms with more arguments, so
+<pre>
+z, y(a), y(b), a(b,c), b(a,a)
+</pre>
+is sorted.
+<hr>
+
+<h3>Sort definitions</h3>
+
+For the time being there are two ways of defining sorts:
+<OL>
+<LI>Use sortdef, i.e. <b><code>sortdef(&lt;Sort-Name&gt;, [&lt;Ground-Term&gt;,...]).</code></b><br> as described above. This is the preferred way.
+<LI>
+<pre>
+sort_element(s(X), Y) :-
+      member(Y, [f(X), g(X), h])
+</pre>
+leading to <code>s(1 + 3)</code> having elements <code>f(4), g(4) and h</code>.
+This allows more complex sort definitions. But the leadsto editor does not
+support such constructs.
+</OL>
+
+<h4>Predefined sorts</h4>
+<DL>
+<DT><b><code>REAL</code></b>
+<DD>Variables of type real. (If you specify this sort in your own text file,
+you should put single quotes around REAL)
+<DT><b><code>INTEGER</code></b>
+<DD>Variables of type integer. (Same remark with regarding to quoting as for sort REAL
+)
+<DT><b><code>between(I1, I2)</code></b>
+<DD>Variables of type integer constrained between two values I1 and I2, i.e.
+<code>x: x >= I1 and x <= I2</code>
+</DL>
+
+<h3>Numerical expressions</h3>
+
+Operators "+", "-", "*", "/", "mod", "exp" are handled in a special way:
+operands are either numbers or variables instantiated to numbers.
+<br>
+<B>Limitation:</B> for the time being the first occurrence of a variable that
+is present in the initial <code>&lt:Vars&gt;</code> list should not be
+part of an operation.
+
+<h2>Printing</h2>
+
+For printout right click on the window and select one of the options.
+Option <b><code>Print</code></b> will print to an installed printer on windows
+or send to the printer on solaris
+at the VU (executes lpr -P $PRINTER tmpfile.ps).
+
+<h2>Saving and later reproducing traces</h2>
+
+A <b><code>leadsto</code></b> simulation session produces a file trace.tr
+which gets overwritten each simulation. If you wish to keep it,
+rename the trace.pl file. To inspect the trace, run <b><code>leadsto -displaytrace TRACEFILE</code></b>.
+
+<h2>Remarks on the AGR model atom representation</h2>
+
+If you wish the checker software to interpret traces generated
+with the leadsto software, the "|" prefix is reserved for expressing
+input/output/internal, role, relation tuples:
+
+<pre>
+output(R:'ROLE')|relation(arg1,..)
+input(R:'ROLE')|relation(arg1,..)
+internal(R:'ROLE')|relation(arg1,..)
+</pre>
+lead to <b>holds</b> relations in the ttl formulae:
+<pre>
+holds(state(trace1, t1, output(R:'ROLE')), relation(arg1,..), trueorfalse)
+holds(state(trace1, t1, input(R:'ROLE')), relation(arg1,..), trueorfalse)
+holds(state(trace1, t1, internal(R:'ROLE')), relation(arg1,..), trueorfalse)
+</pre>
+
+The checker software needs this syntax of defining role/input/output.
+
+
+<H3>Remarks on use of variables</H3>
+
+
+Interval rules will be instantiated completely. This implies that
+all sorts occurring at all places should have finite domains.
+<P>
+Variables may occur almost everywhere in leadsto rules and interval rules.
+If those variables obey certain requirements, they may even be of infinite
+sorts. These requirements will follow in the next paragraph. If these 
+requirements are not met for some variable, the variables will be instantiated, leading to the generation of one rule per variable instantiation.
+<P> 
+Leads to rules may contain variables of non finite domains. There
+are severe restrictions on the use of such variables:
+<OL>
+<LI>Infinite domain variables may not occur in delays: NOT ALLOWED
+<pre>
+leadsto([x:'INTEGER'], a(x), b(x), efgh(1, 1, x, x)).
+</pre>
+<LI>They may not have range restrictions: NOT ALLOWED
+<pre>
+leadsto([x:'INTEGER'< 10], a(x), b(x), efgh(0,0,1,1)).
+</pre>
+<LI>They may not occur as range variables in quantifiers inside
+formulae: NOT ALLOWED:
+<pre>
+leadsto([], forall([x:'INTEGER'],a(x))  , b, efgh(0,0,1,1)).
+</pre>
+<LI>They may not occur as arguments in rule parts such as sorts,
+constant part of conditions, etc. Only inside atoms in formulae.
+NOT ALLOWED:
+<pre>
+leadsto([x:'INTEGER'], forall([y:between(1,x)],a(y), b(x), efgh(1, 1, x, x)).
+
+leadsto([x:'INTEGER'], forall([y:between(1,3)< x + 2],a(y), b(x), 
+efgh(1, 1, x, x)).
+</pre>
+<LI>
+If an infinite domain variable occurs only in the antecedent, this is allowed,
+but may lead to warnings if multiple instantiations lead to the same result.
+<LI>
+Infinite domain variables may not occur only in the consequent.
+</OL>
+
+Variables occurring in leadsto rules are split into two kinds: Global variables
+encompassing the whole leadsto rule, called global variables and local variables,
+i.e. variables
+defined in quantifiers inside the antecedent or consequent.
+<p>
+Local variables will be completely instantiated, internally transforming
+forall quantifiers into conjunctions.
+<P>
+Global variables are analysed for their occurrence in the body of the rule.
+If they occurs in places defined above as NOT ALLOWED, those variables
+will lead to instantiation as well, i.e. for each instantiation of those
+NOT ALLOWED variables, a rule is instantiated.
+
+<UL>
+<LI>
+<pre>
+leadsto([x:between(1, 1000)], a(x), b(x+1), efgh(0,0,1,1)).
+</pre>
+will not be instantiated and will have good performance.
+<LI>
+<pre>
+leadsto([x:between(1, 1000), y:between(x,x+1)], a(x), b(x), efgh(0,0,1,1)).
+</pre>
+will instantiate into 1000 rules.
+<LI><pre>
+leadsto([x:between(1, 3), y:between(x,1000)], a(x,y), b(y+1), efgh(0,0,1,1)).
+</pre>
+is ok: x will be instantiated, but y will not.
+</UL>
+
+
+<h2>Restrictions on e, f, g, h</h2>
+
+<ul>
+<li>f > e is not allowed; this should lead to a warning and the rule should be 
+   ignored. Software versions up to version 0.91 did not check this requirement
+   and could have produced incorrect results.
+<li>Delays must all be numbers >= 0, not all 0, if H = 0 then G must be 0.
+An error message will be shown:
+<pre>
+***ERROR:Delays must all be numbers >= 0, not all 0, if H = 0 then G must be 0, GOT efgh(0, 0, 0, 0)
+
+WARNING:Leadsto rule or interval has no instances
+</pre>
+<LI>If e,f = 0,0 g must be > 0 (for the time being), otherwise the simulation
+    may produce an error: 
+<pre>
+FATAL ERROR:No progress, probably used too much 0 time parameters...
+</pre>
+</ul>
+</h2>
+<h2>Details on working with real numbers</h2>
+
+Before storing derived atoms, their real number arguments are rounded off,
+standard to about 7 digits long. There are facilities for more precise
+results. E-mail lourens@cs.vu.nl if you need more precise results.
+
+<h1><a name="appendix">Appendix</a></H1>
+
+<h2>Trace syntax</h2>
+
+<h3>Introduction</h3>
+
+Traces need not be generated by the leadsto software. The checker expects
+trace files of a certain syntax. At the moment there are two formats for 
+traces. One supports only one trace per file, called "single-trace" trace 
+format, the other supports multiple traces per file, called "multi-trace" trace
+format. For the time being the "multi-trace" trace format cannot be shown by 
+the leadsto software, but can be loaded into the checker.
+
+<h3>General</h3>
+Both format trace files must be correct prolog syntax. A.o. this implies:
+<ul>
+<li>Each entry must be a prolog term followed by a single dot.
+<li>If a (leadsto/checker) atom contains an upper-case name, the name should be
+single quoted, so <code>A(p,R)</code> must be written as 
+<code>'A'(p,'R')</code>. 
+</ul>
+
+<h3>Specific, common</h3>
+
+Each trace may contain facts
+<pre>
+content(SomeValue).
+</pre>
+The checker recognizes and uses:
+<pre>
+content(source(file(FileName, Parts)).
+</pre>
+where parts is a prolog list, the checker only handles an entry
+<code>path(Path)</code> in the <code>Parts</code> list; if such 
+an entry is present, it interprets that as filename of the generating source, 
+otherwise it uses <code>FileName</code>.
+<pre>
+content(run(RunData)).
+</pre>
+where <code>Rundata</code> is a prolog list; the checker only recognises 
+an entry <code>date(Date)</code> as the (modified/creation) date of the
+generating source file.
+<p>
+See the GUI for "trace management" in the checker for how the data is 
+presented.
+<h3>"single-trace" format</h3>
+Example:
+<pre>
+content(type(savedtrace('spec/simple.lt'))).
+content(source(file('spec/simple.lt', [size(214), path('f:/cygwin/home/lourens/wrk/ww/db3/pl/spec/simple.lt')]))).
+content(run([date('Thu Aug 19 10:43:03 2004')])).
+atom_trace(tree, tree, [range(870.0, 1020.0, true), range(740.0, 870.0, false), range(590.0, 740.0, true), range(460.0, 590.0, false), range(310, 460.0, true), range(180, 310, false), range(30, 180, true), range(0, 30, false)]).
+atom_trace(blossom, blossom, [range(960.0, 1110.0, true), range(830.0, 960.0, false), range(680.0, 830.0, true), range(550.0, 680.0, false), range(400.0, 550.0, true), range(270.0, 400.0, false), range(120.0, 270.0, true), range(0, 120.0, false)]).
+atom_trace(seed, seed, [range(860.0, 1000, false), range(840.0, 860.0, true), range(580.0, 840.0, false), range(560.0, 580.0, true), range(300.0, 560.0, false), range(280, 300.0, true), range(20, 280, false), range(0, 20, true)]).
+cwa(A).
+times(0, 1000.0, 1000).
+</pre>
+The <code>atom_trace(AtomKey,Atom, Ranges)</code> entries should speak for 
+themselves apart from the first argument <code>AtomKey</code>. Later on you 
+possibly will be allowed to leave out the argument, but for the time being
+you should add such an argument. The argument is the "quoted" version of the 
+<code>Atom</code> argument. 
+<br>
+If <code>Atom</code> is <code>'A'(p, 'Q')</code> then <code>AtomKey</code> must be
+<code>'\'A\'(p, \'Q\')'</code>. The quoting becomes rather awkward. Best to look at example
+traces.
+<p>
+The entry <code>times(StartTime,HandledTime,EndTime).</code>: Just use <code>HandledTime=EndTime</code>.
+The times are the start and end times of a trace.
+<h3>"multi-trace" format</h3>
+The format is almost identical to the "single-trace" format. Each per trace entry gets an extra
+first argument representing the name of the trace. There is a separate entry 
+<code>trace(TraceName).</code> for each trace.
+<P>
+There should be an entry <code>model(Model, Size).</code> in the file, where <code>Size</code> is the 
+number of traces and <code>Model</code> represents the "generating term" for all trace names. (It
+is probably only used as an identification of the set of traces in the "trace management" of
+the checker.
+<p>
+
+Expected:
+<pre>
+content(source(file('spec/model1.lt', [path('f:/cygwin/home/lourens/wrk/ww/db3/pl/spec/model1.lt']))).
+content(run([date('Thu Aug 19 10:18:48 2004')])).
+model(m1('D':between(10, 12)), 3).
+trace(m1(10)).
+atom_trace(m1(10), a, a, [range(1, 200, false), range(0, 1, true)]).
+atom_trace(m1(10), b, b, [range(12, 200, unknown), range(11, 12, true), range(0, 11, unknown)]).
+cwa(m1(10), a).
+times(m1(10), 0, 210, 200).
+trace(m1(11)).
+atom_trace(m1(11), a, a, [range(1, 200, false), range(0, 1, true)]).
+atom_trace(m1(11), b, b, [range(13, 200, unknown), range(12, 13, true), range(0, 12, unknown)]).
+cwa(m1(11), a).
+times(m1(11), 0, 205, 200).
+trace(m1(12)).
+atom_trace(m1(12), a, a, [range(1, 200, false), range(0, 1, true)]).
+atom_trace(m1(12), b, b, [range(14, 200, unknown), range(13, 14, true), range(0, 13, unknown)]).
+cwa(m1(12), a).
+times(m1(12), 0, 209, 200).
+</pre>
+</HTML>
+
+
+

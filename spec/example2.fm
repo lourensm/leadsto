@@ -1,0 +1,4 @@
+content(type(save_lt_editor('example2.fm'))).
+content(generator(app(leadsto_software, 113, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Oct 31 14:17:14 2005')])).
+denotes(trust_monotonicity, forall([m1:'TRACE', m2:'TRACE'], implies(forall([t:interval, v1:real, v2:real], implies(and(holds(state(m1:'TRACE', time(t:interval)), has_value(experience, v1), true), holds(state(m2:'TRACE', time(t:interval)), has_value(experience, v2), true)), <=(v1, v2))), forall([t:interval, w1:real, w2:real], implies(and(holds(state(m1:'TRACE', time(t:interval)), has_value(trust, w1), true), holds(state(m2:'TRACE', time(t:interval)), has_value(trust, w2), true)), <=(w1, w2)))))).

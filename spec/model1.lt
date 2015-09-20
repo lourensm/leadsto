@@ -1,0 +1,7 @@
+content(type(save_lt_editor('f:/cygwin/home/lourens/wrk/ww/db3/pl/model1.lt'))).
+content(generator(app(leadsto_software, 131, [lteditor:1, psprinting:1]))).
+content(run([date('Tue May 18 18:56:05 2004')])).
+cwa(a).
+model(m1('D':between(10, 12))).
+interval([], range(0, 1), a).
+leadsto([], a, b, efgh('D', 'D', 1, 1)).

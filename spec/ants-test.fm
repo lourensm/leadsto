@@ -1,0 +1,9 @@
+content(type(save_lt_editor('ants-test.fm'))).
+content(generator(app(leadsto_software, 113, [lteditor:1, psprinting:1]))).
+content(run([date('Fri Feb 27 13:48:38 2004')])).
+sortdef(ant, [ant1, ant2]).
+sortdef(edge, [init, 'L1', 'L2']).
+sortdef('SEQ', ['IndDropSeq'(interval, edge)]).
+denotes(has_value_at('IndDropSeq'(t:interval, d:edge), a:ant, 1), holds(state(trace1, time(t:interval)), is_at(a, d), true)).
+denotes(has_value_at('IndDropSeq'(t:interval, d:edge), a:ant, 0), not(holds(state(trace1, time(t:interval)), is_at(a, d), true))).
+denotes(mytest, exists([s:'SEQ', a:ant], has_value_at(s:'SEQ', a:ant, 1))).

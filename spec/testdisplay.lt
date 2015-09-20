@@ -1,0 +1,55 @@
+/*
+TEST:
+Run 
+ltbare ThisFile
+
+Run
+ltbare -view ca ThisFile
+
+Run
+ltbare -view cas ThisFile
+
+Preliminary finetuning of what to show how of the trace:
+
+All entries have a cosntant first argument "standard".
+I plan to offer multiple "Views" later.
+No, immediately:
+command line option:
+-view ViewName  => look at display(ViewName, property)
+
+For now, any entry not "standard" will be ignored.
+
+display(standard,show_atoms(SomeAtom)) :
+     If at least one such entry is present,
+     only show those atoms matching SomeAtom.
+     More than one entry "show_atoms(SomeAtom)" are allowed.
+     The order in which the atoms are shown is the
+     order that the "show_atoms(SomeAtom)" occur in the
+     specification file. All atoms within one "show_atoms(SomeAtom)"
+     will be sorted. Take care: multiple "show_atoms(SomeAtom)" matching
+     one atom will lead to multiple displays of this atom.
+
+display(standard,no_show_atoms(SomeAtom)) :
+     Do not show atoms matching SomeAtom.
+
+display(standard,sort_atoms_global) :
+     Do not follow the order described for "show_atoms(SomeAtom)",
+     but sort all atoms "globally".
+*/
+end_time(20).
+sortdef(abc, [a,b,c]).
+interval([x:abc, y:between(1,5)], range(0,10), a(x, y)).
+
+/* -view ca:
+ Only show all a(c,_) followed by all a(a,_)
+*/ 
+display(ca,show_atoms(a(c,_))).
+display(ca,show_atoms(a(a,_))).
+display(ca,no_show_atoms(a(_,2))).
+/* -view cas:
+ Only show all a(c,_) followed by all a(a,_)
+ but sort them
+*/ 
+display(cas,show_atoms(a(c,_))).
+display(cas,show_atoms(a(a,_))).
+display(cas,sort_atoms_global).

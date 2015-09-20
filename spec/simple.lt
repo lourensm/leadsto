@@ -1,0 +1,10 @@
+content(type(save_lt_editor('spec/simple.lt'))).
+content(generator(app(leadsto_software, 122, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Jan 24 10:40:59 2005')])).
+end_time(1000).
+global_lambda(0.8).
+qterm(cwa('_')).
+interval([], range(0, 20), seed).
+leadsto([], and(seed, not(tree)), tree, efgh(10, 10, 20, 200)).
+leadsto([], tree, blossom, efgh(0, 50, 50, 50)).
+leadsto([], blossom, seed, efgh(10, 10, 150, 20)).

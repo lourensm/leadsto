@@ -1,0 +1,8 @@
+content(type(save_lt_editor('test_external.fm'))).
+content(generator(app(leadsto_software, 85, [lteditor:1, psprinting:1]))).
+content(run([date('Fri Aug 22 17:28:48 2003')])).
+sortdef(s1, [o1, o11]).
+denotes(test, exists([s:s1], external_prop(s:s1))).
+denotes(external_prop('S':s1), external(default)).
+denotes(descendant(p:s1, d:s1), external(default)).
+denotes(testd, exists([s:s1], descendant(o1, s:s1))).

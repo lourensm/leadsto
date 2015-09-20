@@ -1,0 +1,8 @@
+content(type(save_lt_editor('spec/abmp.fm'))).
+content(generator(app(leadsto_software, 116, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Dec 06 16:05:10 2004')])).
+sortdef('ROLE', [buyer, seller]).
+denotes(testpareto, and(abs(pareto_distance(trace1, 1.0, 1.0))<0.01, abs(pareto_distance(trace1, 0.8, 1.0))<0.01)).
+denotes(existssmall001, exists(['BS':'ROLE', 'I':interval, 'R':integer, 'BU':real, 'SU':real], and(holds(state(trace1, time('I':interval)), bid_utility('R':integer, 'BS':'ROLE', buyer, 'BU':real), true), holds(state(trace1, time('I':interval)), bid_utility('R':integer, 'BS':'ROLE', seller, 'SU':real), true), pareto_distance('BU':real, 'SU':real)<0.01))).
+denotes(last_nash_lt('BS':'ROLE', 'LT':real), exists(['I':interval, 'R':integer, 'BU':real, 'SU':real], and(holds(state(trace1, time('I':interval)), bid_utility('R':integer, 'BS':'ROLE', buyer, 'BU':real), true), not(exists(['R1':integer>'R':integer, 'BU1':real, 'I1':interval], holds(state(trace1, time('I1':interval)), bid_utility('R1':integer, 'BS':'ROLE', buyer, 'BU1':real), true))), holds(state(trace1, time('I':interval)), bid_utility('R':integer, 'BS':'ROLE', seller, 'SU':real), true), nash_distance('BU':real, 'SU':real)<'LT':real))).
+denotes(test_last, last_nash_lt(buyer, 0.15)).

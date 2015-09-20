@@ -1,0 +1,528 @@
+specification('sugarscape1.lt').
+end_time(300).
+cwa(_).
+
+display(output, show_atoms(output(_)|_)).
+
+sortdef('ENVIRONMENT',[ew]).
+sortdef('FORAGER',[r1, r2, r3, r4]).
+sortdef('LOCATION',[p1, p2, p3, p4]).
+sortdef('SUGAR',[nothing, a_little, half, a_lot]).
+sortdef('NUMBER',[zero, one, two, three, four]).
+periodic(0, 1, 1,	
+      and(	
+          food_sufficient_for_more(half, one),
+          food_sufficient_for_more(half, two),
+          food_sufficient_for_more(a_lot, one),
+          food_sufficient_for_more(a_lot, two),
+          food_sufficient_for_more(a_lot, three),
+          food_sufficient_for_more(a_lot, four),
+          food_insufficient(nothing),
+          usecommunication,
+          pred(zero, one),
+pred(one, two),
+pred(two, three),
+pred(three, four),
+succ(one, zero),
+succ(two, one),
+succ(three, two),
+succ(four, three)
+      )
+).
+periodic(40, 41, 100,
+      update_food
+).
+periodic(0, 1, 100,
+      my_turn_to_talk(r1)
+).
+periodic(3, 4, 100,
+      my_turn_to_talk(r2)
+).
+periodic(6, 7, 100,
+      my_turn_to_talk(r3)
+).
+periodic(9, 10, 100,
+      my_turn_to_talk(r4)
+).
+periodic(0, 1, 1,
+and(
+      equals(p1, p1),
+      equals(p2, p2),
+      equals(p3, p3),
+      equals(p4, p4)
+)
+).
+interval(0, 1,
+      output(ew)|is_at_location(r1, p2)
+).
+interval(0, 1,
+      output(ew)|is_at_location(r2, p3)
+).
+interval(0, 1,
+      output(ew)|is_at_location(r3, p4)
+).
+interval(0, 1,
+      output(ew)|is_at_location(r4, p4)
+).
+interval(0, 1,
+      and(
+          output(ew)|nr_of_foragers_at(zero, p1),
+          output(ew)|nr_of_foragers_at(one, p2),
+          output(ew)|nr_of_foragers_at(one, p3),
+          output(ew)|nr_of_foragers_at(two, p4)
+      )
+).
+interval(0, 1,
+      and(
+          output(ew)|amount_of_food_at(p1, half),
+          output(ew)|amount_of_food_at(p2, a_lot),
+          output(ew)|amount_of_food_at(p3, a_little),
+          output(ew)|amount_of_food_at(p4, a_lot)
+      )
+).
+interval(0, 1,
+      and(
+          internal(r1)|best_food_experience(r1, p1),
+          internal(r1)|food_precedence(r1, p1, p2),
+          internal(r1)|food_precedence(r1, p2, p3),
+          internal(r1)|food_precedence(r1, p3, p4),
+          internal(r1)|least_food_experience(r1, p4)
+      )
+).
+interval(0, 1,
+      and(
+          internal(r2)|best_food_experience(r2, p2),
+          internal(r2)|food_precedence(r2, p2, p3),
+          internal(r2)|food_precedence(r2, p3, p4),
+          internal(r2)|food_precedence(r2, p4, p1),
+          internal(r2)|least_food_experience(r2, p1)
+      )
+).
+interval(0, 1,
+      and(
+          internal(r3)|best_food_experience(r3, p3),
+          internal(r3)|food_precedence(r3, p3, p4),
+          internal(r3)|food_precedence(r3, p4, p1),
+          internal(r3)|food_precedence(r3, p1, p2),
+          internal(r3)|least_food_experience(r3, p2)
+      )
+).
+interval(0, 1,
+      and(
+          internal(r4)|best_food_experience(r4, p4),
+          internal(r4)|food_precedence(r4, p4, p1),
+          internal(r4)|food_precedence(r4, p1, p2),
+          internal(r4)|food_precedence(r4, p2, p3),
+          internal(r4)|least_food_experience(r4, p3)
+      )
+).
+leadsto(
+      [a:'FORAGER'],
+          my_turn_to_talk(a),
+      my_turn_to_move(a),
+      efgh(59, 59, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',c:'LOCATION',s:'SUGAR',n:'NUMBER'],
+      and(
+          usecommunication, 
+          my_turn_to_talk(a),
+          output(ew)|is_at_location(a, c),
+          output(ew)|amount_of_food_at(c, s),
+          output(ew)|nr_of_foragers_at(n, c),
+          food_sufficient_for_more(s, n)
+      ),
+      output(a)|says(a, come_to(c)),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',c:'LOCATION',s:'SUGAR',n:'NUMBER'],
+      and(
+          usecommunication, 
+          my_turn_to_talk(a),
+          output(ew)|is_at_location(a, c),
+          output(ew)|amount_of_food_at(c, s),
+          output(ew)|nr_of_foragers_at(n, c),
+          not(food_sufficient_for_more(s, n))
+      ),
+      output(a)|says(a, leave_from(c)),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',b:'FORAGER',c:'LOCATION',c0:'LOCATION',p1:'LOCATION',p2:'LOCATION'],
+      and(
+          input(a)|says(b, come_to(c)),
+          internal(a)|food_precedence(a, c0, p1),
+          internal(a)|food_precedence(a, p1, c),
+          internal(a)|food_precedence(a, c, p2)
+      ),
+      and(
+          del_food_precedence(a, c0, p1),
+          del_food_precedence(a, p1, c),
+          del_food_precedence(a, c, p2),
+          add_food_precedence(a, c0, c),
+          add_food_precedence(a, c, p1),
+          add_food_precedence(a, p1, p2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',b:'FORAGER',c:'LOCATION',c0:'LOCATION',p1:'LOCATION'],
+      and(
+          input(a)|says(b, come_to(c)),
+         internal(a)|best_food_experience(a, c0),
+          internal(a)|food_precedence(a, c0, c),
+          internal(a)|food_precedence(a, c, p1)
+      ),
+      and(
+          del_best_food_experience(a, c0),
+          del_food_precedence(a, c0, c),
+          del_food_precedence(a, c, p1),
+          add_best_food_experience(a, c),
+          add_food_precedence(a, c, c0),
+          add_food_precedence(a, c0, p1)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',b:'FORAGER',c:'LOCATION',p1:'LOCATION',p2:'LOCATION'],
+      and(
+          input(a)|says(b, come_to(c)),
+          internal(a)|food_precedence(a, p1, p2),
+          internal(a)|food_precedence(a, p2, c),
+         internal(a)|least_food_experience(a, c)
+      ),
+      and(
+          del_food_precedence(a, p1, p2),
+          del_food_precedence(a, p2, c),
+          del_least_food_experience(a, c),
+          add_food_precedence(a, p1, c),
+          add_food_precedence(a, c, p2),
+          add_least_food_experience(a, p2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',b:'FORAGER',c:'LOCATION',c0:'LOCATION',p1:'LOCATION',p2:'LOCATION'],
+      and(
+          input(a)|says(b, leave_from(c)),
+          internal(a)|food_precedence(a, c0, c),
+          internal(a)|food_precedence(a, c, p1),
+          internal(a)|food_precedence(a, p1, p2)
+      ),
+      and(
+          del_food_precedence(a, c0, c),
+          del_food_precedence(a, c, p1),
+          del_food_precedence(a, p1, p2),
+          add_food_precedence(a, c0, p1),
+          add_food_precedence(a, p1, c),
+          add_food_precedence(a, c, p2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',b:'FORAGER',c:'LOCATION',p1:'LOCATION',p2:'LOCATION'],
+      and(
+          input(a)|says(b, leave_from(c)),
+         internal(a)|best_food_experience(a, c),
+          internal(a)|food_precedence(a, c, p1),
+          internal(a)|food_precedence(a, p1, p2)
+      ),
+      and(
+          del_best_food_experience(a, c),
+          del_food_precedence(a, c, p1),
+          del_food_precedence(a, p1, p2),
+          add_best_food_experience(a, p1),
+          add_food_precedence(a, p1, c),
+          add_food_precedence(a, c, p2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',b:'FORAGER',c:'LOCATION',c0:'LOCATION',p1:'LOCATION'],
+      and(
+          input(a)|says(b, leave_from(c)),
+          internal(a)|food_precedence(a, c0, c),
+          internal(a)|food_precedence(a, c, p1),
+         internal(a)|least_food_experience(a, p1)
+      ),
+      and(
+          del_food_precedence(a, c0, c),
+          del_food_precedence(a, c, p1),
+          del_least_food_experience(a, p1),
+          add_food_precedence(a, c0, p1),
+          add_food_precedence(a, p1, c),
+          add_least_food_experience(a, c)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',c:'LOCATION',c1:'LOCATION',c2:'LOCATION',c3:'LOCATION',s:'SUGAR'],
+      and(
+not(usecommunication),
+          internal(a)|best_food_experience(a, c),
+          internal(a)|food_precedence(a, c, c1),
+          internal(a)|food_precedence(a, c2, c3),
+          internal(a)|least_food_experience(a, c3),
+          output(ew)|is_at_location(a, c),
+          output(ew)|amount_of_food_at(c, s),
+          food_insufficient(s)
+      ),
+      and(
+          del_best_food_experience(a, c),
+          del_food_precedence(a, c, c1),
+          del_food_precedence(a, c2, c3),
+          del_least_food_experience(a, c3),
+          add_best_food_experience(a, c1),
+          add_least_food_experience(a, c),
+          add_food_precedence(a, c2, c)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',c:'LOCATION'],
+      output(a)|says(a, come_to(c)),
+      forall([b:'FORAGER'],input(b)|says(a, come_to(c))),
+      efgh(20, 20, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',c:'LOCATION'],
+      output(a)|says(a, leave_from(c)),
+      forall([b:'FORAGER'],input(b)|says(a, leave_from(c))),
+      efgh(20, 20, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION',p2:'LOCATION'],
+      and(
+          internal(a)|food_precedence(a, p1, p2),
+          not(del_food_precedence(a, p1, p2))
+      ),
+      internal(a)|food_precedence(a, p1, p2),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION'],
+      and(
+         internal(a)|best_food_experience(a, p1),
+          not(del_best_food_experience(a, p1))
+      ),
+     internal(a)|best_food_experience(a, p1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION'],
+      and(
+         internal(a)|least_food_experience(a, p1),
+          not(del_least_food_experience(a, p1))
+      ),
+     internal(a)|least_food_experience(a, p1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION',p2:'LOCATION'],
+      add_food_precedence(a, p1, p2),
+      internal(a)|food_precedence(a, p1, p2),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION'],
+      add_best_food_experience(a, p1),
+     internal(a)|best_food_experience(a, p1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION'],
+      add_least_food_experience(a, p1),
+     internal(a)|least_food_experience(a, p1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',c0:'LOCATION',p1:'LOCATION'],
+ and(
+  my_turn_to_move(a),
+	output(ew)|is_at_location(a, c0),
+     internal(a)|best_food_experience(a, p1),
+	not(equals(c0, p1))
+  ),
+and(
+      goes_to_location(a, p1),
+      forager_leaving(c0),
+      forager_arriving(p1),
+      moving(a)
+),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',n1:'NUMBER',n2:'NUMBER',n3:'NUMBER',n4:'NUMBER',p1:'LOCATION',p2:'LOCATION'],
+ and( 	    
+	output(ew)|is_at_location(a, p1),
+      goes_to_location(a, p2),
+	output(ew)|nr_of_foragers_at(n1, p1),
+	output(ew)|nr_of_foragers_at(n2, p2),
+	pred(n3, n1),
+	succ(n4, n2)
+),
+and(	
+	output(ew)|is_at_location(a, p2),
+	output(ew)|nr_of_foragers_at(n3, p1),	
+	output(ew)|nr_of_foragers_at(n4, p2)	
+),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'FORAGER',p1:'LOCATION'],
+and(
+      output(ew)|is_at_location(a, p1),
+      not(moving(a))
+),
+output(ew)|is_at_location(a, p1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [n:'NUMBER',p1:'LOCATION'],
+and(
+      output(ew)|nr_of_foragers_at(n, p1),
+      not(forager_leaving(p1)),
+      not(forager_arriving(p1))
+),
+      output(ew)|nr_of_foragers_at(n, p1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_lot),
+	output(ew)|nr_of_foragers_at(four, c),
+      update_food
+),
+          output(ew)|amount_of_food_at(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_lot),
+	output(ew)|nr_of_foragers_at(three, c),
+      update_food
+),
+          output(ew)|amount_of_food_at(c, a_little),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_lot),
+	output(ew)|nr_of_foragers_at(two, c),
+      update_food
+),
+          output(ew)|amount_of_food_at(c, half),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_lot),
+	output(ew)|nr_of_foragers_at(one, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, a_lot),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_lot),
+   	output(ew)|nr_of_foragers_at(zero, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, a_lot),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, half),
+	output(ew)|nr_of_foragers_at(four, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, half),
+	output(ew)|nr_of_foragers_at(three, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, half),
+	output(ew)|nr_of_foragers_at(two, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, a_little),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, half),
+	output(ew)|nr_of_foragers_at(one, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, half),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, half),
+	output(ew)|nr_of_foragers_at(zero, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, half),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_little),
+	output(ew)|nr_of_foragers_at(zero, c),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, a_little),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+and(
+          output(ew)|amount_of_food_at(c, a_little),
+	not(output(ew)|nr_of_foragers_at(zero, c)),
+   update_food
+),
+          output(ew)|amount_of_food_at(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION'],
+          output(ew)|amount_of_food_at(c, nothing),
+          output(ew)|amount_of_food_at(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'LOCATION',s:'SUGAR'],
+and(
+          output(ew)|amount_of_food_at(c, s),
+      not(update_food)
+),
+          output(ew)|amount_of_food_at(c, s),
+      efgh(0, 0, 1, 1)
+).
+
+
+

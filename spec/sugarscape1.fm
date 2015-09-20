@@ -1,0 +1,46 @@
+content(type(save_lt_editor('spec/sugarscape1.fm'))).
+content(generator(app(leadsto_software, 73, [lteditor:1, psprinting:1]))).
+content(run([date('Sat May 10 17:35:14 2003')])).
+sortdef('ENVIRONMENT', [ew]).
+sortdef('FORAGER', [r1, r2, r3, r4]).
+sortdef('LOCATION', [p1, p2, p3, p4]).
+sortdef('SUGAR', [nothing, a_little, half, a_lot]).
+sortdef('SUGAR_RICH', [half, a_lot]).
+sortdef('NUMBER', [zero, one, two, three, four]).
+denotes('FP1_all_traces', forall([gamma:'TRACE'], 'FP1'(gamma))).
+denotes('FP1_trace1', 'FP1'(trace1)).
+denotes('FP1'(gamma:'TRACE'), forall(['F':'FORAGER', 'C1':'LOCATION', t1:interval], implies(holds(state(gamma:'TRACE', time(t1:interval), output(ew)), is_at_location('F':'FORAGER', 'C1':'LOCATION'), true), exists([t2:interval, 'C2':'LOCATION'\='C1':'LOCATION'], holds(state(gamma:'TRACE', time(t2:interval), output(ew)), is_at_location('F':'FORAGER', 'C2':'LOCATION'), true))))).
+denotes(food_rich(gamma:'TRACE', t:interval, 'C':'LOCATION'), exists([s:'SUGAR_RICH'], holds(state(gamma:'TRACE', time(t:interval), output(ew)), amount_of_food_at('C':'LOCATION', s:'SUGAR_RICH'), true))).
+denotes(just_food_rich(gamma:'TRACE', t:interval, 'C':'LOCATION'), and(food_rich(gamma:'TRACE', t:interval, 'C':'LOCATION'), or(t:interval=0, and(t:interval>0, not(food_rich(gamma:'TRACE', (t:interval)-1, 'C':'LOCATION')))))).
+denotes(p1, and(exists([s:'SUGAR_RICH'], holds(state(trace1, 0, output(ew)), amount_of_food_at(p1, s:'SUGAR_RICH'), true)), exists([s:'SUGAR_RICH'], holds(state(trace1, 0, output(ew)), amount_of_food_at(p1, s:'SUGAR_RICH'), true)))).
+denotes(jfr, just_food_rich(trace1, 0, p1)).
+denotes('FP2trace1part', implies(just_food_rich(trace1, 0, p1), exists([t2:interval>0, 'F1':'FORAGER', 'F2':'FORAGER'\='F1':'FORAGER'], and(holds(state(trace1, time(t2:interval), output(ew)), is_at_location('F1':'FORAGER', p1), true), holds(state(trace1, time(t2:interval), output(ew)), is_at_location('F2':'FORAGER', p1), true))))).
+denotes('FP2'(gamma:'TRACE'), forall(['C':'LOCATION', t1:interval], implies(just_food_rich(gamma:'TRACE', t1:interval, 'C':'LOCATION'), exists([t2:interval>t1:interval, 'F1':'FORAGER', 'F2':'FORAGER'\='F1':'FORAGER'], and(holds(state(gamma:'TRACE', time(t2:interval), output(ew)), is_at_location('F1':'FORAGER', 'C':'LOCATION'), true), holds(state(gamma:'TRACE', time(t2:interval), output(ew)), is_at_location('F2':'FORAGER', 'C':'LOCATION'), true)))))).
+denotes('FP2_all_traces', forall([gamma:'TRACE'], 'FP2'(gamma:'TRACE'))).
+denotes('________________5_Interlevel_Relation__PROPERTIES___________________', false).
+denotes(food_gone(gamma:'TRACE'), exists([t:'TIME'], forall(['C':'LOCATION'], holds(state(gamma:'TRACE', t:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', nothing), true)))).
+denotes(food_gone_all_traces, forall([gamma:'TRACE'], food_gone(gamma:'TRACE'))).
+denotes('__________________UNTESTED_PROPERTIES__________________', false).
+denotes(food_reduction_over_time(gamma:'TRACE'), forall([t1:'TIME', 'C':'LOCATION'], implies(some_food_available(gamma:'TRACE', t1:'TIME', 'C':'LOCATION'), exists([t2:'TIME'>t1:'TIME'], food_reduction(gamma:'TRACE', t1:'TIME', t2:'TIME', 'C':'LOCATION'))))).
+denotes(food_reduction_over_time_all_traces, forall([gamma:'TRACE'], food_reduction_over_time(gamma:'TRACE'))).
+denotes(conditional_food_reduction(gamma:'TRACE'), forall([t1:'TIME', t2:'TIME'>t1:'TIME'], implies(and(some_food_available(gamma:'TRACE', t1:'TIME', 'C':'LOCATION'), enough_foragers_at(gamma:'TRACE', t2:'TIME', 'C':'LOCATION')), food_reduction(gamma:'TRACE', t1:'TIME', t2:'TIME', 'C':'LOCATION')))).
+denotes(conditional_food_reduction_all_traces, forall([gamma:'TRACE'], conditional_food_reduction(gamma:'TRACE'))).
+denotes(enough_foragers_come_to_food(gamma:'TRACE'), forall([t1:'TIME', 'C':'LOCATION'], implies(some_food_available(gamma:'TRACE', t1:'TIME', 'C':'LOCATION'), exists([t2:'TIME'>t1:'TIME'], enough_foragers_at(gamma:'TRACE', t2:'TIME', 'C':'LOCATION'))))).
+denotes(enough_foragers_come_to_food_all_traces, forall([gamma:'TRACE'], enough_foragers_come_to_food(gamma:'TRACE'))).
+denotes(no_food_increase(gamma:'TRACE'), forall(['C':'LOCATION', t1:'TIME', t2:'TIME'>t1:'TIME', n1:'SUGAR', n2:'SUGAR'], implies(and(holds(state(gamma:'TRACE', t1:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', n1:'SUGAR'), true), holds(state(gamma:'TRACE', t2:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', n2:'SUGAR'), true)), not(is_less_sugar(n1:'SUGAR', n2:'SUGAR'))))).
+denotes(no_food_increase_all_traces, forall([gamma:'TRACE'], no_food_increase(gamma:'TRACE'))).
+denotes('_________________DEFINITIONS_________________________', false).
+denotes(some_food_available(gamma:'TRACE', t:'TIME', 'C':'LOCATION'), exists([n:'SUGAR'\=nothing], holds(state(gamma:'TRACE', t:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', n:'SUGAR'), true))).
+denotes(food_reduction(gamma:'TRACE', t1:'TIME', t2:'TIME', 'C':'LOCATION'), exists([n1:'SUGAR', n2:'SUGAR'], and(is_less_sugar(n2:'SUGAR', n1:'SUGAR'), holds(state(gamma:'TRACE', t1:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', n1:'SUGAR'), true), holds(state(gamma:'TRACE', t2:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', n2:'SUGAR'), true)))).
+denotes(enough_foragers_at(gamma:'TRACE', t:'TIME', 'C':'LOCATION'), forall([n:'SUGAR', m:'NUMBER'], and(holds(state(gamma:'TRACE', t:'TIME', output(ew)), amount_of_food_at('C':'LOCATION', n:'SUGAR'), true), holds(state(gamma:'TRACE', t:'TIME', output(ew)), nr_of_foragers_at(m:'NUMBER', 'C':'LOCATION'), true), eat_threshold_ok(n:'SUGAR', m:'NUMBER')))).
+denotes('________________AUXILIARY__PROPERTIES___________________', false).
+denotes(eat_threshold_ok(n:'SUGAR', m:'NUMBER'), or(and(or(n:'SUGAR'=a_lot, n:'SUGAR'=half), or(m:'NUMBER'=two, m:'NUMBER'=three, m:'NUMBER'=four)), and(n:'SUGAR'=a_little, or(m:'NUMBER'=one, m:'NUMBER'=two, m:'NUMBER'=three, m:'NUMBER'=four)))).
+denotes(is_less_sugar(n1:'SUGAR', n2:'SUGAR'), and(n1:'SUGAR'\=a_lot, or(and(n1:'SUGAR'=half, n2:'SUGAR'=a_lot), and(n1:'SUGAR'\=half, or(and(n1:'SUGAR'=a_little, or(n2:'SUGAR'=half, n2:'SUGAR'=a_lot)), and(n1:'SUGAR'=nothing, n2:'SUGAR'\=nothing)))))).
+denotes('________________SUB_TEST__PROPERTIES___________________', false).
+denotes(test_is_less_sugar, forall([n1:'SUGAR', n2:'SUGAR', n3:'SUGAR'], implies(and(is_less_sugar(n1:'SUGAR', n2:'SUGAR'), is_less_sugar(n2:'SUGAR', n3:'SUGAR')), is_less_sugar(n1:'SUGAR', n3:'SUGAR')))).
+denotes(some_not_just_food_rich_trace1, exists(['C':'LOCATION', t1:'TIME'], not(just_food_rich(trace1, t1:'TIME', 'C':'LOCATION')))).
+denotes(some_more_foragers_same_place, exists(['C':'LOCATION', t1:'TIME', 'F1':'FORAGER', 'F2':'FORAGER'\='F1':'FORAGER'], and(holds(state(trace1, t1:'TIME', output(ew)), is_at_location('F1':'FORAGER', 'C':'LOCATION'), true), holds(state(trace1, t1:'TIME', output(ew)), is_at_location('F2':'FORAGER', 'C':'LOCATION'), true)))).
+denotes(trace1_contains_just_food_rich, exists([t:'TIME', 'C':'LOCATION'], just_food_rich(trace1, t:'TIME', 'C':'LOCATION'))).
+denotes(trace1_contains_food_rich, exists([t:'TIME', 'C':'LOCATION'], food_rich(trace1, t:'TIME', 'C':'LOCATION'))).
+denotes(one_is_at_location_per_t_f, forall(['F':'FORAGER', 'C1':'LOCATION', t1:'TIME'], implies(holds(state(gamma, t1:'TIME', output(ew)), is_at_location('F', 'C1'), true), not(exists(['C2':'LOCATION'], holds(state(gamma, t1:'TIME', output(ew)), is_at_location('F', 'C2'), true)))))).
+denotes(is_location_occurs_in_trace1, exists(['F':'FORAGER', 'C1':'LOCATION', t1:'TIME'], holds(state(trace1, t1:'TIME', output(ew)), is_at_location('F', 'C1'), true))).

@@ -1,0 +1,285 @@
+/* A set of rules describing the behaviour of the living cell */
+
+end_time(3000).
+sort_element(substances, X) :-
+	member(X,['glucose','lactose','gluconate','O2','N','P','S','NAD(P)','PEP','ATP',
+	'CRPcAMP','allolactose','gluconate_6P_observation_amount','glucose6P','pyruvate',
+	'gluconate6P','ADP','ArcB_P','acetate','ethanol','CO2','NAD(P)H','nucleotides','aminoacids',
+	'glucose_import_enzymes','lactose_import_enzymes','gluconate_import_enzymes',
+	'respiration_enzymes','fermentation_enzymes','glucose_import_mRNA',
+	'lactose_import_mRNA','gluconate_import_mRNA','respiration_mRNA','fermentation_mRNA']).
+sort_element(delta, X) :-
+	member(X,['glucose6P','lactose','gluconate6P']).
+sort_element(epsilon, X) :-
+	member(X,['N','P','S']).
+sort_element(zeta, X) :-
+	member(X,['acetate','ethanol','CO2']).
+global_lambda(0.5).
+cwa(_).
+
+/* ENVIRONMENT SETTINGS */
+periodic(300, 1100, 1100, in_environment('glucose')).
+periodic(0, 300, 1100, not(in_environment('glucose'))).
+
+interval(1, 5000, in_environment('lactose')).
+interval(0, 1, not(in_environment('lactose'))).
+
+interval(0, 1, in_environment('gluconate')).
+interval(1, 5000, not(in_environment('gluconate'))).
+
+interval(0, 1000, in_environment('O2')).
+interval(1000, 2000, not(in_environment('O2'))).
+interval(2000, 5000, in_environment('O2')).
+
+interval(1, 5000, in_environment('N')).
+interval(0, 1, not(in_environment('N'))).
+
+interval(1, 5000, in_environment('P')).
+interval(0, 1, not(in_environment('P'))).
+
+interval(1, 5000, in_environment('S')).
+interval(0, 1, not(in_environment('S'))).
+
+/* INITIALISATION PROPERTIES */
+interval(1, 60, anabolism_generates('NAD(P)')).
+interval(1, 60, anabolism_generates('P')).
+interval(1, 60, anabolism_generates('aminoacids')).
+interval(1, 60, anabolism_generates('nucleotides')).
+interval(1, 60, anabolism_generates('ADP')).
+interval(1, 60, catabolism_generates('pyruvate')).
+interval(1, 60, catabolism_generates('PEP')).
+interval(1, 60, catabolism_generates('ATP')).
+interval(1, 60, catabolism_generates('CO2')).
+interval(1, 60, catabolism_generates('acetate')).
+interval(1, 60, catabolism_generates('ethanol')).
+interval(1, 60, catabolism_generates('NAD(P)H')).
+interval(1, 60, transcription_generates('respiration_mRNA')).
+interval(1, 60, transcription_generates('fermentation_mRNA')).
+interval(1, 60, transcription_generates('glucose_import_mRNA')).
+interval(1, 60, transcription_generates('lactose_import_mRNA')).
+interval(1, 60, transcription_generates('gluconate_import_mRNA')).
+interval(1, 60, transcription_generates('ADP')).
+interval(1, 60, transcription_generates('P')).
+interval(1, 60, translation_generates('respiration_enzymes')).
+interval(1, 60, translation_generates('fermentation_enzymes')).
+interval(1, 60, translation_generates('glucose_import_enzymes')).
+interval(1, 60, translation_generates('lactose_import_enzymes')).
+interval(1, 60, translation_generates('gluconate_import_enzymes')).
+interval(1, 60, translation_generates('ADP')).
+interval(1, 60, translation_generates('P')).
+interval(1, 60, transport_generates('glucose6P')).
+interval(1, 60, transport_generates('lactose')).
+interval(1, 60, transport_generates('gluconate6P')).
+interval(1, 60, transport_generates('O2')).
+interval(1, 60, transport_generates('CRPcAMP')).
+interval(1, 60, transport_generates('allolactose')).
+interval(1, 60, transport_generates('gluconate_6P_observation_amount')).
+interval(1, 60, transport_generates('ArcB_P')).
+interval(1, 60, transport_generates('N')).
+interval(1, 60, transport_generates('P')).
+interval(1, 60, transport_generates('S')).
+interval(1, 60, transport_generates('pyruvate')).
+interval(1, 60, transport_generates('ADP')).
+
+/* TRANSFER PROPERTIES (using 0,0,1,1 instead of 0,0,0,0) */
+
+/* TP1 */
+leadsto([s:substances], transcription_generates(s), translation_receives(s), efgh(0,0,1,1)).
+/* TP2 */
+leadsto([s:substances], translation_generates(s), control_portal_receives(s), efgh(0,0,1,1)).
+/* TP3 */
+leadsto([s:substances], control_portal_generates(s), translation_receives(s), efgh(0,0,1,1)).
+/* TP4 */
+leadsto([s:substances], transcription_generates(s), control_portal_receives(s), efgh(0,0,1,1)).
+/* TP5 */
+leadsto([s:substances], control_portal_generates(s), transcription_receives(s), efgh(0,0,1,1)).
+/* TP6 */
+leadsto([s:substances], catabolism_generates(s), anabolism_receives(s), efgh(0,0,1,1)).
+/* TP7 */
+leadsto([s:substances], anabolism_generates(s), catabolism_receives(s), efgh(0,0,1,1)).
+/* TP8 */
+leadsto([s:substances], catabolism_generates(s), transport_receives(s), efgh(0,0,1,1)).
+/* TP9 */
+leadsto([s:substances], transport_generates(s), catabolism_receives(s), efgh(0,0,1,1)).
+/* TP10 */
+leadsto([s:substances], anabolism_generates(s), transport_receives(s), efgh(0,0,1,1)).
+/* TP11 */
+leadsto([s:substances], transport_generates(s), anabolism_receives(s), efgh(0,0,1,1)).
+/* TP12 */
+leadsto([s:substances], catabolism_generates(s), metabolism_portal_receives(s), efgh(0,0,1,1)).
+/* TP13 */
+leadsto([s:substances], metabolism_portal_generates(s), catabolism_receives(s), efgh(0,0,1,1)).
+/* TP14 */
+leadsto([s:substances], anabolism_generates(s), metabolism_portal_receives(s), efgh(0,0,1,1)).
+/* TP15 */
+leadsto([s:substances], metabolism_portal_generates(s), anabolism_receives(s), efgh(0,0,1,1)).
+/* TP16 */
+leadsto([s:substances], transport_generates(s), metabolism_portal_receives(s), efgh(0,0,1,1)).
+/* TP17 */
+leadsto([s:substances], metabolism_portal_generates(s), transport_receives(s), efgh(0,0,1,1)).
+
+/* INTERGROUP ROLE INTERACTION PROPERTIES (using 0,0,1,1 instead of 0,0,0,0) */
+
+/* IGIP1 */
+leadsto([s:substances], control_portal_receives(s), metabolism_portal_generates(s), efgh(0,0,1,1)).
+/* IGIP2 */
+leadsto([s:substances], metabolism_portal_receives(s), control_portal_generates(s), efgh(0,0,1,1)).
+
+/* CATABOLISM PROPERTIES */
+
+/* CaP1 (using 4,12,1,80 instead of 4,12,4,80) */
+leadsto([d:delta], and(catabolism_receives(d),
+			and(catabolism_receives('ADP'),
+			and(catabolism_receives('P'),
+			and(catabolism_receives('NAD(P)'),
+			and(catabolism_receives('O2'), catabolism_receives('respiration_enzymes')))))),
+		   and(catabolism_generates('pyruvate'),
+		   	and(catabolism_generates('ATP'),
+		   	and(catabolism_generates('NAD(P)H'),
+		   	and(catabolism_generates('PEP'),
+		   	and(catabolism_generates('CO2'), catabolism_generates('glucose6P')))))),
+		   efgh(4,12,1,80)).
+
+/* CaP2 (using 4,12,1,80 instead of 4,12,4,4) */
+leadsto([d:delta], and(catabolism_receives(d),
+			and(catabolism_receives('ADP'),
+			and(catabolism_receives('P'),
+			and(catabolism_receives('NAD(P)'), catabolism_receives('fermentation_enzymes'))))),
+		   and(catabolism_generates('pyruvate'),
+		   	and(catabolism_generates('ATP'),
+		   	and(catabolism_generates('NAD(P)H'),
+		   	and(catabolism_generates('PEP'),
+		   	and(catabolism_generates('acetate'),
+		   	and(catabolism_generates('ethanol'), catabolism_generates('glucose6P'))))))),
+		   efgh(4,12,1,80)).
+
+/* ANABOLISM PROPERTIES */
+
+/* AP1 (using 2,6,1,4 instead of 2,6,4,4) */
+leadsto(and(anabolism_receives('ATP'),
+		and(anabolism_receives('NAD(P)H'),
+		and(anabolism_receives('glucose6P'),
+		and(anabolism_receives('pyruvate'),
+		and(anabolism_receives('N'),
+		and(anabolism_receives('P'), anabolism_receives('S'))))))),
+	   and(anabolism_generates('ADP'),
+	   	and(anabolism_generates('P'),
+	   	and(anabolism_generates('NAD(P)'),
+	   	and(anabolism_generates('nucleotides'), anabolism_generates('aminoacids'))))),
+	   efgh(2,6,1,4)).
+
+/* TRANSPORT PROPERTIES */
+
+/* TpP1 (using 0,0,4,4 instead of -4,0,4,4) */
+leadsto(not(in_environment('glucose')), transport_generates('CRPcAMP'), efgh(0,0,4,4)).
+/* TpP2 (using 0,0,1,1 instead of 0,0,0.23,0.23) */
+leadsto(in_environment('lactose'), transport_generates('allolactose'), efgh(0,0,1,1)).
+/* TpP3 (using 0,0,1,1 instead of 0,0,0.23,0.23) */
+leadsto(in_environment('gluconate'), transport_generates('gluconate_6P_observation_amount'), efgh(0,0,1,1)).
+
+/* TpP4 (using 0,0,4,80 instead of -4,0,4,80) */
+leadsto(and(transport_receives('PEP'),
+		and(transport_receives('glucose_import_enzymes'), in_environment('glucose'))),
+   	and(transport_generates('glucose6P'), transport_generates('pyruvate')),
+	   efgh(0,0,4,80)).
+
+/* TpP5 (using 0,0,4,4 instead of -4,0,4,4) */
+leadsto(and(transport_receives('ATP'),
+		and(transport_receives('gluconate_import_enzymes'), in_environment('gluconate'))),
+   	and(transport_generates('gluconate6P'),
+	   	and(transport_generates('ADP'), transport_generates('P'))),
+	   efgh(0,0,4,4)).
+
+/* TpP6 (using 0,0,4,4 instead of -4,0,4,4) */
+leadsto(and(transport_receives('ATP'),
+		and(transport_receives('lactose_import_enzymes'), in_environment('lactose'))),
+   	and(transport_generates('lactose'),
+	   	and(transport_generates('ADP'), transport_generates('P'))),
+	   efgh(0,0,4,4)).
+
+/* TpP7 */
+leadsto(in_environment('O2'),
+	and(transport_generates('O2'), transport_generates('ArcB_P')),
+	efgh(0,0,4,4)).
+
+
+/* TpP8 */
+leadsto([e:epsilon], and(transport_receives('ATP'), in_environment(e)),
+		     and(transport_generates(e),
+		   	and(transport_generates('ADP'), transport_generates('P'))),
+		     efgh(0,0,4,4)).
+
+/* TpP9 */
+leadsto([z:zeta], transport_receives(z), cell_exports(z), efgh(0,0,4,4)).
+
+/* TRANSCRIPTION PROPERTIES */
+
+/* TcP1 */
+leadsto(and(transcription_receives('nucleotides'), transcription_receives('ATP')),
+	     and(transcription_generates('ADP'),
+	   	and(transcription_generates('P'), transcription_generates('glucose_import_mRNA'))),
+	     efgh(60,60,1,40)).
+
+/* TcP2 */
+leadsto(and(transcription_receives('ArcB_P'),
+		and(transcription_receives('nucleotides'), transcription_receives('ATP'))),
+	     and(transcription_generates('ADP'),
+	   	and(transcription_generates('P'), transcription_generates('respiration_mRNA'))),
+	     efgh(60,60,1,40)).
+
+/* TcP3 */
+leadsto(and(not(transcription_receives('ArcB_P')),
+		and(transcription_receives('nucleotides'), transcription_receives('ATP'))),
+	     and(transcription_generates('ADP'),
+	   	and(transcription_generates('P'), transcription_generates('fermentation_mRNA'))),
+	     efgh(60,60,1,40)).
+
+/* TcP4 */
+leadsto(and(transcription_receives('allolactose'),
+		and(transcription_receives('CRPcAMP'),
+		and(transcription_receives('nucleotides'), transcription_receives('ATP')))),
+	     and(transcription_generates('ADP'),
+	   	and(transcription_generates('P'), transcription_generates('lactose_import_mRNA'))),
+	     efgh(60,60,1,40)).
+
+/* TcP5 */
+leadsto(and(transcription_receives('gluconate_6P_observation_amount'),
+		and(transcription_receives('CRPcAMP'),
+		and(transcription_receives('nucleotides'), transcription_receives('ATP')))),
+	     and(transcription_generates('ADP'),
+	   	and(transcription_generates('P'), transcription_generates('gluconate_import_mRNA'))),
+	     efgh(60,60,1,40)).
+
+/* TRANSLATION PROPERTIES */
+
+/* TlP1 */
+leadsto(and(translation_receives('aminoacids'),
+		and(translation_receives('ATP'), translation_receives('respiration_mRNA'))),
+	     and(translation_generates('ADP'),
+	   	and(translation_generates('P'), translation_generates('respiration_enzymes'))),
+	     efgh(0,0,10,600)).
+
+leadsto(and(translation_receives('aminoacids'),
+		and(translation_receives('ATP'), translation_receives('fermentation_mRNA'))),
+	     and(translation_generates('ADP'),
+	   	and(translation_generates('P'), translation_generates('fermentation_enzymes'))),
+	     efgh(0,0,10,600)).
+
+leadsto(and(translation_receives('aminoacids'),
+		and(translation_receives('ATP'), translation_receives('glucose_import_mRNA'))),
+	     and(translation_generates('ADP'),
+	   	and(translation_generates('P'), translation_generates('glucose_import_enzymes'))),
+	     efgh(0,0,10,600)).
+
+leadsto(and(translation_receives('aminoacids'),
+		and(translation_receives('ATP'), translation_receives('lactose_import_mRNA'))),
+	     and(translation_generates('ADP'),
+	   	and(translation_generates('P'), translation_generates('lactose_import_enzymes'))),
+	     efgh(0,0,10,600)).
+
+leadsto(and(translation_receives('aminoacids'),
+		and(translation_receives('ATP'), translation_receives('gluconate_import_mRNA'))),
+	     and(translation_generates('ADP'),
+	   	and(translation_generates('P'), translation_generates('gluconate_import_enzymes'))),
+	     efgh(0,0,10,600)).
+

@@ -1,0 +1,38 @@
+/* A set of rules describing the behaviour of the circulatory system */
+
+end_time(300).
+sort_element(group, X) :-
+	member(X,[systemic, pulmonary]).
+global_lambda(0.5).
+cwa(_).
+
+/* INITIALISATION */
+periodic(0, 5, 80, stimulus|occurs).	% EA2
+
+interval(8.5, 18.5, systemic|cycle|well|generates|fluid).	% init
+interval(8.5, 18.5, pulmonary|cycle|well|generates|fluid).	% init
+
+/* TRANSFER PROPERTIES */
+
+leadsto([g:group], g | cycle|well|generates|fluid, g  | cycle|supply|guidance|receives|fluid, efgh(0,0,1,1)).	%TR1
+leadsto([g:group], g | cycle|supply|guidance|generates|fluid, g  | cycle|exchange|receives|fluid, efgh(0,0,1,1)).	%TR2
+leadsto([g:group], g | cycle|exchange|generates|fluid, g  | cycle|drain|guidance|receives|fluid, efgh(0,0,1,1)).	%TR3
+leadsto([g:group], g | cycle|drain|guidance|generates|fluid, g  | cycle|drain|receives|fluid, efgh(0,0,1,1)).	%TR4
+
+/* ROLE BEHAVIOR PROPERTIES */
+
+leadsto(pulmonary|cycle|supply|guidance|receives|fluid, pulmonary|cycle|supply|guidance|generates|fluid, efgh(3,5,1,1)).
+leadsto(systemic|cycle|supply|guidance|receives|fluid, systemic|cycle|supply|guidance|generates|fluid, efgh(10,20,1,1)).
+leadsto([g:group], g | cycle|exchange|receives|fluid, and(g | cycle|exchange|generates|fluid, g | cycle|ingredients|exchanged), efgh(5,10,1,1)).
+leadsto(pulmonary|cycle|drain|guidance|receives|fluid, pulmonary|cycle|drain|guidance|generates|fluid, efgh(3,5,1,1)).
+leadsto(systemic|cycle|drain|guidance|receives|fluid, systemic|cycle|drain|guidance|generates|fluid, efgh(10,20,1,1)).
+
+/* INTERGROUP ROLE INTERACTION PROPERTIES */
+
+leadsto(and(pulmonary|cycle|drain|received|fluid , stimulus|occurs), systemic|cycle|well|generates|fluid, efgh(5,10,1,10)).
+leadsto(and(systemic|cycle|drain|received|fluid , stimulus|occurs), pulmonary|cycle|well|generates|fluid, efgh(5,10,1,10)).
+
+/* OTHER PROPERTIES */
+
+leadsto([g:group], g | cycle|drain|receives|fluid, g  | cycle|drain|received|fluid, efgh(0,0,1,1)).
+leadsto([g:group], and(not(stimulus|occurs), g | cycle|drain|received|fluid), g  | cycle|drain|received|fluid, efgh(0,0,1,2)).

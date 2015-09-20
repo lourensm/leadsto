@@ -1,0 +1,34 @@
+end_time(10).
+/*
+interval(0, 2, a(1)).
+interval(0, 1, a(0)).
+interval(1, 2, b(2)).
+interval(5, 7, a(1,2)).
+interval(3, 4, a(10,10+1)).
+*/
+
+
+/*
+% variable domains may be constrained
+interval([x:between(1, 3)< 1 + 1], 5, 6, pcond(x)).
+
+
+
+% Times may contain variables
+interval([x:between(1, 3)], x, x + 1, pt(x)).
+
+
+% Sorts may have variable arguments 
+interval([y:between(4, 5), x:between(y, y + 1)], 0, 1, psortvar(x,y)).
+*/
+
+% Sorts may not have infinite domain in interval rules
+interval([x:'INTEGER'], 1, 2, pinfERROR(x)).
+/*
+leadsto([x:'INTEGER'], and(a(x),b(x+1)), b(x+2), efgh(0,0,1,1)).
+leadsto([x:'INTEGER'], and(a(x),a(x+1)), a12(x), efgh(0,0,1,1)).
+
+leadsto([x:'INTEGER'], a(x,x+1), 'A'(x), efgh(0,0,1,1)).
+% LATER for =:= PostCondsOut
+%leadsto([x:'INTEGER'], and(a(x),b(y+x),c(y)), d(x,y), efgh(0,0,1,1)).
+*/

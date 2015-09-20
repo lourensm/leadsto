@@ -1,0 +1,89 @@
+content(type(generatedtrace('bids.pl'))).
+atom_trace('object(\'FX-64-HH\')', object('FX-64-HH'), [range(mininf, maxinf, true)]).
+atom_trace('buyer_price_utility_info(18000, 0.883853, -8.83853e-05, 28000)', buyer_price_utility_info(18000, 0.883853, -8.83853e-05, 28000), [range(1, maxinf, true)]).
+atom_trace('seller_price_utility_info(13000, 0.000128205)', seller_price_utility_info(13000, 0.000128205), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, airco, \'fairly good\', 0.0339943)', attr_utility(buyer, airco, 'fairly good', 0.0339943), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, airco, good, 0.0412181)', attr_utility(buyer, airco, good, 0.0412181), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, airco, meager, 0.00849858)', attr_utility(buyer, airco, meager, 0.00849858), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, airco, none, 0)', attr_utility(buyer, airco, none, 0), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, airco, standard, 0.0212465)', attr_utility(buyer, airco, standard, 0.0212465), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, cd_player, \'fairly good\', 0.0362606)', attr_utility(buyer, cd_player, 'fairly good', 0.0362606), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, cd_player, good, 0.0453258)', attr_utility(buyer, cd_player, good, 0.0453258), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, cd_player, meager, 0.0135977)', attr_utility(buyer, cd_player, meager, 0.0135977), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, cd_player, none, 0.00906516)', attr_utility(buyer, cd_player, none, 0.00906516), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, cd_player, standard, 0.0294618)', attr_utility(buyer, cd_player, standard, 0.0294618), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, drawing_hook, \'fairly good\', 0.0166572)', attr_utility(buyer, drawing_hook, 'fairly good', 0.0166572), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, drawing_hook, good, 0.0164873)', attr_utility(buyer, drawing_hook, good, 0.0164873), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, drawing_hook, meager, 0.0169972)', attr_utility(buyer, drawing_hook, meager, 0.0169972), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, drawing_hook, none, 0)', attr_utility(buyer, drawing_hook, none, 0), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, drawing_hook, standard, 0.0168272)', attr_utility(buyer, drawing_hook, standard, 0.0168272), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, extra_speakers, \'fairly good\', 0.0104249)', attr_utility(buyer, extra_speakers, 'fairly good', 0.0104249), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, extra_speakers, good, 0.0113314)', attr_utility(buyer, extra_speakers, good, 0.0113314), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, extra_speakers, meager, 0)', attr_utility(buyer, extra_speakers, meager, 0), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, extra_speakers, none, 0)', attr_utility(buyer, extra_speakers, none, 0), [range(1, maxinf, true)]).
+atom_trace('attr_utility(buyer, extra_speakers, standard, 0)', attr_utility(buyer, extra_speakers, standard, 0), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, airco, \'fairly good\', -0.173212)', attr_utility(seller, airco, 'fairly good', -0.173212), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, airco, good, -0.209042)', attr_utility(seller, airco, good, -0.209042), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, airco, meager, -0.14332)', attr_utility(seller, airco, meager, -0.14332), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, airco, none, 0.0468421)', attr_utility(seller, airco, none, 0.0468421), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, airco, standard, -0.181781)', attr_utility(seller, airco, standard, -0.181781), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, cd_player, \'fairly good\', 0.0178138)', attr_utility(seller, cd_player, 'fairly good', 0.0178138), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, cd_player, good, 0.00183536)', attr_utility(seller, cd_player, good, 0.00183536), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, cd_player, meager, 0.00890688)', attr_utility(seller, cd_player, meager, 0.00890688), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, cd_player, none, 0.102632)', attr_utility(seller, cd_player, none, 0.102632), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, cd_player, standard, -0.0641026)', attr_utility(seller, cd_player, standard, -0.0641026), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, drawing_hook, \'fairly good\', 0.114507)', attr_utility(seller, drawing_hook, 'fairly good', 0.114507), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, drawing_hook, good, 0.0780027)', attr_utility(seller, drawing_hook, good, 0.0780027), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, drawing_hook, meager, 0.0217274)', attr_utility(seller, drawing_hook, meager, 0.0217274), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, drawing_hook, none, 0.153947)', attr_utility(seller, drawing_hook, none, 0.153947), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, drawing_hook, standard, 0.198381)', attr_utility(seller, drawing_hook, standard, 0.198381), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, extra_speakers, \'fairly good\', -0.00917679)', attr_utility(seller, extra_speakers, 'fairly good', -0.00917679), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, extra_speakers, good, -0.0535762)', attr_utility(seller, extra_speakers, good, -0.0535762), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, extra_speakers, meager, -0.0151147)', attr_utility(seller, extra_speakers, meager, -0.0151147), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, extra_speakers, none, 0.0447368)', attr_utility(seller, extra_speakers, none, 0.0447368), [range(1, maxinf, true)]).
+atom_trace('attr_utility(seller, extra_speakers, standard, 0.00890688)', attr_utility(seller, extra_speakers, standard, 0.00890688), [range(1, maxinf, true)]).
+atom_trace('bid(buyer, 1, bid(1000, good, \'fairly good\', good, meager))', bid(buyer, 1, bid(1000, good, 'fairly good', good, meager)), [range(2, 3, true)]).
+atom_trace('bid_utility(1, buyer, buyer, 0.997819)', bid_utility(1, buyer, buyer, 0.997819), [range(2, 3, true)]).
+atom_trace('bid_utility(1, buyer, seller, -1.73312)', bid_utility(1, buyer, seller, -1.73312), [range(2, 3, true)]).
+atom_trace('bid(buyer, 2, bid(10000, good, standard, good, standard))', bid(buyer, 2, bid(10000, good, standard, good, standard)), [range(4, 5, true)]).
+atom_trace('bid_utility(2, buyer, buyer, 0.987224)', bid_utility(2, buyer, buyer, 0.987224), [range(4, 5, true)]).
+atom_trace('bid_utility(2, buyer, seller, -0.384534)', bid_utility(2, buyer, seller, -0.384534), [range(4, 5, true)]).
+atom_trace('bid(buyer, 3, bid(15000, good, standard, good, standard))', bid(buyer, 3, bid(15000, good, standard, good, standard)), [range(6, 7, true)]).
+atom_trace('bid_utility(3, buyer, buyer, 0.987224)', bid_utility(3, buyer, buyer, 0.987224), [range(6, 7, true)]).
+atom_trace('bid_utility(3, buyer, seller, 0.256491)', bid_utility(3, buyer, seller, 0.256491), [range(6, 7, true)]).
+atom_trace('bid(buyer, 4, bid(16500, good, \'fairly good\', good, standard))', bid(buyer, 4, bid(16500, good, 'fairly good', good, standard)), [range(8, 9, true)]).
+atom_trace('bid_utility(4, buyer, buyer, 0.997649)', bid_utility(4, buyer, buyer, 0.997649), [range(8, 9, true)]).
+atom_trace('bid_utility(4, buyer, seller, 0.430715)', bid_utility(4, buyer, seller, 0.430715), [range(8, 9, true)]).
+atom_trace('bid(buyer, 5, bid(17000, good, \'fairly good\', good, standard))', bid(buyer, 5, bid(17000, good, 'fairly good', good, standard)), [range(10, 11, true)]).
+atom_trace('bid_utility(5, buyer, buyer, 0.997649)', bid_utility(5, buyer, buyer, 0.997649), [range(10, 11, true)]).
+atom_trace('bid_utility(5, buyer, seller, 0.494818)', bid_utility(5, buyer, seller, 0.494818), [range(10, 11, true)]).
+atom_trace('bid(buyer, 6, bid(17000, good, \'fairly good\', good, standard))', bid(buyer, 6, bid(17000, good, 'fairly good', good, standard)), [range(12, 13, true)]).
+atom_trace('bid_utility(6, buyer, buyer, 0.997649)', bid_utility(6, buyer, buyer, 0.997649), [range(12, 13, true)]).
+atom_trace('bid_utility(6, buyer, seller, 0.494818)', bid_utility(6, buyer, seller, 0.494818), [range(12, 13, true)]).
+atom_trace('bid(buyer, 7, bid(17500, good, \'fairly good\', good, standard))', bid(buyer, 7, bid(17500, good, 'fairly good', good, standard)), [range(14, 15, true)]).
+atom_trace('bid_utility(7, buyer, buyer, 0.997649)', bid_utility(7, buyer, buyer, 0.997649), [range(14, 15, true)]).
+atom_trace('bid_utility(7, buyer, seller, 0.55892)', bid_utility(7, buyer, seller, 0.55892), [range(14, 15, true)]).
+atom_trace('bid(seller, 1, bid(20000, standard, standard, good, standard))', bid(seller, 1, bid(20000, standard, standard, good, standard)), [range(3, 4, true)]).
+atom_trace('bid_utility(1, seller, buyer, 0.794589)', bid_utility(1, seller, buyer, 0.794589), [range(3, 4, true)]).
+atom_trace('bid_utility(1, seller, seller, 0.831579)', bid_utility(1, seller, seller, 0.831579), [range(3, 4, true)]).
+atom_trace('bid(seller, 2, bid(20000, \'fairly good\', \'fairly good\', good, standard))', bid(seller, 2, bid(20000, 'fairly good', 'fairly good', good, standard)), [range(5, 6, true)]).
+atom_trace('bid_utility(2, seller, buyer, 0.811813)', bid_utility(2, seller, buyer, 0.811813), [range(5, 6, true)]).
+atom_trace('bid_utility(2, seller, seller, 0.895412)', bid_utility(2, seller, seller, 0.895412), [range(5, 6, true)]).
+atom_trace('bid(seller, 3, bid(20000, good, \'fairly good\', good, standard))', bid(seller, 3, bid(20000, good, 'fairly good', good, standard)), [range(7, 8, true)]).
+atom_trace('bid_utility(3, seller, buyer, 0.820878)', bid_utility(3, seller, buyer, 0.820878), [range(7, 8, true)]).
+atom_trace('bid_utility(3, seller, seller, 0.879433)', bid_utility(3, seller, seller, 0.879433), [range(7, 8, true)]).
+atom_trace('bid(seller, 4, bid(19000, good, \'fairly good\', good, standard))', bid(seller, 4, bid(19000, good, 'fairly good', good, standard)), [range(9, 10, true)]).
+atom_trace('bid_utility(4, seller, buyer, 0.909263)', bid_utility(4, seller, buyer, 0.909263), [range(9, 10, true)]).
+atom_trace('bid_utility(4, seller, seller, 0.751228)', bid_utility(4, seller, seller, 0.751228), [range(9, 10, true)]).
+atom_trace('bid(seller, 5, bid(18000, good, \'fairly good\', \'fairly good\', standard))', bid(seller, 5, bid(18000, good, 'fairly good', 'fairly good', standard)), [range(11, 12, true)]).
+atom_trace('bid_utility(5, seller, buyer, 0.990425)', bid_utility(5, seller, buyer, 0.990425), [range(11, 12, true)]).
+atom_trace('bid_utility(5, seller, seller, 0.658853)', bid_utility(5, seller, seller, 0.658853), [range(11, 12, true)]).
+atom_trace('bid(seller, 6, bid(18500, good, \'fairly good\', good, standard))', bid(seller, 6, bid(18500, good, 'fairly good', good, standard)), [range(13, 14, true)]).
+atom_trace('bid_utility(6, seller, buyer, 0.953456)', bid_utility(6, seller, buyer, 0.953456), [range(13, 14, true)]).
+atom_trace('bid_utility(6, seller, seller, 0.687126)', bid_utility(6, seller, seller, 0.687126), [range(13, 14, true)]).
+atom_trace('bid(seller, 7, bid(18000, good, \'fairly good\', good, standard))', bid(seller, 7, bid(18000, good, 'fairly good', good, standard)), [range(15, 16, true)]).
+atom_trace('bid_utility(7, seller, buyer, 0.997649)', bid_utility(7, seller, buyer, 0.997649), [range(15, 16, true)]).
+atom_trace('bid_utility(7, seller, seller, 0.623023)', bid_utility(7, seller, seller, 0.623023), [range(15, 16, true)]).
+atom_trace('deal_first(buyer, others_last_bid_ok)', deal_first(buyer, others_last_bid_ok), [range(16, 17, true)]).
+atom_trace('deal_second(seller, confirmed)', deal_second(seller, confirmed), [range(17, 18, true)]).
+times(0, maxinf, 19).

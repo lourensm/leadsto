@@ -1,0 +1,430 @@
+<HTML>
+<TITLE>issues/wish-list/bugs/to do</TITLE>
+<BODY BGCOLOR="white">
+<H1>issues/wish-list/bugs/to do</H1>
+
+<h2>Shortest term</h2>
+
+<UL>
+<LI>Using holds(State, Atom, TF) confuses me so much that I get a
+slightly uncomfortable feeling when seeing the |= variant.
+I should replace it.
+<LI>Copy paste low level software philosophy very gammel.
+</UL>
+
+<H2>To Do/Bugs Short term</H2>
+<UL>
+<LI><h3>ToDo List</h3>
+<uL>
+<li>Single quotes in output is rather stupid.
+<li>Leadsto trace visualisation: make single atoms right clickable=>
+<ul>
+<li>Inspect single atom trace : show atom name in window header, make range
+change with size
+<li>Allow display of subrange?
+<li>Printout?
+<li>Add atom to view set?
+<li>Edit current view
+</ul>
+<li>Leadsto interactive options: same as ttlchecker: make all settings editable:
+<ul>
+<li>font
+<li>tracerangepixels
+<li>allow colour changes
+</ul>
+<li>leadsto: save display options optionally with lt spec.
+<li>leadsto: redesign algorithm: make GC more robust. Try to increase step size.
+<li>BUG: efgh = 0001 leads to crash
+<li>background knowledge
+<li>recursive properties
+<li>Add information types to leadsto and checker
+<li>Integrate leadsto editor and leadsto checker
+<li>Cannot change atoms to property_applications to ...
+</ul>
+<LI><h3>Automate simple ordering of holds formulae</h3>
+
+
+Explore <code>such(X:s1< a, .. , , f(X,Y,Z), formula)</code> and then 
+<code>size(such((X,Y,Z), formula)</code>
+and whole range of set operations... a cesspool ...
+<p>
+Then, analyse: forall -> exists, within each qvar environment,
+rewrite formula as disjunction of conjunctions. Then find positive binding 
+occurrences of quantifier variables. Result per conjunction: no_occurrence,
+binding, needs_bound.
+<p>
+Partition the set into those that have no_occurrence, binding, needs_bound.
+But different variables require different partitions.
+As soon as one conjunction has needs_bound, rest not very important.
+As soon as all conjunctions have same binding for variable, the
+variable is no longer relevant for partitioning.
+In the end we simply could partition each conjunction into its own
+partition.
+Need an operation that for a subformula that is not a disjunction
+and given a set of qvars returns the set of var bindings. Difference with
+previous approach: allow reordering of conjunctions. But very tricky,
+may need deep splitup of disjunctions.
+<p>
+and(exists(or(F1,F2)) +> no, should be seen as a disjunction, unless
+F1, F2 both have identical qvar bindings. So splitting up into
+disjunction of conjunctions already depends on qvars.
+and(not(exists(and(F1,F2))), F3) => ? ok?
+ and(not(exists(or(F1,F2))), F3) ->
+ and(not(or(exists(F1),exists(F2)))) (if different bindings) ->
+ and(and(exists(F1),exists(F2))) so not(exists) handling independent
+ of substructure, could say: any occurring qvar must be needs_bound.
+<p>
+But seems counterintuitive.
+not(exists(something_containingqvar(X)))
+not(exists(Y, holds(aap(X,Y)))) => would not bind X! but could still be
+simplified as check, new kind of binding: not(exists(X)) but
+only for holds? not(exists(X < 3)) could be ok as well.
+So: binding, needs_bound, not_exists_binding(i.e. all?), 
+<p>
+NEXT:
+<ol>
+<li>Replace forall by not exists, and for the time normalise by taking out any 
+  disjunctions.
+<li>If a variable occcurs positive as a holds at some depth, it may be
+  bound.
+<li>If a variable occurs negative in a holds fact at some depth, check whether
+  we are dealing with an infinite sort. In that case we know that there must be
+  some value of the variable where all such negative holds facts do not
+  hold ... tricky..
+<li>If a variable does not occur in a holds, but in some other non = 
+  call, then we must start instantiating.
+<li>If there is a positive holds at some depth, coding might proceed as
+  follows. Do we depend on that holds fact (enclosed in not(not(..exists)))
+  being true? Then, if we encounter a \+ in between the quantifier
+  position and the holds, we add a holds(...x..) term outside the first
+  \+.
+<li>Even if we are allowed to not preinstantiate, i.e. if x occurs
+  effectively pos in a holdsfact then we should not iterate over x unless
+  |x| < |holds(f(x))|
+<li>Normalised would be F if
+<pre>
+F == and(F1,..Fn) Fi normalised
+or
+F == exists(X, F(X)) F(X) normalised
+or 
+F == not exists(X, F(X)) F(X) normalised
+or
+F == holds or not(holds) or cmpop (propbably should precompile =
+</pre>
+<pre>
+- X occurs posholds in F if F == holds(fact) and X occurs in fact
+- X occurs negholds in F if F == not(holds(fact)) and X occurs in fact
+- X occurs posholds in F if F == and(F1,..Fn) and X occurs posholds in some Fi
+- X occurs negholds in F if F == and(F1,..Fn) and X occurs negholds in some Fi
+  (not posholds and not otherwise)
+- X occurs posholds in F if F == exists(X,F(X)) and X occurs posholds in F(X)
+- X occurs negholds in F if F == exists(X,F(X)) and X occurs negholds in F(X)
+- X occurs posholds in F if F == not(exists(X,F(X))) and X occurs 
+             negholds in F(X)
+- X occurs negholds in F if F == not(exists(X,F(X))) and X occurs 
+             posholds in F(X)
+exists(X, not(exists(Y, not(exists(Z,holds(a(x,y,z)))))))
+<=>
+exists(X, forall(Y, exists(Z, holds(a(x,y,z)))))
+</pre>
+That is either Y empty or 
+forall(Y, F(Y)) implies emptyrange(Y) or exists(Y, F(Y))
+So, any entry not(exists(Z, G)) implies emptyrange(Z) or exists(Z, not(G))
+Seems to lead to the proof, but we need to be carefull about the
+emptyrange check.
+<p>
+So we have some formula where X occurs posholds in some holds(f(X))
+then 
+If F is and(...., exists(X, and(...,not(exists(Y, Fp)))))
+F implies notemptyrange(X) and (emptyrange(Y(X) or exists(Y, not(Fp)))) 
+this would leave X bound to some holds(f(X))
+<p>
+Now it could be that some X would be negholds in a not(holds(aap(X,Y))).
+Almost any way this proves to be a problem.
+<p>
+We should probably not remove disjunctions, but analyse and sort variable
+occurrences in all parts of the disjunction and maintain the worst
+case binding for each variable.
+</OL>
+<LI>Replace forall code generation by not(exists(not(F)))
+<LI>Sort and possibly subnormalise sub expression for ordering.
+<LI>If infinite range encountered, possibly try deriving negative might
+function?
+</OL>
+<LI>Refutation: if formula fails, give the "instance" for which it
+fails.
+<LI>Equality with reals does not preinstantiate
+<LI>holds(aap(X-1,X)): intelligent reordering of variable occurrences such that
+invert operation not performed if not really needed. Really needed:
+holds(aap(X-1,X+2))
+<LI>holds(aap(X,X-1)) should generate new indexed entry depending on X
+    only.
+<LI>backtracking or typing of display elements.
+<LI>exists(  or(F1,F2))? could manipulate formula, but then question is,
+where would we end in transforming the original formula?
+<LI>in quantifier exists or forall implies lhs: detect isolated conditions
+    and incorporate them in the generator.
+<LI>settings: picture background, node lines
+<LI>config: numerical values not name, but..
+<LI>Real numbers:
+<OL><LI>Inspect inverse_op thing, i.e. when will inverse_op succeed
+    <LI>Allow simple inverse_ops
+    <LI>Inspect source code: REAL problems
+    <LI>Lots of examples
+</OL>
+<LI>If cannot write in pwd: ERROR message about cannot write only
+    in bg window.
+<LI>V prefix disappears for variables containing conditions
+<LI>view/display:
+<OL>
+<LI>pass on to checker, to save_compacted. 
+<LI>not only command line
+   option -view, but also change view from GUI 
+<LI>Use only atoms of one view in holds.
+<LI>display/2 specs in lteditor
+<LI>view selection GUI in leadsto
+<LI>view restriction of active holds facts in ttlchecker
+</OL>
+<LI>Checking must be interruptable
+<LI>Warn for unused variables, try doing something with checking for constants.
+<LI>Give civilized error message for duplicate variable occurrence.
+(see noot.fm) <em>transsat.pl contains unlinked code!</em>
+<LI>In case of already present "and", disable insert_left "and" in lteditor.
+<LI>Explain somewhere that lteditor is complicated because it shares
+GUI with formeditor.
+<LI>Give constants optional context
+<LI>Implement memberchk
+<LI>display_range etc
+<LI>Make all examples work from lteditor -> leadsto
+<LI>Pretty print lteditor output
+<LI>Copy/paste file (for exchange of parts between specifications).
+<LI>Relations in editors
+<LI>Checked variables and sorts in editors:
+Probably easiest to provide a sub menu in FILE.
+<LI>Disjunction in leadsto
+<LI>Remove O(N^2) inefficiency from leadsto algorithm
+<LI>Checker infinite range variables
+</UL>
+
+<H1>Just done</H1>
+<OL>
+<LI>option exit after doing test (-nogui), make output of tests more clear
+<LI>Leadsto: allow command line constants: -constant aap=noot but save those settings with the trace.
+<LI>Make constants more stable:
+    <OL>
+    <LI>Test constants inchecker
+    <LI>Test command line constants in checker
+    <LI>test tbosses lt spec
+    </OL> 
+<LI>in quantifier range allow two restrictions.
+<OL>
+<LI>Possibly print out utilised comandline constants which checker result
+<LI>Detect loops in constant unfolding
+<LI>Store command line constants in trace header
+<LI>Allow constants in leadsto editor
+<LI>Allow constants in ttleditor
+<LI>Command line constants
+</OL>
+<LI>Further compact time range: wait with compacting after transProlog. Then
+filter out only occurring holds facts. 
+<LI>discretised time => inf time
+<LI>change traces, not only add, but also remove.
+<LI>Allow conditions in leadsto rules as separate terms (for Tibor)
+<LI>Constraints on range variables seemed to crash for tbosses 
+formulae.
+If there is a holds formula binding one variable,
+followed by another one binding another, and the first variable is constrained by the second,
+<LI>Resizing mini-editors should resize text-entry windows.
+<LI>Do something with x:sort1 + 1 => needs (x:sort1) + 1
+<LI>Make checker more robust wrt error handling:
+  <OL>
+  <LI>generic elements
+  <LI>objects not in sort (such as trace1 missing)
+  </OL>
+<LI>Test ttlchecker some more
+<LI>Replace fatal checker errors into non fatal ones if GUI
+<LI>Conditions to variables in lteditor
+<LI>Check copy/paste, seemed to not always function.
+<LI>Bug in Leon Torre's spec (Only occurring when using type REAL)
+<LI>time <-> TIME sort
+<LI>Predefine sort TRACE
+<LI>For now, require save of formula before checking.
+<LI>Conditions as formulae
+<LI>Fast checking without log info.
+<LI>Provide minimal functional checker.
+<LI>Sudden exit after checking
+<LI>Generated_compacted_trace strange behavior
+<LI>In lteditor: do not allow non atom children of not node
+<LI>Conditions in vars
+<LI>Generate a trace for the checker.
+<LI>Linux installation.
+<LI>Add ttlchecker to installation
+<LI>Detect "unsorted" variables in ttlchecker
+<LI>In formeditor:distinguish holds and property "calls" instead of atoms
+<LI>Provide an installation batch file.
+<LI>Check all operations whether they set modified.
+<LI>It is almost impossible to interrupt a simulation in windows.(cell.lt)
+<LI>Make leadsto/ltbare reload lt specs
+<LI>Restrict not to only right before atoms.
+<LI>Duplicate entries in menu formula
+<LI>Disable exists/disjunction (optionally)
+</OL>
+<DL>
+<DT>Restrictions to variables
+<DD>Add restrictions to variables in leadsto variable list. Only 
+memberchk seems to be needed. For lb0.dyn example.
+Probably pre-instantiate such rules. The conditions should probably
+be separate from the variable specifications themselves.
+<DD>
+<DT>GUI: add Properties/settings
+<DD><OL>
+	<LI>For logging settings
+	<LI>allow saving of settings as in pcedraw
+	<LI>default fonts etc
+    </OL>
+<DT>Algorithm:order of var ops
+<DD>
+Check order of operations <code>PostOps, PostConds</code>. 
+Use of variables has hardly been tested. Check <code>a(X, X + 3)</code>
+where <code>X</code> does not occur earlier.
+<DT>Running prolog code from loaded specification
+<DD>
+Defining sort_element(s,X) :- member(X, ..) gave problems, that
+    are circumvented by preloading member/2, memberchk/2 in spec module;
+<P>Optionally install SWI-prolog (lite?) with software
+<DT>
+<DD>Change the way wait_var ids are constructed:now those all backslashes
+<DT>Unorganised TODO:
+<DD><UL>
+	<LI>Change SWI-prolog icon
+	<LI>Hide the SWI-prolog window
+	<LI>We must have facilities for restrictions on variable
+	    ranges for rules.
+<Pre>
+Sort INTERGROUP_ROLE_RELATION Var ForAll X : BANKNRS EndVar
+  rec_related_d
+  +( pcc X _related_ lb X +)
+// <--
+  secr_related_boardsecr
+  msrepr_related_secr
+  rec_related_csrepr
+// -->
+EndSort
+Var ForAll R : RECEPTIONIST:open_group:OPEN_GROUP
+    ForAll D : DISTRIBUTOR:cc:DISTRIBUTION
+      MemberCheck +( R _related_ D +) : INTERGROUP_ROLE_RELATION
+</pre>
+Here we could distinguish 1-1 relationships from n-m ones.
+For the time being we could also pre-instantiate such dependencies.
+lb0.dyn seems to require only memberchk
+    </UL>
+</DL>
+<LI><H2>Simulation Internals:Algorithm/Syntax/Constructs</H2>
+
+    <DL>
+    <DT>Performance
+    <DD><OL>
+	<LI>Optimize for literals not containing variable
+	<LI>Remove/optimise repeat loop  wait_var
+	</OL>
+    <DT>Functionality/Features
+    <DD><OL>
+	<LI>Compile time warn for cwa on non instantiated cwa variables
+	<LI>Constants typed
+	<LI>COMPLETE: cwa with LT variables
+	<LI>COMPLETE: sort definitions with LT variables
+	<LI>COMPLETE: show-options with LT variables
+	<LI>COMPLETE: relation definitions
+	<LI>Allow sorts as synonym for others...?
+	</OL>
+    <DT>Annotation/documentation in specification
+    <DD><OL>
+	<LI>Allow for user given name of rules
+	<LI>Allow for comment everywhere, for example by allowing extra
+            unfunctional arguments '$cmt'(tag(Tag)) or '$cmt'('Comment ..')
+	</OL>
+    </DL>
+    <LI><H2>Simulation Program</H2>
+	<OL>	
+		<LI>Allow loading more than one specification(same time??)
+		<P><B>Especially allow seeing multiple traces at same time for comparison.</B>
+	<LI>Linux version
+	<LI>Window: add setup, create shortcuts
+	<LI>Running visual presentation: 
+    	    <OL>
+	    <LI>Replace log(partly) by GUI component, use transient_for and
+	    application
+	    <LI>Progess bar
+	    <LI><B>Fill trace while running optional!?</B>
+	    </OL>
+	</OL>
+<LI><H2>Simulation Trace Display</H2>
+        <DL>
+	<DT>Control what atoms to show
+	<DD><OL>
+	    <LI>Tag all such control constructs with a name per kind
+                of show filter, so user may choose.
+	    <LI>remove boring
+	    <LI>explicit show hide(see<a href=#note1>note 1</a>)
+	    <LI>Save such information in trace
+	    </OL>
+        <DT>Printout
+	<DD><OL>
+	    <LI>REMOVE QUOTES from atom printout
+	    <LI>multi page to printer
+	    <LI>explode scale for nice printer output
+	    <LI>change fonts
+	    <LI>resize window -> redraw
+	    <LI>Select part of time range(zoom in out)
+	    <LI>
+	    </OL>
+        <DT>Save Trace
+	<DD><OL>
+	    <LI>Store cwa in trace
+	    <LI>Optionally do not/do complete stored trace
+	    <LI>TODO:do not load trace as module?
+	    </OL>
+	</DL>
+<LI><H2>Formula Editor</H2>
+<OL>
+<LI>take out: test it
+<LI>add after: implement
+<LI>cut paste, copy paste: implement
+<LI>vars
+<LI>relation
+<LI>term
+<LI>save/load>
+<LI>delay
+<LI>leadsto vars
+<LI>sorts
+<LI>constants
+<LI>checking
+<LI>look and feel: more colour
+<LI>extra's:
+    <OL>
+    <LI>simplify
+    <LI>normalise
+    <LI>only supported constructs
+    </OL>
+</OL>
+</UL>
+
+<H1>Notes</H1>
+<DL>
+<DT><A name="note1">Remarks on show control
+<DD>
+<pre>
+trace_format(Name, [
+	show([	a, 
+		'$together(3,[
+			b, 
+			'$sort'([c(X), e])
+		     ]), 
+		'$var'(['P':'S1'],a('P')),
+		'$eval'(p(X), between(1,3,X)]),
+	noshow([c(2)])
+]).
+trace_part_show_atom(a1(X)). ?
+</pre>
+</DL>
+</HTML>

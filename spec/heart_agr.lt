@@ -1,0 +1,133 @@
+/* A set of rules describing the behaviour of the circulatory system */
+/* Modified for AGR model */
+
+end_time(300).
+sortdef(group, [systemic_cycle, pulmonary_cycle]).
+global_lambda(0.5).
+cwa(_).
+
+/* INITIALISATION */
+periodic(0, 5, 80, occurs(stimulus)).	% EA2
+
+interval(8.5, 18.5, output(well(systemic_cycle))|generates(fluid)).	% init
+interval(8.5, 18.5, output(well(pulmonary_cycle))|generates(fluid)).	% init
+
+/* TRANSFER PROPERTIES */
+
+/* TP1 / TS1 */
+
+leadsto(
+	[g:group], 
+	output(well(g))|generates(fluid), 
+	input(supply_guidance(g))|receives(fluid), 
+	efgh(0,0,1,1)
+).
+
+/* TP2 / TS2 */
+
+leadsto(
+	[g:group], 
+	output(supply_guidance(g))|generates(fluid), 
+	input(exchange(g))|receives(fluid), 
+	efgh(0,0,1,1)
+).
+
+/* TP3 / TS3 */
+
+leadsto(
+	[g:group], 
+	output(exchange(g))|generates(fluid), 
+	input(drain_guidance(g))|receives(fluid), 
+	efgh(0,0,1,1)
+).
+
+/* TP3 / TS3 */
+
+leadsto(
+	[g:group], 
+	output(drain_guidance(g))|generates(fluid), 
+	input(drain(g))|receives(fluid), 
+	efgh(0,0,1,1)
+).
+
+/* ROLE BEHAVIOR PROPERTIES */
+
+leadsto(
+	input(supply_guidance(pulmonary_cycle))|receives(fluid), 
+	output(supply_guidance(pulmonary_cycle))|generates(fluid), 
+	efgh(3,5,1,1)
+).
+
+leadsto(
+	input(supply_guidance(systemic_cycle))|receives(fluid), 
+	output(supply_guidance(systemic_cycle))|generates(fluid), 
+	efgh(10,20,1,1)
+).
+
+leadsto(
+	[g:group], 
+	input(exchange(g))|receives(fluid), 
+	and(
+		output(exchange(g))|generates(fluid), 
+		g|ingredients|exchanged
+	),
+	efgh(5,10,1,1)
+).
+
+leadsto(
+	input(drain_guidance(pulmonary_cycle))|receives(fluid), 
+	output(drain_guidance(pulmonary_cycle))|generates(fluid), 
+	efgh(3,5,1,1)
+).
+
+leadsto(
+	input(drain_guidance(systemic_cycle))|receives(fluid), 
+	output(drain_guidance(systemic_cycle))|generates(fluid), 
+	efgh(10,20,1,1)
+).
+
+/* INTERGROUP ROLE INTERACTION PROPERTIES */
+
+/* ips */
+
+leadsto(
+	and(
+		input(drain(pulmonary_cycle))|received(fluid),
+		occurs(stimulus)
+	), 
+	output(well(systemic_cycle))|generates(fluid), 
+	efgh(5,10,1,10)
+).
+
+/* isp */
+
+leadsto(
+	and(
+		input(drain(systemic_cycle))|received(fluid), 
+		occurs(stimulus)
+	), 
+	output(well(pulmonary_cycle))|generates(fluid), 
+	efgh(5,10,1,10)
+).
+
+/* OTHER PROPERTIES */
+
+leadsto(
+	[g:group], 
+	input(drain(g))|receives(fluid), 
+	input(drain(g))|received(fluid), 
+	efgh(0,0,1,1)
+).
+
+leadsto(
+	[g:group], 
+	and(
+		not(occurs(stimulus)), 
+		input(drain(g))|received(fluid)
+	), 
+	input(drain(g))|received(fluid), 
+	efgh(0,0,1,2)
+).
+
+
+

@@ -1,0 +1,4 @@
+content(type(save_lt_editor('example1.fm'))).
+content(generator(app(leadsto_software, 113, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Oct 31 14:05:52 2005')])).
+denotes(observational_belief_creation, forall([m:'TRACE', t1:interval], implies(holds(state(m:'TRACE', time(t1:interval)), observation_result(itsraining), true), exists([t2:interval>=t1:interval], holds(state(m:'TRACE', time(t2:interval)), belief(itsraining), true))))).

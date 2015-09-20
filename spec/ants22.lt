@@ -1,0 +1,40 @@
+content(type(save_lt_editor('ants22.lt'))).
+content(generator(app(leadsto_software, 113, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Apr 19 13:25:50 2004')])).
+end_time(80).
+global_lambda(0.5).
+cwa(_).
+sortdef(ant, [ant1, ant2, ant3]).
+sortdef(location, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']).
+sortdef(direction, [food, nest]).
+sortdef(edge, [init, 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10']).
+constant(decay, 0.98).
+constant(incr, 10.0).
+constant(end_time, 80).
+interval([], range(0, 1), forall([e:edge], pheromones_at(e, 0.0))).
+interval([], range(0, 1), is_at_location_from(ant1, 'A', init)).
+interval([], range(0, 1), is_at_location_from(ant2, 'A', init)).
+interval([], range(2, 3), is_at_location_from(ant3, 'A', init)).
+interval([], range(0, end_time), and(connected_to_via('A', 'B', 'L1'), connected_to_via('B', 'A', 'L1'), connected_to_via('B', 'C', 'L2'), connected_to_via('C', 'B', 'L2'), connected_to_via('C', 'D', 'L3'), connected_to_via('D', 'C', 'L3'), connected_to_via('D', 'E', 'L4'), connected_to_via('E', 'D', 'L4'), connected_to_via('E', 'F', 'L5'), connected_to_via('F', 'E', 'L5'), connected_to_via('A', 'G', 'L6'), connected_to_via('G', 'A', 'L6'), connected_to_via('G', 'H', 'L7'), connected_to_via('H', 'G', 'L7'), connected_to_via('H', 'F', 'L8'), connected_to_via('F', 'H', 'L8'), connected_to_via('G', 'C', 'L9'), connected_to_via('C', 'G', 'L9'), connected_to_via('H', 'D', 'L10'), connected_to_via('D', 'H', 'L10'))).
+interval([], range(0, end_time), and(attractive_direction_at(ant1, 'A', 'L1'), attractive_direction_at(ant1, 'B', 'L2'), attractive_direction_at(ant1, 'C', 'L3'), attractive_direction_at(ant1, 'D', 'L4'), attractive_direction_at(ant1, 'E', 'L5'), attractive_direction_at(ant2, 'A', 'L6'), attractive_direction_at(ant2, 'G', 'L7'), attractive_direction_at(ant2, 'H', 'L8'), attractive_direction_at(ant3, 'A', 'L1'), attractive_direction_at(ant3, 'B', 'L2'), attractive_direction_at(ant3, 'C', 'L3'), attractive_direction_at(ant3, 'D', 'L4'), attractive_direction_at(ant3, 'E', 'L5'))).
+interval([], range(0, end_time), and(neighbours('A', 2), neighbours('B', 2), neighbours('C', 3), neighbours('D', 3), neighbours('E', 2), neighbours('F', 2), neighbours('G', 3), neighbours('H', 3))).
+leadsto([a:ant, l1:location, l2:location, e0:edge, e1:edge, e2:edge, i1:'REAL', i2:'REAL'], and(observes(a, is_at_location_from('A', e0)), attractive_direction_at(a, 'A', e1), connected_to_via('A', l1, e1), observes(a, pheromones_at(e1, i1)), connected_to_via('A', l2, e2), observes(a, pheromones_at(e2, i2)), e1\=e2, i1=i2), to_be_performed(a, go_to_edge_from_to(e1, 'A', l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, l1:location, l2:location, e0:edge, e1:edge, e2:edge, i1:'REAL', i2:'REAL'], and(observes(a, is_at_location_from('A', e0)), connected_to_via('A', l1, e1), observes(a, pheromones_at(e1, i1)), connected_to_via('A', l2, e2), observes(a, pheromones_at(e2, i2)), i1>i2), to_be_performed(a, go_to_edge_from_to(e1, 'A', l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, l1:location, l2:location, e0:edge, e1:edge, e2:edge, i1:'REAL', i2:'REAL'], and(observes(a, is_at_location_from('F', e0)), connected_to_via('F', l1, e1), observes(a, pheromones_at(e1, i1)), connected_to_via('F', l2, e2), observes(a, pheromones_at(e2, i2)), i1>i2), to_be_performed(a, go_to_edge_from_to(e1, 'F', l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, l:location, l1:location, e0:edge, e1:edge], and(observes(a, is_at_location_from(l, e0)), neighbours(l, 2), connected_to_via(l, l1, e1), e0\=e1, l\='A', l\='F'), to_be_performed(a, go_to_edge_from_to(e1, l, l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, l:location, l1:location, l2:location, e0:edge, e1:edge, e2:edge], and(observes(a, is_at_location_from(l, e0)), attractive_direction_at(a, l, e1), neighbours(l, 3), connected_to_via(l, l1, e1), observes(a, pheromones_at(e1, 0.0)), connected_to_via(l, l2, e2), observes(a, pheromones_at(e2, 0.0)), e0\=e1, e0\=e2, e1\=e2), to_be_performed(a, go_to_edge_from_to(e1, l, l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, l:location, l1:location, l2:location, e0:edge, e1:edge, e2:edge, i1:'REAL', i2:'REAL'], and(observes(a, is_at_location_from(l, e0)), neighbours(l, 3), connected_to_via(l, l1, e1), observes(a, pheromones_at(e1, i1)), connected_to_via(l, l2, e2), observes(a, pheromones_at(e2, i2)), e0\=e1, e0\=e2, e1\=e2, i1>i2), to_be_performed(a, go_to_edge_from_to(e1, l, l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge, l:location, l1:location], to_be_performed(a, go_to_edge_from_to(e, l, l1)), is_at_edge_from_to(a, e, l, l1), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge, l:location, l1:location], is_at_edge_from_to(a, e, l, l1), observes(a, is_at_edge_from_to(e, l, l1)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge, l:location, l1:location], observes(a, is_at_edge_from_to(e, l, l1)), and(to_be_performed(a, drop_pheromones_at_edge_from(e, l)), to_be_performed(a, go_to_location_from(l1, e)), someone_is_dropping_pheromones_at(e)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge, l:location], to_be_performed(a, go_to_location_from(l, e)), is_at_location_from(a, l, e), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge, l:location], is_at_location_from(a, l, e), observes(a, is_at_location_from(l, e)), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e0:edge, e1:edge, l:location, l1:location, i:'REAL'], and(is_at_location_from(a, l, e0), connected_to_via(l, l1, e1), pheromones_at(e1, i)), observes(a, pheromones_at(e1, i)), efgh(0, 0, 1, 1)).
+leadsto([a1:ant, a2:ant, a3:ant, e:edge, l1:location, i:'REAL'], and(to_be_performed(a1, drop_pheromones_at_edge_from(e, l1)), forall([l2:location], not(to_be_performed(a2, drop_pheromones_at_edge_from(e, l2)))), forall([l3:location], not(to_be_performed(a3, drop_pheromones_at_edge_from(e, l3)))), a1\=a2, a1\=a3, a2\=a3, pheromones_at(e, i)), pheromones_at(e, i*decay+incr), efgh(0, 0, 1, 1)).
+leadsto([a1:ant, a2:ant, a3:ant, e:edge, l1:location, l2:location, i:'REAL'], and(to_be_performed(a1, drop_pheromones_at_edge_from(e, l1)), to_be_performed(a2, drop_pheromones_at_edge_from(e, l2)), forall([l3:location], not(to_be_performed(a3, drop_pheromones_at_edge_from(e, l3)))), a1\=a2, a1\=a3, a2\=a3, pheromones_at(e, i)), pheromones_at(e, i*decay+incr+incr), efgh(0, 0, 1, 1)).
+leadsto([a1:ant, a2:ant, a3:ant, e:edge, l1:location, l2:location, l3:location, i:'REAL'], and(to_be_performed(a1, drop_pheromones_at_edge_from(e, l1)), to_be_performed(a2, drop_pheromones_at_edge_from(e, l2)), to_be_performed(a3, drop_pheromones_at_edge_from(e, l3)), a1\=a2, a1\=a3, a2\=a3, pheromones_at(e, i)), pheromones_at(e, i*decay+incr+incr+incr), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge], observes(a, is_at_location_from('F', e)), to_be_performed(a, pick_up_food), efgh(0, 0, 1, 1)).
+leadsto([a:ant], to_be_performed(a, pick_up_food), is_carrying_food(a), efgh(0, 0, 1, 1)).
+leadsto([a:ant, e:edge], and(observes(a, is_at_location_from('A', e)), is_carrying_food(a)), to_be_performed(a, drop_food), efgh(0, 0, 1, 1)).
+leadsto([a:ant], and(is_carrying_food(a), not(to_be_performed(a, drop_food))), is_carrying_food(a), efgh(0, 0, 1, 1)).
+leadsto([e:edge, i:'REAL'], and(pheromones_at(e, i), not(someone_is_dropping_pheromones_at(e))), pheromones_at(e, i*decay), efgh(0, 0, 1, 1)).

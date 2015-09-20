@@ -1,0 +1,3 @@
+This software is for personal use only, not for professional use. If
+you wish to use the tools under any other conditions or if others are
+interested in the software, please contact treur@cs.vu.nl

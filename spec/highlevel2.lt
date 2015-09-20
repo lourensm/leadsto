@@ -1,0 +1,156 @@
+content(type(save_lt_editor('h:/Projects/CIM/highlevel3.lt'))).
+content(generator(app(leadsto_software, 110, [lteditor:1, psprinting:1]))).
+content(run([date('Fri Mar 19 15:14:27 2004')])).
+end_time(85).
+sortdef('ROLE', ['ATC', 'AFD', 'MHS', 'O611', 'CPA', other_CPA_s, 'Police', 'RFD', 'Marechaussee', m_ambulance, c_ambulance1, c_ambulance2, c_ambulance3, c_ambulance4, c_ambulance5, police_unit1, police_unit2, police_unit3, police_unit4, police_unit5, mac1, mac2, mac3, ts1, ts2, ts3, ts4, 'Hospital', 'OSO', head_afd, commander_ts1, commander_ts2, commander_ts3, 'OSC', head_company_safety, 'OvD', assistance_vehicle, ff_specialist, sec_operator, fire_watcher1, fire_watcher2, driver, 'CvD', off_duty_firemen, lot_team]).
+sortdef('MESSAGE', [crash, nothing_known, no_idea_why, negative, not_available, plane_off_runway, plane_on_fire, military_plane, worst_feared, large_n_ambul_standby, one_ambulance_sent_already, possibly_burn_victims_coming, fully_on_scene, feeding_water_to_mac, under_control, do_not_need_a_lot, possible, ext_left_engine_powder, ext_fires_with_high_pres, preferred_location, belgium_cargo_plane, four_zero, i_am_here, using_cutter_for_left_rear_door, perform_task_cockpit, perform_task_middle_part, perform_task_left_rear_door, perform_task_cool_victims, opinion, drive_around_plane, scenario_3_used, condition_of_plane, will_start_more_detailed_investigation, major_accident_lots_of_victims, location_woundsnest_near_plane, fax_with_passengers, call_0611, use_runway, n_of_people_in_plane, going_to_scene, need_backup, use_backup, more_info, deliver_water_mac1, deliver_water_mac3, ext_left_engine_powder, water_tank_unit_woensel, tools_opening_plane, assistance_vehicle, ext_fires_with_high_pres, situation_update, preferred_location, stretcher, spell_n_of_people_on_plane, multiple_ambulances, additional_ts, opinion, tell_OvD_scenario_3_used, relieve_colleagues, use_truck_ts4_for_cooling, fan, drive_to_woundsnest, location_woundsnest, motor_fire_escape, scenario2, woundsnest_location]).
+sortdef('OBSERVATION', [crash, hercules, left_rear_door_opened_6_8_cm, left_rear_door_opened_60_cm, right_door_blocked, cargo_door_no_control_panel, left_rear_door_opens_manually, left_rear_door_standing_open, left_rare_door_does_not_open_further, rear_hatch_not_suitable, victim_partially_falls_out_left_rear_door, left_rear_door_used_as_second_path, unable_to_open_left_rear_door_more, right_rear_door_unreachable_due_to_victims, control_hatch_not_functioning, fan_present, fax_with_passengers]).
+sortdef('MSG_TYPE', [observe, inform, request, permit, declare, resource]).
+sortdef('AMOUNT_TYPE', [people, survivor, casualties, wounded_severely_burnt, wounded_trans_alive, ambulance_sent]).
+interval([], range(0, 0.2), and((output(ew)|communication_from_to(ew, 'ATC', observe, hercules)), (output(ew)|communication_from_to(ew, 'ATC', observe, crash)))).
+leadsto(['R':'ROLE', 'O':'OBSERVATION'], (output(ew)|communication_from_to(ew, 'R', observe, 'O')), (input('R')|communication_from_to(ew, 'R', observe, 'O')), efgh(0, 0, 0.1, 0.1)).
+leadsto(['R':'ROLE', 'DST':'ROLE', 'T':'MSG_TYPE', 'MSG':'MESSAGE'], (output('R')|communication_from_to('R', 'DST', 'T', 'MSG')), (input('DST')|communication_from_to('R', 'DST', 'T', 'MSG')), efgh(0, 0, 0.1, 0.1)).
+leadsto(['R':'ROLE', 'DST':'ROLE', 'T':'MSG_TYPE', 'AT':'AMOUNT_TYPE', n:integer], (output('R')|communication_from_to('R', 'DST', 'T', amount('AT', n))), (input('DST')|communication_from_to('R', 'DST', 'T', amount('AT', n))), efgh(0, 0, 0.1, 0.1)).
+leadsto(['R':'ROLE', 'DST':'ROLE', 'T':'MSG_TYPE', 'AT':'AMOUNT_TYPE', n:integer], (output('R')|communication_from_to('R', 'DST', 'T', amount('AT', at_least(n)))), (input('DST')|communication_from_to('R', 'DST', 'T', amount('AT', at_least(n)))), efgh(0, 0, 0.1, 0.1)).
+leadsto(['R':'ROLE', 'DST':'ROLE', 'T':'MSG_TYPE', 'AT':'AMOUNT_TYPE', n:integer], (output('R')|communication_from_to('R', 'DST', 'T', amount('AT', at_most(n)))), (input('DST')|communication_from_to('R', 'DST', 'T', amount('AT', at_most(n)))), efgh(0, 0, 0.1, 0.1)).
+leadsto(['R':'ROLE', 'DST':'ROLE', 'T':'MSG_TYPE', 'AT':'AMOUNT_TYPE', m:integer, n:integer], (output('R')|communication_from_to('R', 'DST', 'T', amount('AT', between(m, n)))), (input('DST')|communication_from_to('R', 'DST', 'T', amount('AT', between(m, n)))), efgh(0, 0, 0.1, 0.1)).
+leadsto([], and((input('ATC')|communication_from_to(ew, 'ATC', observe, hercules)), (input('ATC')|communication_from_to(ew, 'ATC', observe, crash))), and((output('ATC')|communication_from_to('ATC', 'AFD', inform, crash)), (output('ATC')|communication_from_to('ATC', 'MHS', inform, crash))), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('AFD')|communication_from_to('ATC', 'AFD', inform, crash)), and(member_of(mac2, 'AFD'), member_of(mac3, 'AFD'), member_of(laro, 'AFD')), efgh(0, 0, 0.1, 3.8)).
+leadsto([], and((input('ATC')|communication_from_to(ew, 'ATC', observe, crash)), (input('ATC')|communication_from_to(ew, 'ATC', observe, hercules))), (output('ATC')|communication_from_to('ATC', 'AFD', request, call_0611)), efgh(1.2, 1.2, 0.1, 0.1)).
+interval([], range(1, 2), (output('AFD')|communication_from_to('AFD', 'ATC', request, use_runway))).
+leadsto([], (input('ATC')|communication_from_to('AFD', 'ATC', request, use_runway)), (output('ATC')|communication_from_to('ATC', 'AFD', permit, use_runway)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(1.6, 2.6), (output('AFD')|communication_from_to('AFD', 'ATC', request, n_of_people_in_plane))).
+leadsto([], (input('ATC')|communication_from_to('AFD', 'ATC', request, n_of_people_in_plane)), (output('ATC')|communication_from_to('ATC', 'AFD', inform, nothing_known)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('MHS')|communication_from_to('ATC', 'MHS', inform, crash)), member_of(m_ambulance, 'MHS'), efgh(3, 3, 0.1, 6)).
+leadsto([], (input('AFD')|communication_from_to('ATC', 'AFD', request, call_0611)), (output('AFD')|communication_from_to('AFD', 'O611', inform, crash)), efgh(2, 2, 0.1, 0.1)).
+interval([], range(4, 5), (output('AFD')|communication_from_to('AFD', 'CPA', inform, crash))).
+interval([], range(4, 7), member_of(mac2, 'OSO')).
+leadsto([], member_of(mac3, 'AFD'), member_of(mac3, 'OSO'), efgh(3.5, 3.5, 0.1, 100)).
+leadsto([], member_of(laro, 'AFD'), member_of(laro, 'OSO'), efgh(3.5, 3.5, 0.1, 100)).
+leadsto([], (input('CPA')|communication_from_to('AFD', 'CPA', inform, crash)), member_of(c_ambulance1, 'CPA'), efgh(1, 1, 0.1, 10)).
+leadsto([], (input('CPA')|communication_from_to('AFD', 'CPA', inform, crash)), member_of(c_ambulance2, 'CPA'), efgh(1, 1, 0.1, 26.5)).
+interval([], range(5.2, 12.2), member_of(police_unit1, 'Police')).
+interval([], range(6, 16), and(member_of(police_unit2, 'Police'), member_of(police_unit3, 'Police'), member_of(police_unit4, 'Police'), member_of(police_unit5, 'Police'))).
+interval([], range(6.1, 6.3), (output('Police')|communication_from_to('Police', 'RFD', request, going_to_scene))).
+leadsto([], (input('RFD')|communication_from_to('Police', 'RFD', request, going_to_scene)), (output('RFD')|communication_from_to('RFD', 'Police', inform, no_idea_why)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(7.0, 7.2), (output('O611')|communication_from_to('O611', 'Marechaussee', inform, crash))).
+interval([], range(7.1, 38.8), member_of(mac2, 'AFD')).
+interval([], range(10, 13), member_of(mac1, 'AFD')).
+interval([], range(9.0, 9.2), (output('RFD')|communication_from_to('RFD', 'ATC', permit, use_backup))).
+leadsto([], (input('ATC')|communication_from_to('RFD', 'ATC', permit, use_backup)), (output('ATC')|communication_from_to('ATC', 'AFD', request, need_backup)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('AFD')|communication_from_to('ATC', 'AFD', request, need_backup)), (output('AFD')|communication_from_to('AFD', 'ATC', inform, negative)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('ATC')|communication_from_to('AFD', 'ATC', inform, negative)), (output('ATC')|communication_from_to('ATC', 'RFD', inform, negative)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], member_of(m_ambulance, 'MHS'), member_of(m_ambulance, 'OSO'), efgh(6.4, 6.4, 0.1, 100)).
+interval([], range(9.7, 9.9), (output('AFD')|communication_from_to('AFD', 'AFD', declare, scenario2))).
+interval([], range(10, 10.2), (output('AFD')|communication_from_to('AFD', 'Marechaussee', inform, crash))).
+leadsto([], member_of(police_unit1, 'Police'), member_of(police_unit1, 'OSO'), efgh(7, 7, 0.1, 100)).
+interval([], range(12.3, 12.5), (output('AFD')|communication_from_to('AFD', 'RFD', inform, crash))).
+interval([], range(13, 13.2), (output('CPA')|communication_from_to('CPA', 'RFD', request, more_info))).
+leadsto([], (input('RFD')|communication_from_to('CPA', 'RFD', request, more_info)), (output('RFD')|communication_from_to('RFD', 'CPA', inform, not_available)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('RFD')|communication_from_to('AFD', 'RFD', inform, crash)), member_of(ts1, 'RFD'), efgh(1, 1, 0.1, 9)).
+leadsto([], member_of(mac1, 'AFD'), member_of(mac1, 'OSO'), efgh(3.2, 3.2, 0.1, 100)).
+leadsto([], member_of(c_ambulance1, 'CPA'), member_of(c_ambulance1, 'OSO'), efgh(10, 10, 0.1, 100)).
+interval([], range(15.3, 15.5), and((output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, plane_off_runway)), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, plane_on_fire)))).
+interval([], range(15.5, 28), member_of('OvD', 'RFD')).
+leadsto([], member_of(police_unit2, 'Police'), member_of(police_unit2, 'OSO'), efgh(10, 10, 0.1, 100)).
+leadsto([], member_of(police_unit3, 'Police'), member_of(police_unit3, 'OSO'), efgh(10, 10, 0.1, 100)).
+leadsto([], member_of(police_unit4, 'Police'), member_of(police_unit4, 'OSO'), efgh(10, 10, 0.1, 100)).
+leadsto([], member_of(police_unit5, 'Police'), member_of(police_unit5, 'OSO'), efgh(10, 10, 0.1, 100)).
+interval([], range(18, 18.2), and((output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, military_plane)), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, amount(people, 4))), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, worst_feared)))).
+leadsto([], and((input('CPA')|communication_from_to(c_ambulance1, 'CPA', inform, amount(people, 4))), (input('CPA')|communication_from_to(c_ambulance1, 'CPA', inform, worst_feared)), (input('CPA')|communication_from_to(c_ambulance1, 'CPA', inform, military_plane))), and((output('CPA')|communication_from_to('CPA', 'RFD', inform, amount(people, 4))), (output('CPA')|communication_from_to('CPA', 'RFD', inform, worst_feared)), (output('CPA')|communication_from_to('CPA', 'RFD', inform, large_n_ambul_standby)), (output('CPA')|communication_from_to('CPA', 'RFD', inform, amount(ambulance_sent, 1)))), efgh(3, 3, 0.1, 0.1)).
+leadsto([], member_of(ts1, 'RFD'), member_of(ts1, 'OSO'), efgh(9, 9, 0.1, 100)).
+interval([], range(22, 29.2), member_of(head_afd, 'AFD')).
+interval([], range(23, 23.2), (output('CPA')|communication_from_to('CPA', 'Hospital', inform, possibly_burn_victims_coming))).
+interval([], range(24, 100), member_of(commander_ts1, ts1)).
+interval([], range(24, 24.2), (output('OSC')|communication_from_to('OSC', commander_ts1, request, deliver_water_mac3))).
+interval([], range(24.3, 37.9), and(member_of(ts2, 'RFD'), member_of(ts3, 'RFD'))).
+interval([], range(25, 25.2), (output('OSC')|communication_from_to('OSC', commander_ts1, request, ext_left_engine_powder))).
+interval([], range(25.1, 25.3), and((output(ts1)|communication_from_to(ts1, 'RFD', inform, fully_on_scene)), (output(ts1)|communication_from_to(ts1, 'RFD', inform, feeding_water_to_mac)), (output(ts1)|communication_from_to(ts1, 'RFD', request, water_tank_unit_woensel)))).
+interval([], range(26, 26.2), and((output(ts1)|communication_from_to(ts1, 'RFD', inform, under_control)), (output(ts1)|communication_from_to(ts1, 'RFD', inform, do_not_need_a_lot)))).
+interval([], range(26.2, 100), member_of(head_company_safety, 'AFD')).
+interval([], range(28, 100), member_of('OvD', 'OSO')).
+interval([], range(29.2, 41.1), member_of(head_afd, 'OSO')).
+interval([], range(30, 30.2), (output('OSC')|communication_from_to('OSC', commander_ts1, request, tools_opening_plane))).
+leadsto([], (input(commander_ts1)|communication_from_to('OSC', commander_ts1, request, tools_opening_plane)), (output(commander_ts1)|communication_from_to(commander_ts1, 'OSC', inform, possible)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(30.3, 30.5), (output('OSC')|communication_from_to('OSC', commander_ts1, request, ext_fires_with_high_pres))).
+leadsto([], (input(commander_ts1)|communication_from_to('OSC', commander_ts1, request, tools_opening_plane)), and((output(commander_ts1)|communication_from_to(commander_ts1, 'RFD', request, assistance_vehicle)), (output(commander_ts1)|communication_from_to(commander_ts1, 'RFD', request, water_tank_unit_woensel))), efgh(1, 1, 0.1, 0.1)).
+interval([], range(32, 32.2), (output('OvD')|communication_from_to('OvD', commander_ts1, request, situation_update))).
+leadsto([], (input(commander_ts1)|communication_from_to('OvD', commander_ts1, request, situation_update)), and((output(commander_ts1)|communication_from_to(commander_ts1, 'OvD', inform, feeding_water_to_mac)), (output(commander_ts1)|communication_from_to(commander_ts1, 'OvD', inform, ext_left_engine_powder)), (output(commander_ts1)|communication_from_to(commander_ts1, 'OvD', inform, ext_fires_with_high_pres))), efgh(0, 0, 0.1, 0.1)).
+interval([], range(32.4, 100), member_of(c_ambulance2, 'OSO')).
+interval([], range(32.5, 34), member_of(c_ambulance3, 'CPA')).
+interval([], range(32.5, 100), member_of(c_ambulance4, 'CPA')).
+interval([], range(32.6, 100), member_of(assistance_vehicle, 'OSO')).
+interval([], range(32.6, 32.8), (output(assistance_vehicle)|communication_from_to(assistance_vehicle, 'RFD', inform, fully_on_scene))).
+interval([], range(32.7, 32.9), (output('OSC')|communication_from_to('OSC', 'OvD', inform, amount(people, 4)))).
+interval([], range(33, 100), and(member_of(ff_specialist, mac2), member_of(sec_operator, mac2))).
+interval([], range(34, 100), member_of(c_ambulance3, 'OSO')).
+interval([], range(34.1, 34.3), (output('OvD')|communication_from_to('OvD', c_ambulance1, request, preferred_location))).
+leadsto([], (input(c_ambulance1)|communication_from_to('OvD', c_ambulance1, request, preferred_location)), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'OvD', inform, preferred_location)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('OvD')|communication_from_to(c_ambulance1, 'OvD', inform, preferred_location)), (output('OvD')|communication_from_to('OvD', 'OvD', declare, woundsnest_location)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(35, 35.2), (output(fire_watcher1)|communication_from_to(fire_watcher1, request, commander_ts1, stretcher))).
+interval([], range(35.2, 35.4), (output(fire_watcher2)|communication_from_to(fire_watcher2, commander_ts1, inform, amount(people, between(20, 30))))).
+interval([], range(36, 36.2), and((output('Police')|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (output('Police')|communication_from_to('Police', all_units, inform, amount(people, 4))))).
+leadsto([], and((output('Police')|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (output('Police')|communication_from_to('Police', all_units, inform, amount(people, 4)))), and((input(police_unit1)|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (input(police_unit1)|communication_from_to('Police', all_units, inform, amount(people, 4))), (input(police_unit2)|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (input(police_unit2)|communication_from_to('Police', all_units, inform, amount(people, 4))), (input(police_unit3)|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (input(police_unit3)|communication_from_to('Police', all_units, inform, amount(people, 4))), (input(police_unit4)|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (input(police_unit4)|communication_from_to('Police', all_units, inform, amount(people, 4))), (input(police_unit5)|communication_from_to('Police', all_units, inform, belgium_cargo_plane)), (input(police_unit5)|communication_from_to('Police', all_units, inform, amount(people, 4)))), efgh(0, 0, 0.1, 0.1)).
+interval([], range(36.3, 36.5), (output(head_afd)|communication_from_to(head_afd, ff_specialist, inform, amount(people, between(10, 12))))).
+interval([], range(37, 37.2), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, amount(survivor, at_least(2))))).
+interval([], range(37.1, 37.3), (output('ATC')|communication_from_to('ATC', 'AFD', inform, amount(people, 40)))).
+leadsto([], (input('AFD')|communication_from_to('ATC', 'AFD', inform, amount(people, 40))), (output('AFD')|communication_from_to('AFD', all_units, inform, amount(people, 40))), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (output('AFD')|communication_from_to('AFD', all_units, inform, amount(people, 40))), and((input(mac1)|communication_from_to('AFD', all_units, inform, amount(people, 40))), (input(mac2)|communication_from_to('AFD', all_units, inform, amount(people, 40))), (input(mac3)|communication_from_to('AFD', all_units, inform, amount(people, 40))), (input(ts1)|communication_from_to('AFD', all_units, inform, amount(people, 40)))), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input(mac2)|communication_from_to('AFD', all_units, inform, amount(people, 40))), (output(ff_specialist)|communication_from_to(ff_specialist, 'AFD', request, spell_n_of_people_on_plane)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('AFD')|communication_from_to(ff_specialist, 'AFD', request, spell_n_of_people_on_plane)), (output('AFD')|communication_from_to('AFD', ff_specialist, inform, four_zero)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(37.9, 100), and(member_of(ts2, 'OSO'), member_of(ts3, 'OSO'))).
+interval([], range(37.85, 38.05), (output(commander_ts1)|communication_from_to(commander_ts1, 'OvD', inform, amount(people, between(20, 30))))).
+interval([], range(37.96, 38.16), (input('OvD')|communication_from_to('ATC', all_units, inform, amount(people, 40)))).
+interval([], range(38, 38.2), (output(police_unit1)|communication_from_to(police_unit1, 'Police', request, multiple_ambulances))).
+interval([], range(38.2, 38.4), (output(commander_ts1)|communication_from_to(commander_ts1, 'RFD', request, additional_ts))).
+interval([], range(38.4, 38.6), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', request, multiple_ambulances))).
+interval([], range(38.6, 38.8), (output(c_ambulance1)|communication_from_to(c_ambulance1, 'CPA', inform, amount(people, 40)))).
+interval([], range(38.8, 100), member_of(mac2, 'OSO')).
+interval([], range(39, 100), member_of(c_ambulance5, 'CPA')).
+interval([], range(39.1, 39.3), (input('OSO')|communication_from_to(ew, 'OSO', observe, left_rear_door_opened_6_8_cm))).
+interval([], range(39.2, 39.4), (output(ff_specialist)|communication_from_to(ff_specialist, 'OSC', inform, i_am_here))).
+leadsto([], (input('OSC')|communication_from_to(ff_specialist, 'OSC', inform, i_am_here)), and((output('OSC')|communication_from_to('OSC', ff_specialist, request, deliver_water_mac1)), (output('OSC')|communication_from_to('OSC', ff_specialist, request, deliver_water_mac3))), efgh(0, 0, 0.1, 0.1)).
+interval([], range(39.5, 100), member_of(driver, mac2)).
+leadsto([], (input(ff_specialist)|communication_from_to('OSC', ff_specialist, request, deliver_water_mac1)), (output(ff_specialist)|communication_from_to(ff_specialist, driver, request, deliver_water_mac1)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input(ff_specialist)|communication_from_to('OSC', ff_specialist, request, deliver_water_mac3)), (output(ff_specialist)|communication_from_to(ff_specialist, driver, request, deliver_water_mac3)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(39.8, 40), and((input(commander_ts1)|communication_from_to(ew, commander_ts1, observe, right_rear_door_blocked)), (input(commander_ts1)|communication_from_to(ew, commander_ts1, observe, cargo_door_no_control_panel)), (input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, right_rear_door_blocked)), (input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, cargo_door_no_control_panel)))).
+interval([], range(40, 40.2), and((input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, left_rear_door_opens_manually)), (input(commander_ts1)|communication_from_to(ew, commander_ts1, observe, door_standing_open)))).
+interval([], range(40.1, 40.3), and((input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, left_rear_door_does_not_open_further)), (input(commander_ts1)|communication_from_to(ew, commander_ts1, observe, left_rear_door_does_not_open_further)))).
+leadsto([], (input(commander_ts1)|communication_from_to(ew, commander_ts1, observe, left_rear_door_does_not_open_further)), (output(commander_ts1)|communication_from_to(commander_ts1, 'OvD', inform, using_cutter_for_left_rear_door)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(40.5, 40.7), and((output('OvD')|communication_from_to('OvD', 'OSC', inform, perform_task_cockpit)), (output('OvD')|communication_from_to('OvD', commander_ts1, inform, perform_task_middle_part)), (output('OvD')|communication_from_to('OvD', commander_ts2, inform, perform_task_left_rear_door)), (output('OvD')|communication_from_to('OvD', commander_ts3, inform, perform_task_cool_victims)))).
+interval([], range(41, 41.2), (input(commander_ts1)|communication_from_to(ew, commander_ts, observe, right_rear_door_blocked))).
+interval([], range(41.1, 100), member_of(head_afd, 'AFD')).
+interval([], range(41.2, 41.4), (output(commander_ts2)|communication_from_to(commander_ts2, ff_specialist, request, opinion))).
+leadsto([], (input(ff_specialist)|communication_from_to(commander_ts2, ff_specialist, request, opinion)), (output(ff_specialist)|communication_from_to(ff_specialist, commander_ts2, inform, opinion)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input(commander_ts2)|communication_from_to(ff_specialist, commander_ts2, inform, opinion)), (output(commander_ts2)|communication_from_to(commander_ts2, ff_specialist, inform, drive_around_plane)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(41.8, 42), (input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, rear_hatch_not_suitable))).
+interval([], range(43, 43.2), (output('CPA')|communication_from_to('CPA', other_CPA_s, request, need_backup))).
+interval([], range(43.1, 43.3), and((input('OSO')|communication_from_to(ew, 'OSO', observe, left_rear_door_opened_60_cm)), (input('OSO')|communication_from_to(ew, 'OSO', observe, victim_partially_falls_out_left_rear_door)), (input('OSO')|communication_from_to(ew, 'OSO', observe, left_rear_door_used_as_second_path)))).
+interval([], range(43.2, 43.4), and((input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, unable_to_open_left_rear_door_more)), (input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, right_rear_door_unreachable_due_to_victims)))).
+interval([], range(43.3, 57), member_of(ts4, 'RFD')).
+interval([], range(43.4, 43.6), (output(head_afd)|communication_from_to(head_afd, 'RFD', request, tell_OvD_scenario_3_used))).
+leadsto([], (input('RFD')|communication_from_to(head_afd, 'RFD', request, tell_OvD_scenario_3_used)), (output('RFD')|communication_from_to('RFD', 'OvD', inform, scenario_3_used)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(44, 44.2), (input(ff_specialist)|communication_from_to(ew, ff_specialist, observe, control_hatch_not_functioning))).
+interval([], range(45, 100), member_of('CvD', 'OSO')).
+interval([], range(45.1, 45.3), (output('CvD')|communication_from_to('CvD', 'RFD', inform, fully_on_scene))).
+interval([], range(45.3, 45.5), (output('CvD')|communication_from_to('CvD', 'RFD', inform, condition_of_plane))).
+interval([], range(45.5, 45.7), (output('CvD')|communication_from_to('CvD', 'RFD', inform, will_start_more_detailed_investigation))).
+interval([], range(47, 47.2), (output('AFD')|communication_from_to('AFD', off_duty_firemen, request, relieve_colleagues))).
+interval([], range(47.2, 47.4), (output('OvD')|communication_from_to('OvD', 'RFD', inform, major_accident_lots_of_victims))).
+interval([], range(47.4, 47.6), (output('OvD')|communication_from_to('OvD', 'RFD', request, stretcher))).
+interval([], range(48, 48.2), (output('CvD')|communication_from_to('CvD', 'RFD', inform, amount(wounded_severely_burnt, 5)))).
+interval([], range(48.2, 48.4), (ouput('CvD')|communication_from_to('CvD', 'RFD', request, use_truck_ts4_for_cooling))).
+interval([], range(48.3, 48.5), (input('RFD')|communication_from_to('CvD', 'RFD', request, use_truck_ts4_for_cooling))).
+interval([], range(48.4, 48.6), (output(commander_ts1)|communication_from_to(commander_ts1, 'OvD', request, fan))).
+leadsto([], (input('RFD')|communication_from_to('CvD', 'RFD', request, use_truck_ts4_for_cooling)), (output('RFD')|communication_from_to('RFD', ts4, request, drive_to_woundsnest)), efgh(4, 4, 0.1, 0.1)).
+leadsto([], (input(ts4)|communication_from_to('RFD', ts4, request, drive_to_woundsnest)), (output(ts4)|communication_from_to(ts4, 'RFD', request, location_woundsnest)), efgh(0, 0, 0.1, 0.1)).
+leadsto([], (input('RFD')|communication_from_to(ts4, 'RFD', request, location_woundsnest)), (output('RFD')|communication_from_to('RFD', ts4, inform, location_woundsnest_near_plane)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(57, 100), member_of(ts4, 'OSO')).
+interval([], range(57.1, 57.3), and((output('OvD')|communication_from_to('OvD', 'RFD', request, motor_fire_escape)), (output('OvD')|communication_from_to('OvD', 'RFD', request, fan)))).
+interval([], range(62, 62.2), (input('OSO')|communication_from_to(ew, 'OSO', observe, fan_present))).
+interval([], range(67, 100), member_of(lot_team, 'OSO')).
+interval([], range(68, 68.2), (input('OSC')|communication_from_to(ew, 'OSC', observe, fax_with_passengers))).
+leadsto([], (input('OSC')|communication_from_to(ew, 'OSC', observe, fax_with_passengers)), (output('OSC')|communication_from_to('OSC', head_afd, inform, fax_with_passengers)), efgh(0, 0, 0.1, 0.1)).
+interval([], range(79, 79.2), (output('CvD')|communication_from_to('CvD', 'RFD', inform, amount(wounded_trans_alive, 10)))).
+interval([], range(83, 83.2), (output('CvD')|communication_from_to('CvD', 'RFD', inform, amount(casualties, at_least(26))))).
+display(ViewTag, sort_atoms_time_global).

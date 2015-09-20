@@ -1,0 +1,7 @@
+content(type(save_lt_editor('spec1.lt'))).
+content(generator(app(leadsto_software, 113, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Oct 31 17:14:58 2005')])).
+end_time(5).
+interval([], range(0, 1), observes_no_screen).
+interval([], range(0, 1), observes_food_at_p2).
+leadsto([], and(observes_food_at_p2, observes_no_screen), goes_to_p2, efgh(0, 0, 1, 3)).

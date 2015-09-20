@@ -1,0 +1,8 @@
+content(type(savedtrace('spec1.lt'))).
+content(generator(app(leadsto_software, 113, [psprinting:1, showtrace:8, simalgo:11]))).
+content(source(file('spec1.lt', [size(366), path('/home/tbosse/spec1.lt'), mdate('Mon Oct 31 17:14:58 2005')]))).
+content(run([date('Mon Oct 31 17:15:05 2005')])).
+atom_trace(goes_to_p2, goes_to_p2, [range(4, 5, unknown), range(1, 4, true), range(0, 1, unknown)]).
+atom_trace(observes_food_at_p2, observes_food_at_p2, [range(1, 5, unknown), range(0, 1, true)]).
+atom_trace(observes_no_screen, observes_no_screen, [range(1, 5, unknown), range(0, 1, true)]).
+times(0, 5, 5).

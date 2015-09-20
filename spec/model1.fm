@@ -1,0 +1,4 @@
+content(type(save_lt_editor('model1.fm'))).
+content(generator(app(leadsto_software, 132, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Jun 28 17:54:45 2004')])).
+denotes(p1, forall([t:'TRACE'], exists(['D':between(10, 12)], t:'TRACE'=m1('D':between(10, 12))))).

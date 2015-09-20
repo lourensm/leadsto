@@ -1,0 +1,5 @@
+content(type(save_lt_editor('h:/spec1check.fm'))).
+content(generator(app(leadsto_software, 136, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Oct 31 17:45:35 2005')])).
+denotes('GP1', exists([t:interval], holds(state(trace1, time(t:interval)), goes_to_p2, true))).
+denotes('GP2', forall([m:'TRACE', t:interval], implies(holds(state(m:'TRACE', time(t:interval)), goes_to_p2, true), exists([t2:interval<t:interval], and(holds(state(m:'TRACE', time(t2:interval)), observes_food_at_p2, true), holds(state(m:'TRACE', time(t2:interval)), observes_no_screen, true)))))).

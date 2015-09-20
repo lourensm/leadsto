@@ -1,0 +1,4 @@
+content(type(save_lt_editor('aap.fm'))).
+content(generator(app(leadsto_software, 38, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Jan 20 14:30:30 2003')])).
+denotes(test, forall([x:between(1, 10), y:between(1, 10), z:between(1, 10)], implies(and(x<y, y<z), x<z))).

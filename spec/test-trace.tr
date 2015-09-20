@@ -1,0 +1,8 @@
+content(type(savedtrace('testfile.lt'))).
+content(generator(app(leadsto_software, 105, [psprinting:1, showtrace:8, simalgo:11]))).
+content(source(file('testfile.lt', [size(332), path('/home/tbosse/research/tools/check/ants/complex/testfile.lt'), mdate('Fri Feb 27 13:19:38 2004')]))).
+content(run([date('Fri Feb 27 13:19:41 2004')])).
+atom_trace('is_at(ant1, \'L1\')', is_at(ant1, 'L1'), [range(7, 10, false), range(6, 7, true), range(4, 6, false), range(3, 4, true), range(0, 3, false)]).
+atom_trace('is_at(ant2, \'L1\')', is_at(ant2, 'L1'), [range(4, 10, false), range(3, 4, true), range(0, 3, false)]).
+cwa(A).
+times(0, maxinf, 10).
