@@ -162,11 +162,6 @@ $(LTINSTALLDIR)/plrt/bin/chplhd:	chplhd
 RTPLNEEDEDLOC=xpce plrc chplhd
 RTPLNEEDED=$(RTPLNEEDEDLOC:%=$(LTINSTALLDIR)/plrt/bin/%)
 
-q:
-	echo $(PLBIN)
-
-piep:
-	echo $(SOLRTPLDIR)
 
 $(LTINSTALLDIR)/plrt/bin/xpce:	$(SOLRTPLDIR)/bin/xpce
 	echo "MAKING xpce rt"
@@ -184,10 +179,6 @@ $(LTINSTALLDIR)/plrt/bin/xpce:	$(SOLRTPLDIR)/bin/xpce
 	done;\
 	cp $(PLLIBDIR)/xpce/lib/$$PLARCH/pl2xpce.so $(LTINSTALLDIR)/plrt/lib/$$PLARCH
 
-uuu:
-	eval `$(PLBIN) -dump-runtime-variables`;\
-	echo $$PLARCH;\
-	ls $(PLLIBDIR)/xpce/lib/$$PLARCH/
 
 $(LTINSTALLDIR)/plrt/bin/plrc:	$(SOLRTPLDIR)/bin/plrc
 	mkdir -p $(LTINSTALLDIR)/plrt/bin
@@ -770,10 +761,29 @@ instpl:
 	tar -zcf darwin11.tgz lt/
 	chmod go+r darwin11.tgz
 	ls -l darwin11.tgz
-port install pear	scp -p darwin11.tgz lourens@$(FLUIT).cs.vu.nl:www/aistaff/sim/
+#	scp -p darwin.tgz lourens@$(FLUIT).cs.vu.nl:www/aistaff/sim/
 #	chmod go-r ltrhlinux71.tgz
 
 endif
+
+ifeq ($(PLATFORM),darwin)
+instpl:
+	rm -f darwin.tgz
+	$(MAKE) NSA=_nsa instcommon.lt
+#	mkdir lt/pl
+#	eval `swipl -dump-runtime-variables`;echo $$PLBASE;cd $$PLBASE/lib/i386*;cp *.dylib /Users/lourens/wrk/db3/pl/lt/pl
+#	eval `pl -dump-runtime-variables`;cd $$PLBASE;tar cf - bin lib xpce xpce-*/lib |(cd /home/lourens/wrk/ww/db3/pl/lt/pl;tar xfBp -)
+#	echo "pl" > lt/swipl
+#	cp /usr/lib/libreadline.so.4.2 lt/pl/lib/
+	tar -zcf darwin.tgz lt/
+	chmod go+r darwin.tgz
+	ls -l darwin.tgz
+#scp -p darwin11.tgz lourens@$(FLUIT).cs.vu.nl:www/aistaff/sim/
+#	chmod go-r ltrhlinux71.tgz
+
+endif
+
+
 
 
 ty:
@@ -998,13 +1008,14 @@ clean:
 	rm -f *~ scratch.eps trace.tr leadsto$(EXESUFFIX) ltbare$(EXESUFFIX) lteditor$(EXESUFFIX) abmptr$(EXESUFFIX) fv$(EXESUFFIX)
 	rm -f ttleditor$(EXESUFFIX) ttlchecker$(EXESUFFIX) log2trace$(EXESUFFIX)
 	rm -f  log ltpl.zip ltrhlinux71.tgz
-	rm -rf ltpl satsimpleverbose.pl satsimplequiet.pl
+	rm -rf lt ltpl satsimpleverbose.pl satsimplequiet.pl
 	rm -f generatedholds.pl generated_compacted_trace_*.tr
 	rm -f interact-a.tr interact-b.tr
 	rm -f install_leadsto.exe install_leadsto_comm.exe
 	rm -f abmptr.exe fv.exe saveabmp.exe
 	rm -f spec/*~
 	rm -f compiled.txt version.nsi log.log
+	rm -f darwin.tgz typescript
 	rm -rf shortcuts
 
 chktr:

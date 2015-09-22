@@ -10,3 +10,4 @@ First test with swi pl 6.4.1
 There are lots of requirements for regenerating the installer.
 - cygwin
 - nsis
+

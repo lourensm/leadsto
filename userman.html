@@ -22,6 +22,10 @@
 </UL>
 <H1><A name="intro">Introduction</A></H1>
 
+<h2>Contact</h2>
+
+lkmeel: info  ATT lkmeel DOT nl
+
 <h2>Documentation</h2>
 
 The separate "getting started" pdf documents introduce the tools:
@@ -74,8 +78,7 @@ or
 will output information on command line options.
 <h1><a name="install">Installation</a></h1>
 
-Currently the software is available for Windows, Linux (Redhat 7.1) and 
-Solaris.
+Currently the software is available for Windows, Linux and mac os x.
 <P>
 <A name="installwin"><H3>Installation Instructions for Windows</H3></A>
 
@@ -101,31 +104,13 @@ the desktop to create/edit or check TTL-formulae.
 </UL>
 </OL>
 
-<H3>Instructions at the Vrije Universiteit on Solaris</H3>
+<A name="installlinux"><H3>Installation Instructions for mac os x</H3></A>
+Download and extract darwin.tgz. Make sure you have swi prolog installed on your
+mac. Verify or make sure you have an environment variable $SWIPL pointing to
+your swi-prolog executable. Start the leadsto/ttl programs as
+YourPath/lt/bin/YourProgram.
 
-
-Execute 
-<ul>
-<li><b><code>/usr/local/ai/lt/bin/lteditor [leadstofile]</code></b> to 
-run a simulation (the argument is optional, but then the file must exist)
-<li><b><code>/usr/local/ai/lt/bin/leadsto [leadstofile]</code></b> to 
-run a simulation
-<li><b><code>/usr/local/ai/lt/bin/ttlchecker [fm-file]</code></b> to 
-create/edit or check ttl-formulae of a formula specification file.
-(The file argument is optional).
-</ul>
-Run in a directory where you have write permission, as the program will
-create several log files.
-<p>
-If you add <code>/usr/local/ai/lt/bin</code> to your environment variable
-<code>PATH</code>, you may simply type <code>lteditor</code>, 
-<code>leadsto</code>, <code>ttlchecker</code>.
-(How to do that depends on the Unix-shell you have (execute : echo $SHELL)
-and what environment file you normally put your environment variables in.
-For $SHELL = */bash: Edit your <code>.bashrc</code> or <code>.bash_profile</code>
-file: look for a line "export PATH= ..." and add <code>:/usr/local/ai/lt/bin</code>)
-
-
+The procedure has not been tested. Contact lkmeel for problems.
 <A name="installlinux"><H3>Installation Instructions for Linux</H3></A>
 
 <em>We do not update and test new versions of the Linux version of the software
@@ -153,7 +138,7 @@ of Redhat 7.1.
 There are other more recent/other version linux installations avalaible. Try
 the most recent ones first.
 
-(Please e-mail lourens@cs.vu.nl with your experiences with
+(Please e-mail lkmeel with your experiences with
 installing on Linux)
 
 <H4>Known problems installing on Linux</H4>
@@ -879,7 +864,7 @@ FATAL ERROR:No progress, probably used too much 0 time parameters...
 
 Before storing derived atoms, their real number arguments are rounded off,
 standard to about 7 digits long. There are facilities for more precise
-results. E-mail lourens@cs.vu.nl if you need more precise results.
+results. E-mail lkmeel if you need more precise results.
 
 <h1><a name="appendix">Appendix</a></H1>
 
