@@ -1975,7 +1975,7 @@ option(_) :-
 do_setup_time(TStart, TSetup) :-
 	(	member(Option, [setup_maxg, setup_maxfg]),
 		option(Option)
-	->	fatal_error('Option ~w temporarily unsupported, email lourens@cs.vu.nl', [Option]),
+	->	fatal_error('Option ~w temporarily unsupported, email lourens', [Option]),
 		leadsto_max_value(Option, Delay)
 	;	Delay = 0
 	),
