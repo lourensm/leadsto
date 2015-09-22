@@ -74,6 +74,16 @@ PLLIBDIR:=$(shell eval `$(PLBIN) -dump-runtime-variables`;echo $$PLBASE)
 SOLRTPLDIR:=$(shell dirname `dirname $(PLLIBDIR)`)
 SO=so
 else
+ifeq ($(findstring apple-darwin,$(MACHINE)), apple-darwin)
+PLATFORM=darwin
+PL=swipl
+XPCE=swipl
+XPCEBIN=$(XPCE)
+PLBIN=$(PL)
+PLLIBDIR:=$(shell eval `$(PLBIN) -dump-runtime-variables`;echo $$PLBASE)
+SOLRTPLDIR:=$(shell dirname `dirname $(PLLIBDIR)`)
+SO=so
+else
 PLATFORM=mingw32
 PLDIR="/program files/pl/"
 PLRT=standalone
@@ -86,12 +96,13 @@ endif
 endif
 endif
 endif
+endif
 
-aap1:
-	echo PLATFORM:$(PLATFORM)
-	echo $(MACHINE)
-	echo $(PL)
-	echo xpce:$(XPCE)
+settings:
+	@ echo PLATFORM:$(PLATFORM)
+	@ echo "MACHINE: $(MACHINE)"
+	@ echo "PL:      $(PL)"
+	@ echo "XPCE:    $(XPCE)"
 
 ifeq ($(PLATFORM),solaris) 
 TGZ=gtar -zcf
