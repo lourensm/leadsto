@@ -182,8 +182,9 @@ runsetup(Header, PgmName, File) :-
 	%set_prolog_flag(iso, true),
 	setupmainnew(Header, PgmName, [os(util,[wd,constant,log,debugging]),
 				       os(algo,[ltsim,ltshow]),
-				       os(rolegraph,[rolegraph]),
-				       os(fv,[fv])], File).
+				       os(rolegraph,[rolegraph])/*,
+				       os(fv,[fv])*/],
+		     File).
 
 
 
