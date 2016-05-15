@@ -38,6 +38,50 @@
 :- dynamic display_number_range/4.
 :- dynamic display/2.
 
+/** <module> LeadsTo loading and running2
+
+This module defines the LeadsTo load, compile and running functionality.
+
+Documentation in progress.
+
+Different phases:
+
+---+++ Loading a simulation from a file.
+
+  A simulation is encoded as a pl file containing predicates.We should
+  have an exhaustive documentation of all allowed predicates.
+  The predicates are loaded into module called "spec".
+
+  After that, all terms in the input file are preprocessed, often
+  leading to asserted dynamic predicates in the current(algo) module.
+
+  There seems to be almost no compilation at this stage and it looks
+  like terms in thee spec module often are asserted as facts into algo
+  without any transformation.
+
+  Some translation of sortdefs is performed. If a sort contains less
+  than 100 ground terms, it is instantiated, otherwise the sort
+  definition is left as is. This leads to spec:sortdef(Sort, Terms). The
+  source contains a beginning of a new way of encoding sort definitions.
+
+---+++ Running a loaded simulation.
+
+  If the specification contained a model specification, we run each
+  model instance. Otherwise we perform a single run.
+
+---++++ Running the specification
+
+Two stages:
+   * setup of the runtime (first part of runspec1/0)
+   * performing the firing of rules (runspec_rest/0)
+
+---++++ Saving the generated trace
+
+
+
+@author Lourens van der Meij
+*/
+
 /*
   Allow:
   constant(name, value)
@@ -203,6 +247,12 @@ sim_status(X,Y) :-
 	dyn_sim_status(X,Y).
 
 
+/**     run_simulation(+File:atom, +Frame:atom) is det.
+
+	Load and run simulation.
+
+*/
+
 run_simulation(File, Frame) :-
 	load_simulation(File),
 	runshowspec(Frame).
@@ -313,7 +363,7 @@ readrunspec(File) :-
 	;	run_simulation(File1)
 	),
 	noprotocol.
-:- debug(algo).
+%:- debug(algo).
 runshowspec(Picture) :-
 	(retract(dyn_sim_status(File, loaded))
 	->	true
@@ -633,8 +683,8 @@ sim_entry(dyn_schedule_fire(_ConseRId, _T3, _T4),run).
 sim_entry(util:dyn_sort_info(_Sort, _Info),run).
 
 check_no_sim_info :-
-	(	dyn_sim_status(File, _Status);
-		dyn_currently_loaded(sim, File);
+	(	dyn_sim_status(_File1, _Status);
+		dyn_currently_loaded(sim, _File2);
 		(sim_entry(Entry),
 		call(Entry)
 		);
@@ -884,6 +934,7 @@ handle_term(constant(Name, Value)) :-
 handle_term(model(Term)) :-
 	!,
 	check_set_model(Term).
+
 
 
 
@@ -1546,7 +1597,7 @@ initvars2q_step1([Var|Vars],IVarsIn,GVarsIn,CodeIn,IVarsOut,GVarsOut,
 	;	Res1 == ground
 	->	(Op == none
 		->	assert_debug(CTerm == true),
-			(var_inst_from_var_list(IVarsIn,VarName, SortA,
+			(var_inst_from_var_list(IVarsIn,VarName, _SortA1,
 						_Kinda, PVar)
 			->	Code1 = [ds_rc(Op,Sort1,PVar,CTerm)|CodeIn],
 				initvars2q_step1(Vars,IVarsIn,GVarsIn,
@@ -1562,7 +1613,7 @@ initvars2q_step1([Var|Vars],IVarsIn,GVarsIn,CodeIn,IVarsOut,GVarsOut,
 			->	add_inst(VN1, S1, 'in condition of range ~w',
 					 [Var],Res)
 			;Res2 == ground
-			->	(var_inst_from_var_list(IVarsIn,VarName, SortA,
+			->	(var_inst_from_var_list(IVarsIn,VarName, _SortA2,
 							_Kindb, PVar)
 				->	Code1 = [ds_rc(Op,Sort1,PVar,CTerm1)
 						| CodeIn],
@@ -1711,7 +1762,7 @@ find_atom_trace(Atom, AtomTrace) :-
 	(ground(Atom)
 	->	atom_key(Atom, AtomKey),
 		dyn_atom_trace(AtomKey, _Atoma, AtomTrace)
-	;	dyn_atom_trace(AtomKey, Atom, AtomTrace)
+	;	dyn_atom_trace(_AtomKey, Atom, AtomTrace)
 	).
 /*	;       rm_real_args(Atom, Atom1, Args, Insts),
 	        dyn_atom_trace(AtomKey, Atom1, AtomTrace),
@@ -2104,6 +2155,7 @@ cleanup_model_constants([],[]).
 cleanup_model_constants([Constant|ModelConstants], [ModelInstance|ModelInstances]) :-
 	spec:retract(constant(Constant, ModelInstance)),
 	cleanup_model_constants(ModelConstants, ModelInstances).
+
 runspec(Pict) :-
 	dyn_model(Model),
 	!,
