@@ -337,7 +337,7 @@ vars_in_cond_vars([tev(Then, Else, Var)|CondVars],VLIn,VLOut,QIn,QOut,
 	vars_in_cond_var(Then, Else, Var, VLIn, VL1, QIn, Q1, QHIn, QH1),
 	vars_in_cond_vars(CondVars,VL1,VLOut,Q1,QOut, QH1,QHOut).
 vars_in_cond_var(Then, Else, VarTerm, VLIn, VLOut, QIn, QOut, QHIn, QHOut) :-
-	(is_var_then_ensure_add(VarTerm, VLIn, Sort, VLOut, Var)
+	(is_var_then_ensure_add(VarTerm, VLIn, Sort, VLOut)
 	->	qvars_in_term(Sort, 1, needs_bound, VLIn, QIn, Q1),
 		qvars_in_term([Then,Else], 1, needs_bound,VLIn,Q1,Q2),
 		qvar_in_term(Var, bound, Q2, Q3),
@@ -348,7 +348,7 @@ vars_in_cond_var(Then, Else, VarTerm, VLIn, VLOut, QIn, QOut, QHIn, QHOut) :-
 		;	QHOut = QHIn,
 			QOut = Q3
 		)
-	;	impl_error('expected variable, got ~w', [Var])
+	;	impl_error('expected variable, got ~w', [VarTerm])
 	).
 
 /*
@@ -515,15 +515,15 @@ add_q_vars([Arg|Args], VLIn, VLOut, QIn, QOut, QHIn, QHOut,[Var|Vars]) :-
   Q for now
   */
 add_q_var(X, VLIn, VLOut, QIn, QOut, QHIn, QHOut,Var) :-
-	(is_var_then_ensure_add(X, VLIn, Sort, VLOut, Var)
+	(is_var_then_ensure_add(X, VLIn, Sort, VLOut)
 	->	qvars_in_term(Sort, 1, needs_bound, VLIn, QIn, Q2)
 	;	iscmpoploc(X, _Call1, LHS, RHS)
 	->	(iscmpoploc(RHS, _Call2, LHS2, RHS2)
-		->	is_var_then_ensure_add(LHS2, VLIn, Sort, VLOut, Var),
+		->	is_var_then_ensure_add(LHS2, VLIn, Sort, VLOut),
 			qvars_in_term(Sort, 1, needs_bound, VLIn, QIn, Q1),
 			qvars_in_term([LHS,RHS2], 1, needs_bound,VLIn,Q1,Q2)
 		        % ORDER important for hiding: exists(p1:r < p1:r,F)
-		;	is_var_then_ensure_add(LHS, VLIn, Sort, VLOut, Var),
+		;	is_var_then_ensure_add(LHS, VLIn, Sort, VLOut),
 			qvars_in_term(Sort, 1, needs_bound, VLIn, QIn, Q1),
 			qvars_in_term(RHS, 1, needs_bound, VLIn, Q1, Q2)
 			% ORDER see above
