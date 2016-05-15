@@ -1,0 +1,102 @@
+[
+  {
+    "id": 154861418,
+    "number": 7,
+    "title": "pxor doesn't seem to be working",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "created_at": "2016-05-14T16:07:35Z",
+    "updated_at": "2016-05-15T11:09:06Z",
+    "body": "See file spec/pxor.lt      If space between antecedent matching is small, firing seems to use same\r\npxor alternative."
+  },
+  {
+    "id": 154859272,
+    "number": 6,
+    "title": "pxor problem.",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "created_at": "2016-05-14T15:25:54Z",
+    "updated_at": "2016-05-14T15:25:54Z",
+    "body": "Enable poor by lteditor -pxor, add poor functionality. When reloading a saved specification,\r\nan error is printed: ERROR:Input pxor([pxe(0.1,b),pxe(0.2,a),pxe(@nil,c)]) not recognised as a valid Formula"
+  },
+  {
+    "id": 145629909,
+    "number": 5,
+    "title": "$ leadsto test.lt  : ERROR: util:getLocalOption/4: Undefined procedure: fv:local_option/4",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "closed",
+    "comments": 1,
+    "created_at": "2016-04-04T09:26:24Z",
+    "updated_at": "2016-04-04T10:17:24Z",
+    "closed_at": "2016-04-04T10:16:18Z",
+    "body": "Work around: load source from the GUI."
+  },
+  {
+    "id": 145628368,
+    "number": 4,
+    "title": "improve editors",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "created_at": "2016-04-04T09:19:31Z",
+    "updated_at": "2016-04-04T09:19:31Z",
+    "body": "The editors are very awkward, require too many mouse clicks. "
+  },
+  {
+    "id": 145626640,
+    "number": 3,
+    "title": "GUI is particularly ugly on mac retina (5k)",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "created_at": "2016-04-04T09:11:18Z",
+    "updated_at": "2016-04-04T09:11:18Z",
+    "body": "NO PRIORITY. Would probably prefer to redesign GUI as html contacting server."
+  },
+  {
+    "id": 145626156,
+    "number": 2,
+    "title": "making source directory configurable.",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "created_at": "2016-04-04T09:08:47Z",
+    "updated_at": "2016-04-04T09:08:47Z",
+    "body": "The leadsto settings do not provide an option for setting source directory to load least sources from.\r\nLOW PRIORITY"
+  },
+  {
+    "id": 145625897,
+    "number": 1,
+    "title": "Cleanup of Mac OS X installation procedure",
+    "user": {
+    },
+    "labels": [
+
+    ],
+    "state": "open",
+    "created_at": "2016-04-04T09:07:10Z",
+    "updated_at": "2016-04-04T09:07:10Z",
+    "body": "I reused an earlier procedure for installing the executables on Mac OS X which succeeded in providing the installation without an additional swim-prolog installation step. I haven't succeeded in doing that for new versions of mac os x and swim-prolog. The reused procedure does need separate installation of swi-prolog.\r\nLOW PRIORITY. "
+  }
+]
