@@ -14,11 +14,13 @@
 	   default_value/2,
 	   ensure_handled_time/1,
 	   ensure_setup_time/1,
+	   times/3,
 	   runsetup/3,
 	   run_simulation/2,
 	   load_show/2,
 	   missing_range1/4,
 	   atom_trace/3,
+	   filled_atom_trace/3,
 	   lt_rule/6
 	  ]).
 
@@ -38,7 +40,7 @@
 :- dynamic display_number_range/4.
 :- dynamic display/2.
 
-/** <module> LeadsTo loading and running2
+/** <module> LeadsTo loading and running leadsto simulations
 
 This module defines the LeadsTo load, compile and running functionality.
 
@@ -171,6 +173,10 @@ local_option(ltsim, single('-pxor', set_option(pxor)),
 	     'Enable probabilistic or',[]).
 local_option(ltsim, single('-modelchecking', set_option(modelchecking)),
 	     'Modelchecking research',[]).
+/*
+local_option(ltsim, arg('-cmptrace', Trace, set_option(cmptrace(Trace)), 'TRACEFILE'),
+			'Compare with existing TRACEFILE').
+*/
 local_option(ltsim, single('-pc', setprof(cumulative)),'Debugging:Profiling(cumulative)',
 	     [help_sort(back(10))]).
 local_option(ltsim,single('-pp', setprof(plain)),
@@ -243,6 +249,14 @@ run_simulation(File) :-
 
 
 :- dynamic dyn_sim_status/2.
+
+
+/**
+ *   sim_status(File, Status) is semidet.
+ *
+ *   Status in [loaded, running, done]
+ *
+ */
 sim_status(X,Y) :-
 	dyn_sim_status(X,Y).
 
@@ -389,7 +403,37 @@ runshowspec(Picture) :-
 	show_results(File,Picture).
 
 
-
+/**
+ * atom_trace(?AtomKey, ?Atom, +AtomTrace:list) is nondet.
+ *
+ * High level access to lower level trace content.
+ * If cwa(Atom) holds, only true ranges are stored.
+ *
+ * The lower level storage is done through =dyn_atom_trace/3= and
+ * =dyn_atom_trace_backup/3.
+ *
+ * Changes to the atom traces are done by:
+ * set_range_atom(T1, T2, VarsInst, Atom, TF).
+ *
+ * The link between AtomKey and Atom is maintained by =atom_key(Atom,
+ * AtomKey)=
+ *
+ * cleanup_traces(OldHT, NextHT) moves traces to backup. It is called at
+ * the end of each step in handled_time_step(ResultTime):
+ * If a trace is not visible for rules, we may remove the trace
+ * OldHT, NewHT: we just handled all changes between OldHT, NewHT.
+ * This introduces dyn_atom_trace_backup/3.
+ *
+ * Main predicate explicitly using dyn_atom_trace/3:
+ * find_atom_trace(Atom, AtomTrace) which is used for our algorithm.
+ *
+ * ensure_bu_atom(Atom, Id, IdTerm, FV): complex?.. Used in
+ * setup_lt_notgrouund_fv probably to clean up the wait_var status.
+ *
+ * We need to understand why we allow retracting dyn_atom_trace_backup
+ * and setting dyn_atom_trace in set_range_atom.
+ *
+ */
 atom_trace(AtomKey, Atoma, AtomTrace) :-
 	dyn_atom_trace(AtomKey, Atoma, AtomTrace).
 atom_trace(AtomKey, Atoma, AtomTrace) :-
@@ -465,6 +509,14 @@ trace_entry(Trace, In, Out) :-
 portray_trace_entry(Trace, Term) :-
 	trace_entry(Trace, Term, T),
 	portray_clause(T).
+
+/**
+ * savetrace1(TraceName) is det
+ *
+ * save atom_trace into current output stream.
+ *
+ */
+
 savetrace1(Trace) :-
 	findall(AtomKey-Atoma-AtomTrace,
 	       atom_trace(AtomKey, Atoma, AtomTrace),
@@ -505,6 +557,20 @@ savetrace(Frame) :-
 	),
 	format('SAVED TRACE IN ~w~n',[File]).
 savetrace(_Frame).
+
+
+/**
+ * filled_atom_trace(?AtomKey, ?Atom, +FilledAtomTrace:list) is nondet
+ *
+ * return value ranges, but dense range with cwa and unknown values
+ * filled in.
+ */
+
+filled_atom_trace(AtomKey, Atom, FilledAtomTrace) :-
+	atom_trace(AtomKey, Atom, AtomTrace),
+	default_value(Atom, FU),
+	end_time(ET),
+	fill_ranges(AtomTrace, ET, FU, FilledAtomTrace).
 
 fill_trace1(AtomTrace, AtomKey, Atoma, atom_trace(AtomKey, Atoma, TrTrace)) :-
 	default_value(Atoma, FU),
@@ -743,6 +809,7 @@ reset_sim_info :-
 	;	true
 	),
 	clear_module(spec).
+
 currently_loaded(Kind, File) :-
 	(dyn_currently_loaded(sim, File)
 	->	true
@@ -2072,6 +2139,18 @@ ensure_handled_time(THandled) :-
 	;	fatal_fail(dyn_handled_time(THandled))
 	).
 
+
+/**
+ * times(-TSetup, -THandled, -EndTime) is det
+ *
+ * Get trace times.
+ *
+ */
+
+times(TSetup, THandled, ET) :-
+	ensure_handled_time(THandled),
+	ensure_setup_time(TSetup),
+	end_time(ET).
 tr_model_arg(Var:SortName, Var:Sort, Size) :-
 	(reserved(Var)
 	->	error('model variable name is a reserved name: ~w',

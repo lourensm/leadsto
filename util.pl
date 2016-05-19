@@ -219,6 +219,22 @@
 
 %:- use_module(pareto).
 
+:- meta_predicate util:uchecklist2(+,1).
+:- meta_predicate util:fatal_fail(0).
+:- meta_predicate util:ensure_set_once(0).
+:- meta_predicate util:assert_debug(0).
+:- meta_predicate util:catch_fatal_halt(0,*).
+:- meta_predicate util:catch_error_fail(0,*,*).
+:- meta_predicate util:call_ground(0,0).
+:- meta_predicate util:assert_debug(0,*).
+:- meta_predicate util:bagof1(?,^,-).
+:- meta_predicate util:ensure(0).
+:- meta_predicate util:var_code_test_inf(*,0,0).
+:- meta_predicate util:uchecklist(1,*).
+:- meta_predicate util:code_sort_element(*,*,0,*).
+:- meta_predicate util:check_sort_element_code(*,*,0).
+
+
 %%	find_set(+S,-D) is det.
 %
 %	D is unique, sorted version of S
@@ -793,7 +809,10 @@ add_cmd_constant(Name, Value) :-
 	% order assertz, assertz constant(..)
 	assertz(dyn_add_cmd_constant(Name, Value)).
 
-/*
+/**
+ * setupmainnew(+Header, +PgmName, +OptionSpecs, File) is det
+ *
+ *
 application consists of various functionalities
   - lt simulation
   - lt load_trace
@@ -811,21 +830,27 @@ application consists of various functionalities
   Application has list of part functionality:
      Need module in which to call parts but also label for part options
 
-  setupmainnew(Header, Pgm, OptionSpecs, SingleNonOptionArgOrEmptyList)
-  OptionSpecs : os(Module, Tag)
+  setupmainnew(Header, Pgm, OptionSpecs, File)
+  OptionSpecs : [os(Module, Tag)|..]  or [Tag|..]
 
-  Module:local_option(Tag, Code, HelpCode, Options)
-  Tag: distinguishes groups of tags
+  Module:local_option(Tag, Code, HelpCode, OptionOptions)
+
+  Tag: distinguishes groups of options
+  ==
   Code: single('-opt1', Call)
   Code: arg('-opt2',Arg, Call, HelpArgText)
+  ==
   HelpCode : text for help entry
-  Options: help_sort(front(SortKey))
-           help_sort(back(InverseSortKey))
+
+ OptionOptions:help_sort(front(SortKey))|help_sort(back(InverseSortKey)) Those options are ordered according
+ to the specified =SortKey= or =InverseSortKey=.
+
   Other entries are not sorted.
-  Normal order is order of OptionSpecs, Module:local_option
+
+  Normal order is order of OptionSpecs, =Module:local_option=
   */
-setupmainnew(Header, Pgm,OptionSpecs,  File) :-
-	setupmainnewn(Header, Pgm,OptionSpecs,  1, Files, false),
+setupmainnew(Header, Pgm, OptionSpecs,  File) :-
+	setupmainnewn(Header, Pgm, OptionSpecs,  1, Files, false),
 	(Files == []
 	->	File = []
 	;Files = [File]
@@ -837,7 +862,7 @@ setupmainnew(Header, Pgm,OptionSpecs,  File) :-
 
 
 
-setupmainnewn(Header, Pgm,OptionSpecs, N, Files, ExactArgs) :-
+setupmainnewn(Header, Pgm, OptionSpecs, N, Files, ExactArgs) :-
 	(   memberchk(file(File), OptionSpecs)
 	->  Files = [File]
 	;   unix(argv(Argv)),
@@ -846,21 +871,24 @@ setupmainnewn(Header, Pgm,OptionSpecs, N, Files, ExactArgs) :-
 	    getLocalOptionsNew(Args0, OptionSpecs, Args2),
 	    (Args2 == []
 	    ->	Files = [],
-		check_files_args0(Files, N, ExactArgs, [Pgm|Args1], OptionSpecs,Header)
+		check_files_args0(Files, N, ExactArgs, [Pgm|Args1], OptionSpecs,
+				  Header)
 	    ;Args2 = [--|Files]
-	    ->	check_files_args0(Files, N, ExactArgs, [Pgm|Args1], OptionSpecs,Header)
+	    ->	check_files_args0(Files, N, ExactArgs, [Pgm|Args1], OptionSpecs,
+				  Header)
 	    ;	member(E, Args2),
 		may_be_option(E)
 	    ->	format('You seemed to start up with "~w"~n',[[Pgm|Args1]]),
 		version_header(Header, []),
-	     do_help1(OptionSpecs),
-	     fatal_error('Unrecognised option ~w', [E])
+	        do_help1(OptionSpecs),
+	        fatal_error('Unrecognised option ~w', [E])
 	    ;	Files = Args2,
-		check_files_args0(Files, N, ExactArgs, [Pgm|Args1], OptionSpecs,Header)
+		check_files_args0(Files, N, ExactArgs, [Pgm|Args1], OptionSpecs,
+				  Header)
 	    ->	true
 	    ;	format('You seemed to start up with "~w"~n',[[Pgm|Args1]]),
 		do_help1(OptionSpecs),
-	     fatal_error('Run with zero or one file argument(s)')
+	        fatal_error('Run with zero or one file argument(s)')
 	    ),
 	    version_header(Header, Files),
 	    adjust_wd(Files, OptionSpecs),
@@ -953,6 +981,28 @@ setupmain1(Module, Header, Pgm, File) :-
 		fatal_error('Run with zero or one file argument(s)')
 	),
 	version_header(Header, File).
+
+/**
+ * getLocalOptionsNew(+Args:list, +OptionSpecs, -ArgsLeft:list) is det
+ *
+ * Handle options as specified by OptionSpecs.
+ *
+ *
+ * OptionSpecs = [OptionSpec|..]
+ * OptionSpec = os(Module, Tags)
+ *
+ * Per Prolog module, we define sets of options by means of Tags.
+ * Within modules there will be clauses
+ * =local_option(Tag, ArgSpec, Documentation, [])=
+ * ==
+ * local_option(ltsim,
+		arg('-savetrace', Arg,set_option(savetrace(Arg)),'FILE'),
+		'Save trace in file FILE',[]).
+   local_option(ltsim, single('-nosavetrace', set_option(nosavetrace)),
+		'Do not (automatically save trace',[]).
+ * ==
+ * Tags = Tag or [Tag|..]
+ */
 getLocalOptionsNew(Args, _OptionSpecs, _Args2) :-
 	var(Args),
 	!,
@@ -1033,7 +1083,7 @@ write_help(single(Opt, _Call), HelpCode, _Options, LM) :-
 	format('   ~w~t~*|: ~w~n', [Opt, LM, HelpCode]).
 write_help(arg(Opt, _Arg, _Call, HT), HelpCode, _Options, LM) :-
 	format('   ~w ~w~t~*|: ~w~n', [Opt, HT, LM, HelpCode]).
-option(FMB,OptionSpecs, Code, HelpCode, Options,Key) :-
+option(FMB, OptionSpecs, Code, HelpCode, Options, Key) :-
 	member(os(Module, TagL), OptionSpecs),
 	list_or_single_element(TagL, Tag),
 	Module:local_option(Tag, Code, HelpCode, Options),
@@ -3081,7 +3131,7 @@ check_sort_value(Sort, Kind, Val) :-
 	!,
 	check_ground_sort_value(Sort, Kind, Val).
 check_sort_value(Sort, Kind, Val) :-
-	\+ \+ instantiate_elemente(Sort, Kind, Val, Status),
+	\+ \+ instantiate_elemente(Sort, Kind, Val, _Status),
 	instantiate_elemente(Sort, Kind, Val, Status),
 	(var(Status)
 	->	true

@@ -1,4 +1,6 @@
 .PHONY: aap
+.SUFFIXES: .tex .dvi .doc .txt .pl
+
 FLUIT=flits
 MACHINE:=$(shell gcc -dumpmachine)
 ifeq ($(MACHINE), x86_64-linux-gnu)
@@ -1167,3 +1169,37 @@ exportlt:
 	cd generated;\
 	zip -r LT.zip lt
 	ls -l generated/LT.zip
+
+
+mkgithubissues:
+	$(MAKE) githubissues0 githubfilterissues
+
+githubissues0:
+	curl https://api.github.com/repos/lourensm/leadsto/issues?state=all > tmpissues
+
+githubfilterissues:
+	grep -v '"login": "lourensm"' tmpissues | grep -v '"repository_url": "https://api.github.com/repos/lourensm/leadsto",' | grep -v '"url": "https://api.github.com/users/lourensm",' | grep -v '"avatar_url": "https://avatars.githubusercontent.com/u/2205402?v=3",' | grep -v '"followers_url": "https://api.github.com/users/lourensm/followers",' | grep -v '"following_url": "https://api.github.com/users/lourensm/following{/other_user}",' | grep -v '"gists_url": "https://api.github.com/users/lourensm/gists{/gist_id}",' | grep -v '"starred_url": "https://api.github.com/users/lourensm/starred{/owner}{/repo}",' | grep -v '"subscriptions_url": "https://api.github.com/users/lourensm/subscriptions",' | grep -v '"organizations_url": "https://api.github.com/users/lourensm/orgs",' | grep -v '"html_url": "https://github.com/lourensm",' | grep -v '"repos_url": "https://api.github.com/users/lourensm/repos",' | grep -v '"events_url": "https://api.github.com/users/lourensm/events{/privacy}",' | grep -v '"received_events_url": "https://api.github.com/users/lourensm/received_events",' | grep -v '    "url": "https://api.github.com/repos/lourensm/leadsto/issues/' | grep -v '    "labels_url": "https://api.github.com/repos/lourensm/leadsto/issues/' | grep -v '    "comments_url": "https://api.github.com/repos/lourensm/leadsto/issues' | grep -v '    "events_url": "https://api.github.com/repos/lourensm/leadsto/issues' | grep -v '    "html_url": "https://github.com/lourensm/leadsto/issues' | grep -v '    "closed_at": null,' | grep -v '      "id": 2205402,' | grep -v '      "gravatar_id": "",' | grep -v '      "type": "User",' | grep -v '    "comments": 0,' | grep -v '      "site_admin": false' | grep -v '    "assignee": null,' | grep -v '    "locked": false,' | grep -v '    "milestone": null,' > githubissues
+
+PLMANDIR=$(HOME)/software/swipl-devel/man
+DOC2TEX=$(PLMANDIR)/doc2tex
+
+DOC=leadsto
+TEX=$(DOC).tex
+DVI=$(DOC).dvi
+PDF=$(DOC).pdf
+HTML=$(DOC).html
+
+$(HTML):	$(TEX)
+		latex2html -dir lthtml -mkdir $(DOC)
+
+$(PDF):		$(TEX)
+		$(PLMANDIR)/runtex --pdf $(DOC)
+
+$(TEX):		$(DOC2TEX)
+
+doc:
+	$(MAKE) leadsto.tex
+
+
+.doc.tex:
+	$(DOC2TEX) $*.doc > $*.tex

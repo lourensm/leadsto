@@ -3,6 +3,12 @@ leadsto
 
 leadsto software.
 
+Latest, May 12 2016
+Exploring ways to improve documentation. Can I use PlDoc?
+Looking at SWI-Prologs packages, documentation seems to be only partially based
+on the source generated documentation. I notice .doc files, .md files and
+(possibly generated) .html files.
+
 Latest, April 4, 2016
 Checking status of software.
 The software does work on a mac os x system with SWI-Prolog 7.3.6 installed.
@@ -24,15 +30,22 @@ I will test the procedure on another mac.
     The procedure does not make swipl accessible from command line.
 * add export PATH="/Applications/SWI-Prolog.app/Contents/MacOS:$PATH" to
 $HOME/.bash_profile
+    This disk image did not work either, on executables somehow the swipl dynamic
+    libraries weren't found. I downloaded th eswipl development sources and built
+    SWI-Prolog from them. (For SWI-Prolog version 7.3.20 for x86_64-darwin15.4.0 this
+    worked)
 
 * get the LeadsTo sources from leadsto https://github.com/lourensm/leadsto
-* run $ make instpl
+* run $ make instpl which generates a file darwin.tgz
 
 * I did a minimum number of tests.
   * Moving the installed files to another directory: The generated executables
     are generated in a subdirectory lt of the leadsto.
+    Extracting the 
     I did $mv lt ~/
-    The executables seem to work running from this new directory:
+    The executables seem to work from this new directory.
+    I also extracted the generated darwin.tgz to some directory. This also
+    worked.
     $ ~/lt/bin/leadsto
     ( A warning on the command line
     Warning: locale not supported by Xlib, locale set to C

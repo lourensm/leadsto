@@ -783,7 +783,7 @@ term_to_formula_node(pxor(PList), Node, Extra) :-
 		send(Node, son, N1),
 		fail
 	;	true
-	).
+	),!.
 
 
 term_to_formula_node(itef(Cond, Vars, Form), Node, Extra) :-

@@ -867,6 +867,17 @@ Before storing derived atoms, their real number arguments are rounded off,
 standard to about 7 digits long. There are facilities for more precise
 results. E-mail lkmeel if you need more precise results.
 
+<h2>Probabilistic reasoning</h2>
+
+Probabilistic reasoning is not enabled by default in the Leadsto editor. Starting it up with option
+<pre>-pxor</pre> enables the probabilistic features.
+
+The way the features function does need more study. Probably the antecedent of pxor leadsto rules
+are checked once, leading to one result for the whole delayed consequent range.
+This implies that if we split up an antecedent range into separate intervals almost touching,
+the result will be different from the case where the range is not split up.
+
+The implementation may contain bugs, see the leadsto specification \verb-spec/pxor.lt-.
 <h1><a name="appendix">Appendix</a></H1>
 
 <h2>Trace syntax</h2>

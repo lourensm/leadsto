@@ -1,0 +1,14 @@
+
+util.pl:
+check_sort_element_code(Sort, Element, Code) :-
+	ground(Element),
+	ground(Sort),
+	var(Element),
+	!,
+	????
+
+
+algo.pl:
+setup_leadsto/6 accompanied by setup_leadsto/5 which checks for failure.
+Verify that it should not fail.
+

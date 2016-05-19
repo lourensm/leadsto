@@ -1,6 +1,6 @@
 content(type(save_lt_editor('spec/pxor.lt'))).
 content(generator(app(leadsto_software, 129, [psprinting:1, lteditor:1]))).
-content(run([date('Sun May 15 12:50:46 2016')])).
+content(run([date('Sun May 15 15:24:38 2016')])).
 interval([], range(0, 10), tt).
 interval([t:between(20, 30)], range(2*t, 2*t+1), tt).
 interval([], range(80, 81), tt).
