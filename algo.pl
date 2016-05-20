@@ -152,6 +152,7 @@ Two stages:
 
 :- dynamic dyn_setup_time/1, dyn_handled_time/1.
 
+:- dynamic dyn_next_model/3.
 user:version(simalgo, 11).
 
 
@@ -2107,7 +2108,7 @@ do_setup_time(TStart, TSetup) :-
 
 /*
   dyn_setup_time(TSetup), dyn_handled_time(THandled)
-  You should never as for values before TSetup.
+  You should never ask for values before TSetup.
   All Atoms that have no explicit trace entry before THandled have value
   false if cwa unknown otherwise.
   */
