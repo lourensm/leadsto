@@ -158,9 +158,16 @@ dyn_atom_trace_backup/3 facts.
 
 Traces are saved in two stages by
 \begin{description}
-\item[savetracesetup/3] Saves constants
-\item[savetrace1/1] Saves the trace itself.
+\predicate{savetracesetup}{3}{+File, +Frame, -Telling}
+Saves constants and sets up trace storage stream.
+\predicate{savetrace1}{1}{+TraceName}
+ Saves the trace itself. (If \arg{TraceName} is \const{[]}, trace will
+ not have trace id.)
+\predicate{savemodelspec_cleanup}{2}{-TellStream,
++ModelInstanceTraceName}
+If the \jargon{leadsto specification} contains a model, the separate
+model instances saved._
 \end{description}
-If we have models in our specification, all model instantiations end up in a single trace, see
-savemodelspec_cleanup/2.
+
+
 

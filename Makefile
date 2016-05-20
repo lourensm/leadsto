@@ -106,7 +106,7 @@ settings:
 	@ echo "PL:      $(PL)"
 	@ echo "XPCE:    $(XPCE)"
 
-ifeq ($(PLATFORM),solaris) 
+ifeq ($(PLATFORM),solaris)
 TGZ=gtar -zcf
 GTAR=gtar
 else
@@ -157,7 +157,7 @@ $(LTINSTALLDIR)/plrt/bin/.chplflag:	$(RTPLNEEDED) $(EXECUTABLES)
 	touch $@
 
 
-$(LTINSTALLDIR)/plrt/bin/chplhd:	chplhd 
+$(LTINSTALLDIR)/plrt/bin/chplhd:	chplhd
 	mkdir -p $(LTINSTALLDIR)/plrt/bin
 	cp chplhd $@
 
@@ -233,7 +233,7 @@ dodemo:
 dodemo1:
 	$(MAKE) fv$(EXESUFFIX);./fv -test1
 ifeq ($(PLATFORM),cygwin)
-abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl 
+abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl
 	$(XPCE) -f abmpanalyse.pl -g 'abmpanalyse:savealone(tmp)'
 	if chicon.exe tmp.exe tree.ico abmptr$(EXESUFFIX) ;\
 	then true; else cp tmp$(EXESUFFIX) abmptr$(EXESUFFIX); fi
@@ -259,14 +259,14 @@ tstabmp5:
 	./abmptr -participant swpc305
 tstabmp6:
 	$(MAKE) abmptr$(EXESUFFIX)
-	./abmptr -participant swpc305 -participant swpc458 
+	./abmptr -participant swpc305 -participant swpc458
 
 tstabmp7:
 	$(MAKE) abmptr$(EXESUFFIX)
 	./abmptr -local -datfile vrobunew.dat
 tstabmp8:
 	$(MAKE) abmptr$(EXESUFFIX)
-	./abmptr -participant tst 
+	./abmptr -participant tst
 tst9:
 	$(MAKE) abmptr$(EXESUFFIX)
 	./abmptr -local
@@ -508,7 +508,7 @@ trpl1:
 
 LTSOURCES=algo.pl util.pl logutil.pl varutil.pl showtrace.pl formats.pl \
 		psprinting.pl ltversion.pl modelchecking.pl rolegraph.pl \
-#		fv.pl 
+#		fv.pl
 
 STSOURCES=$(LTSOURCES) simtool.pl lt_config.pl
 
@@ -602,7 +602,7 @@ log2trace$(EXESUFFIX):	$(LTSOURCES) logtotrace.pl
 	swipl -o logtotrace -g logtotrace:run $(STANDALONEOPT) -c logtotrace.pl
 
 
-abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl 
+abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl
 	swipl -o abmptr -g abmpanalyse:run $(STANDALONEOPT) -c abmpanalyse.pl
 
 
@@ -632,7 +632,7 @@ NSA=
 log2trace$(EXESUFFIX):	$(LTSOURCES) logtotrace.pl
 	$(XPCE) -f logtotrace.pl -g 'logtotrace:savealone$(NSA)'
 
-abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl 
+abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl
 	$(XPCE) -f abmpanalyse.pl -g 'abmpanalyse:savealone$(NSA)(abmptr)'
 
 ltbare$(EXESUFFIX):	$(LTSOURCES)
@@ -662,7 +662,7 @@ ifeq ($(PLATFORM),oldnotcygwin)
 log2trace$(EXESUFFIX):	$(LTSOURCES) logtotrace.pl
 	$(XPCE) -f logtotrace.pl -g 'logtotrace:savealone_nsa'
 
-abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl 
+abmptr$(EXESUFFIX):	abmptrace.pl abmpanalyse.pl abmputil.pl util.pl
 	$(XPCE) -f abmpanalyse.pl -g 'abmpanalyse:savealone_nsa(abmptr)'
 
 ltbare$(EXESUFFIX):	$(LTSOURCES)
@@ -1161,7 +1161,7 @@ tbt:
 	expr 1 + 1
 
 
-exportlt:	
+exportlt:
 	$(MAKE) cleanall
 	mkdir -p generated/lt
 	cp -r *.pl *.xpm *.html ChangeLog Makefile* *.txt *.ico DEV README README.win TODO algo chplhd *.doc *.c *.cc ds.h install.nsi leadsto.pd nego options.ini pars seedtree.gif shortcuts.zip spec total_steam_failure_v6l.lt generated/lt
@@ -1190,16 +1190,19 @@ PDF=$(DOC).pdf
 HTML=$(DOC).html
 
 $(HTML):	$(TEX)
-		latex2html -dir lthtml -mkdir $(DOC)
+		latex2html $(DOC)
 
 $(PDF):		$(TEX)
 		$(PLMANDIR)/runtex --pdf $(DOC)
 
 $(TEX):		$(DOC2TEX)
 
+leadsto.tex:	leadsto.doc
+	$(DOC2TEX) leadsto.doc > leadsto.tex
+
 doc:
-	$(MAKE) leadsto.tex
+	$(DOC2TEX) leadsto.doc > leadsto.tex
 
 
-.doc.tex:
-	$(DOC2TEX) $*.doc > $*.tex
+
+
