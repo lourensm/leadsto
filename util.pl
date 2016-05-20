@@ -779,6 +779,14 @@ bind_bindings([A=B|Rest]) :-
 	A = B,
 	!,
 	bind_bindings(Rest).
+
+
+/**
+ * set_option_constant(+Arg) is det
+ * Set the constant specified as
+ * command line option -constant Name=Value
+ */
+
 set_option_constant(Arg) :-
 	atom_to_term_non_var(Arg, Term),
 	(Term = (Name = Value)
