@@ -57,7 +57,7 @@ do_set_state :-
 	!.
 
 
-	
+
 
 do_set_state :-
 	print_model_checking(Level),

@@ -3798,24 +3798,28 @@ rm_true_ds_litd([L|LIn], Last, LitsOut) :-
 		rm_true_ds_litd(LIn, L, LitsOut1)
 	).
 
-/*
-  Again: follow the conjunction thru literals.
-  Assume LHS has been handled and is true
-  Analysis of Lit in the middle: There are already a number of results for LHS.
-  One such result has Some prolog vars instantiated and has antecedent up to
-  then true starting at least at TIn, upto THolds.
+/**
+ * Again: follow the conjunction thru literals.
+ * Assume LHS has been handled and is true
+ * Analysis of Lit in the middle: There are already a number of results
+ * for LHS.
+ * One such result has Some prolog vars instantiated and has antecedent
+ * up to then true starting at least at TIn, upto THolds.
+ *
+ * So, we start out with a partially instantiated PVList, with LHS
+ * instantiated,
+ * Also with THolds
+ */
 
-  So, we start out with a partially instantiated PVList, with LHS instantiated,
-  Also with THolds
-
-  setup_lt_normed(AnteTodo, AnteHolds, TMin, TMax, ConseRId, PVOutC, Delay)
-
-  We know AnteTodo holds in range(TMin, TMax), we need to continue with
-  AnteHolds.
-
-  Addition: We need the FV: free variable instantiation of the last
-  true Literal
-  */
+/**  setup_lt_normed(AnteTodo, AnteHolds, TMin, TMax, ConseRId, PVOutC,
+ * Delay)
+ *
+ * We know AnteTodo holds in range(TMin, TMax), we need to continue
+ * with AnteHolds.
+ *
+ * Addition: We need the FV: free variable instantiation of the last
+ * true Literal
+ */
 setup_lt_normed([], AnteHolds, TMin, THolds, ConseRId, _PV, Delay, Removed) :-
 	!,setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed).
 
@@ -3997,20 +4001,25 @@ setup_lt_notground(LitData, ToDoAnte, AnteHolds, TMin, THolds, ConseRId,
 	setup_lt_notground_fv(TMin, FV, [], LitData, ToDoAnte, AnteHolds,
 			      THolds, ConseRId,PV,Delay, Id, IdTerm, Removed).
 
-/*
-  We know AnteHolds is true between TStart and THolds
-  We have possibly removed some wait_var entry and need to restore it.
-  This wait_var should have time = THandled: so handle all
-  intermediate effects.
-
-  DEBUGGING: I think wait-var is set always at new HandledTime
-             while overlapping_ground_range_po looks at TStart:
-
-  Problem1: It could well be that THolds <= THandled, then
-            we need to refocus on AnteHolds
-  Problem2: TStart may well be, always always is < THandled
-            find_min_range
-  */
+/**
+ * setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
+ *		      ConseRId,PV,Delay, Id, IdTerm, Removed)
+ *
+ *
+ * Comment probably for first clause.
+ * We know AnteHolds is true between TStart and THolds
+ * We have possibly removed some wait_var entry and need to restore it.
+ * This wait_var should have time = THandled: so handle all
+ * intermediate effects.
+ *
+ * DEBUGGING: I think wait-var is set always at new HandledTime
+ *           while overlapping_ground_range_po looks at TStart:
+ *
+ * Problem1: It could well be that THolds <= THandled, then
+ *           we need to refocus on AnteHolds
+ * Problem2: TStart may well be, always always is < THandled
+ *           find_min_range
+ */
 
 setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 		      ConseRId,PV,Delay, Id, IdTerm, Removed) :-
@@ -4026,11 +4035,10 @@ setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 		       LitData, ToDoAnte, ConseRId,PV,Delay,Id,IdTerm,Removed).
 
 
-	/*
-	  We know AnteHolds holds up to THolds, but do not
-	  know enough about T <= THandled
-
-	  */
+/**
+ * We know AnteHolds holds up to THolds, but do not
+ * know enough about T <= THandled
+ */
 setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 		      ConseRId,PV,Delay, Id, IdTerm, Removed) :-
 	chk_inv(AnteHolds),
@@ -4112,19 +4120,22 @@ find_atom_trace_op(Atom, AtomTrace, PostOps, PostConds) :-
 	run_ops(PostOps),
 	run_ops(PostConds).
 
-/*
-  fail unless we have an entry that is true up to or past THandled
-  in which case we create a separate entry or if we have an entry that
-  fails past THandled for which we also create an entry
-
-  Take care: We must also deal with atoms having entries for
-  cwa such that the trace would prevent cwa firing.
-
-  We know AnteHolds holds between TIn and THolds. Anything before
-  TIn has been dealt with.
-
-  TODO: ensure that Conse is instantiated to FV
-  */
+/**
+ * fail_filter_handle(TIn, FV, FV1, Atom, PN, ToDoAnte, AnteHolds, THolds,
+ *		   ConseRId,
+ *		   PV,Delay, Id, IdTerm, AtomTrace, Removed)
+ * fail unless we have an entry that is true up to or past THandled
+ * in which case we create a separate entry or if we have an entry that
+ * fails past THandled for which we also create an entry
+ *
+ * Take care: We must also deal with atoms having entries for
+ * cwa such that the trace would prevent cwa firing.
+ *
+ * We know AnteHolds holds between TIn and THolds. Anything before
+ * TIn has been dealt with.
+ *
+ * TODO: ensure that Conse is instantiated to FV
+ */
 fail_filter_handle(_TIn, FV, FV1, _Atom, _PN, _ToDoAnte, _AnteHolds, _THolds,
 		   _ConseRId,
 		   _PV,_Delay, Id, IdTerm, _AtomTrace, _Removed) :-

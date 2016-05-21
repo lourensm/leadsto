@@ -253,14 +253,19 @@ initialise_interval_p(Interval, P, Vars, Form1) :-
 		tr_basic_element(P, VarsInst, P1),
 		...
 \end{code}
-TODO: \jargon{modelchecking}? Where that comes in is unclear for now.
+TODO: \jargon{modelchecking}? Where that comes in is unclear for now. See \secref{modelchecking}.
+
 But, the result seems to be relatively straightfoward, some initial atom_trace/3 values.
 \predicate{setup_leadsto}{6}
-Also uses init_interval_callbacks/10.
+Also uses init_interval_callbacks/10. It sets dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId) 
 \predicate{init_interval_callbacks}{10}{TimeInfo, Vars, Forms, TimeInfo1, Vars1,
 Forms2, InvalidVars, InvalidTimeInfo, ActPreInstantiated}
 is used for setting up interval rules and leadsto rules. Probably instantiates variables,
 also takes care of forall/2 terms.
+
+TODO FIRST: Lets first get into the details of this important predicate. After that,
+inspect what setup_leadsto/6 does.
+
 \end{description}
 
 
@@ -300,3 +305,25 @@ util:set_option_constant/1 handles this by asserting dyn_add_cmd_constant/2.
 util:load_cmd_constants/0 loads those constants into module \const{spec} as
 \const{constant(Name, Value)} facts.
 
+\subsection{Model Checking} \label{sec:modelchecking}
+
+The source contains code labelled \jargon{model checking}. I do not remember whether
+this code ever worked. I seem to remember I tried converting the leadsto model
+into some state based form.
+
+\const{Makefile} contains an example call of using modelchecking:
+\begin{code}
+./leadsto -local -modelchecking spec/heartn.lt
+\end{code}
+The only visible result seems to be some debugging info on the screen.
+
+A first look at the code in \jargon{modelchecking.pl} does not make anything clear
+yet.
+
+\subsection{recwait}
+
+Within algo the two choices for representing algorithm state are mixed too much with
+the rest of the code. recwait/0 is the switch between storage as recorded and storage as
+a dynamic clause. Sometimes code seems to be copy/pasted almost. But, it seems
+that backtracking in the recorded database and backtracking in the asserted database
+works differently, see update_activity_times1/1.
