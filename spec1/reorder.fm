@@ -1,0 +1,4 @@
+content(type(save_lt_editor('f:/cygwin/home/lourens/wrk/ww/db3/pl/spec/reorder.fm'))).
+content(generator(app(leadsto_software, 124, [lteditor:1, psprinting:1]))).
+content(run([date('Thu May 12 16:46:55 2005')])).
+denotes(reorder, exists([i:integer], and(i<2, '|='(state(trace1, 0), a(i))))).

@@ -1,0 +1,5 @@
+content(type(save_lt_editor('aap.lt'))).
+content(generator(app(leadsto_software, 52, [lteditor:1, psprinting:1]))).
+content(run([date('Thu Feb 27 16:34:08 2003')])).
+interval([], range(0, 1), aap(0.12)).
+interval([], range(0, 1), aap(0.12, 0.12+1)).

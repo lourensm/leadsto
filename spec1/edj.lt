@@ -1,0 +1,496 @@
+specification('org.dyn').
+end_time(300).
+cwa(_).
+
+%random_seed(1234).
+%global_lambda(0.5). niet gebruikt omdat overal E = F
+sortdef('AGENTS',[a1, a2, a3, a4]).
+sortdef('COLORS',[c1, c2, c3, c4]).
+sortdef('SUGAR',[nothing, a_little, half, a_lot]).
+sortdef('NUMBER',[zero, one, two, three, four]).
+sortdef('WORDS',[come_to, leave]).
+periodic(0, 1, 1,
+      and(
+          food_sufficient_for_more(half, one),
+          food_sufficient_for_more(half, two),
+          food_sufficient_for_more(a_lot, one),
+          food_sufficient_for_more(a_lot, two),
+          food_sufficient_for_more(a_lot, three),
+          food_sufficient_for_more(a_lot, four),
+pred(zero, one),
+pred(one, two),
+pred(two, three),
+pred(three, four),
+succ(one, zero),
+succ(two, one),
+succ(three, two),
+succ(four, three)
+      )
+).
+periodic(40, 41, 100,
+      update_food
+).
+periodic(0, 1, 100,
+      my_turn_to_talk(a1)
+).
+periodic(3, 4, 100,
+      my_turn_to_talk(a2)
+).
+periodic(6, 7, 100,
+      my_turn_to_talk(a3)
+).
+periodic(9, 10, 100,
+      my_turn_to_talk(a4)
+).
+periodic(0, 1, 1,
+and(
+      equals(c1, c1),
+      equals(c2, c2),
+      equals(c3, c3),
+      equals(c4, c4)
+)
+).
+interval(0, 1,
+      pos(a1, c2)
+).
+interval(0, 1,
+      pos(a2, c3)
+).
+interval(0, 1,
+      pos(a3, c4)
+).
+interval(0, 1,
+      pos(a4, c4)
+).
+interval(0, 1,
+      and(
+          nr_agents_at(zero, c1),
+          nr_agents_at(one, c2),
+          nr_agents_at(one, c3),
+          nr_agents_at(two, c4)
+      )
+).
+interval(0, 1,
+      and(
+          food(c1, half),
+          food(c2, a_lot),
+          food(c3, a_little),
+          food(c4, a_lot)
+      )
+).
+interval(0, 1,
+      and(
+          best_food_experience(a1, c1),
+          food_precedence(a1, c1, c2),
+          food_precedence(a1, c2, c3),
+          food_precedence(a1, c3, c4),
+          least_food_experience(a1, c4)
+      )
+).
+interval(0, 1,
+      and(
+          best_food_experience(a2, c2),
+          food_precedence(a2, c2, c3),
+          food_precedence(a2, c3, c4),
+          food_precedence(a2, c4, c1),
+          least_food_experience(a2, c1)
+      )
+).
+interval(0, 1,
+      and(
+          best_food_experience(a3, c3),
+          food_precedence(a3, c3, c4),
+          food_precedence(a3, c4, c1),
+          food_precedence(a3, c1, c2),
+          least_food_experience(a3, c2)
+      )
+).
+interval(0, 1,
+      and(
+          best_food_experience(a4, c4),
+          food_precedence(a4, c4, c1),
+          food_precedence(a4, c1, c2),
+          food_precedence(a4, c2, c3),
+          least_food_experience(a4, c3)
+      )
+).
+leadsto(
+      [a:'AGENTS'],
+          my_turn_to_talk(a),
+      my_turn_to_move(a),
+      efgh(59, 59, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c:'COLORS',s:'SUGAR',n:'NUMBER'],
+      and(
+          my_turn_to_talk(a),
+          pos(a, c),
+          food(c, s),
+          nr_agents_at(n, c),
+          food_sufficient_for_more(s, n)
+      ),
+      says(a, c, come_to),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c:'COLORS',s:'SUGAR',n:'NUMBER'],
+      and(
+          my_turn_to_talk(a),
+          pos(a, c),
+          food(c, s),
+          nr_agents_at(n, c),
+          not(food_sufficient_for_more(s, n))
+      ),
+      says(a, c, leave),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',b:'AGENTS',c:'COLORS',c0:'COLORS',c1:'COLORS',c2:'COLORS'],
+      and(
+          said(b, c, come_to),
+          food_precedence(a, c0, c1),
+          food_precedence(a, c1, c),
+          food_precedence(a, c, c2)
+      ),
+      and(
+          del_food_precedence(a, c0, c1),
+          del_food_precedence(a, c1, c),
+          del_food_precedence(a, c, c2),
+          add_food_precedence(a, c0, c),
+          add_food_precedence(a, c, c1),
+          add_food_precedence(a, c1, c2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',b:'AGENTS',c:'COLORS',c0:'COLORS',c1:'COLORS'],
+      and(
+          said(b, c, come_to),
+          best_food_experience(a, c0),
+          food_precedence(a, c0, c),
+          food_precedence(a, c, c1)
+      ),
+      and(
+          del_best_food_experience(a, c0),
+          del_food_precedence(a, c0, c),
+          del_food_precedence(a, c, c1),
+          add_best_food_experience(a, c),
+          add_food_precedence(a, c, c0),
+          add_food_precedence(a, c0, c1)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',b:'AGENTS',c:'COLORS',c1:'COLORS'],
+      and(
+          said(b, c, come_to),
+          food_precedence(a, c1, c2),
+          food_precedence(a, c2, c),
+          least_food_experience(a, c)
+      ),
+      and(
+          del_food_precedence(a, c1, c2),
+          del_food_precedence(a, c2, c),
+          del_least_food_experience(a, c),
+          add_food_precedence(a, c1, c),
+          add_food_precedence(a, c, c2),
+          add_least_food_experience(a, c2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',b:'AGENTS',c:'COLORS',c0:'COLORS',c1:'COLORS',c2:'COLORS'],
+      and(
+          said(b, c, leave),
+          food_precedence(a, c0, c),
+          food_precedence(a, c, c1),
+          food_precedence(a, c1, c2)
+      ),
+      and(
+          del_food_precedence(a, c0, c),
+          del_food_precedence(a, c, c1),
+          del_food_precedence(a, c1, c2),
+          add_food_precedence(a, c0, c1),
+          add_food_precedence(a, c1, c),
+          add_food_precedence(a, c, c2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',b:'AGENTS',c:'COLORS',c1:'COLORS'],
+      and(
+          said(b, c, leave),
+          best_food_experience(a, c),
+          food_precedence(a, c, c1),
+          food_precedence(a, c1, c2)
+      ),
+      and(
+          del_best_food_experience(a, c),
+          del_food_precedence(a, c, c1),
+          del_food_precedence(a, c1, c2),
+          add_best_food_experience(a, c1),
+          add_food_precedence(a, c1, c),
+          add_food_precedence(a, c, c2)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',b:'AGENTS',c:'COLORS',c0:'COLORS',c1:'COLORS'],
+      and(
+          said(b, c, leave),
+          food_precedence(a, c0, c),
+          food_precedence(a, c, c1),
+          least_food_experience(a, c1)
+      ),
+      and(
+          del_food_precedence(a, c0, c),
+          del_food_precedence(a, c, c1),
+          del_least_food_experience(a, c1),
+          add_food_precedence(a, c0, c1),
+          add_food_precedence(a, c1, c),
+          add_least_food_experience(a, c)
+      ),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c:'COLORS',w:'WORDS'],
+      says(a, c, w),
+      said(a, c, w),
+      efgh(20, 20, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS',c2:'COLORS'],
+      and(
+          food_precedence(a, c1, c2),
+          not(del_food_precedence(a, c1, c2))
+      ),
+      food_precedence(a, c1, c2),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS'],
+      and(
+          best_food_experience(a, c1),
+          not(del_best_food_experience(a, c1))
+      ),
+      best_food_experience(a, c1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS'],
+      and(
+          least_food_experience(a, c1),
+          not(del_least_food_experience(a, c1))
+      ),
+      least_food_experience(a, c1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS',c2:'COLORS'],
+      add_food_precedence(a, c1, c2),
+      food_precedence(a, c1, c2),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS'],
+      add_best_food_experience(a, c1),
+      best_food_experience(a, c1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS'],
+      add_least_food_experience(a, c1),
+      least_food_experience(a, c1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c0:'COLORS',c1:'COLORS'],
+ and(
+  my_turn_to_move(a),
+	pos(a, c0),
+      best_food_experience(a, c1),
+	not(equals(c0, c1))
+  ),
+and(
+      new_pos(a, c1),
+      agents_leaving(c0),
+      agents_arriving(c1),
+      moving(a)
+),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',n1:'NUMBER',n2:'NUMBER',n3:'NUMBER',n4:'NUMBER',c1:'COLORS',c2:'COLORS'],
+ and( 	    
+	pos(a, c1),
+      new_pos(a, c2),
+	nr_agents_at(n1, c1),
+	nr_agents_at(n2, c2),
+	pred(n3, n1),
+	succ(n4, n2)
+),
+and(	
+	vuurt(move_regel, a, c1, c2, n1, n2, n3, n4),
+	pos(a, c2),
+	nr_agents_at(n3, c1),	
+	nr_agents_at(n4, c2)	
+),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [a:'AGENTS',c1:'COLORS'],
+and(
+      pos(a, c1),
+      not(moving(a))
+),
+pos(a, c1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [n:'NUMBER',c1:'COLORS'],
+and(
+      nr_agents_at(n, c1),
+      not(agents_leaving(c1)),
+      not(agents_arriving(c1))
+),
+      nr_agents_at(n, c1),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_lot),
+	nr_agents_at(four, c),
+      update_food
+),
+          food(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_lot),
+	nr_agents_at(three, c),
+      update_food
+),
+          food(c, a_little),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_lot),
+	nr_agents_at(two, c),
+      update_food
+),
+          food(c, half),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_lot),
+	nr_agents_at(one, c),
+   update_food
+),
+          food(c, a_lot),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_lot),
+   	nr_agents_at(zero, c),
+   update_food
+),
+          food(c, a_lot),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, half),
+	nr_agents_at(four, c),
+   update_food
+),
+          food(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, half),
+	nr_agents_at(three, c),
+   update_food
+),
+          food(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, half),
+	nr_agents_at(two, c),
+   update_food
+),
+          food(c, a_little),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, half),
+	nr_agents_at(one, c),
+   update_food
+),
+          food(c, half),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, half),
+	nr_agents_at(zero, c),
+   update_food
+),
+          food(c, half),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_little),
+	nr_agents_at(zero, c),
+   update_food
+),
+          food(c, a_little),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+and(
+          food(c, a_little),
+	not(nr_agents_at(zero, c)),
+   update_food
+),
+          food(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS'],
+          food(c, nothing),
+          food(c, nothing),
+      efgh(0, 0, 1, 1)
+).
+leadsto(
+      [c:'COLORS',s:'SUGAR'],
+and(
+          food(c, s),
+      not(update_food)
+),
+          food(c, s),
+      efgh(0, 0, 1, 1)
+).
+
+
+

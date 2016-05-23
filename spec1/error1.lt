@@ -1,0 +1,5 @@
+constant(errordelay1, efgh(aap, 2, 3, 4)).
+constant(errordelay2, efgh(-1, 2, 3, 4)).
+constant(errordelay3, efgh(0, 0, 0, 0)).
+constant(errordelay4, efgh(1, 1, 1, 0)).
+leadsto(aap, noot, errordelay4).

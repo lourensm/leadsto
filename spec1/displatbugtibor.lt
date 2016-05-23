@@ -1,0 +1,73 @@
+content(type(save_lt_editor('c:/Documents and Settings/Tibor/Bureaublad/ch7-overallmodel.lt'))).
+content(generator(app(leadsto_software, 127, [lteditor:1, psprinting:1]))).
+content(run([date('Sat Jan 17 19:05:41 2009')])).
+constant(endtime, 25).
+constant(round, 8).
+constant(max_x, 3).
+constant(max_y, 3).
+constant(w1, 0.8).
+constant(w1_ag, 0.8).
+constant(w2, 0.5).
+constant(w2_ag, 0.5).
+constant(alpha, 0.9).
+constant(alpha_ag, 0.9).
+constant(a, 0.9).
+constant(a_ag, 0.9).
+constant(d, 0.3).
+constant(d_ag, 0.3).
+constant(th, 0.25).
+sortdef(object, [nothing, contact05, contact22, contact39]).
+sortdef(attribute, [brightness, size]).
+qterm('display_number_range(has_attention_level(loc(1, 1), X), X, \'attention at loc(1,1)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(1, 2), X), X, \'attention at loc(1,2)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(1, 3), X), X, \'attention at loc(1,3)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(2, 1), X), X, \'attention at loc(2,1)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(2, 2), X), X, \'attention at loc(2,2)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(2, 3), X), X, \'attention at loc(2,3)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(3, 1), X), X, \'attention at loc(3,1)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(3, 2), X), X, \'attention at loc(3,2)\', \'value\')').
+qterm('display_number_range(has_attention_level(loc(3, 3), X), X, \'attention at loc(3,3)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(1, 1), X)), X, \'estimated attention at loc(1,1)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(1, 2), X)), X, \'estimated attention at loc(1,2)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(1, 3), X)), X, \'estimated attention at loc(1,3)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(2, 1), X)), X, \'estimated attention at loc(2,1)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(2, 2), X)), X, \'estimated attention at loc(2,2)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(2, 3), X)), X, \'estimated attention at loc(2,3)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(3, 1), X)), X, \'estimated attention at loc(3,1)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(3, 2), X)), X, \'estimated attention at loc(3,2)\', \'value\')').
+qterm('display_number_range(belief(agent, has_attention_level(loc(3, 3), X)), X, \'estimated attention at loc(3,3)\', \'value\')').
+qterm('display(_, no_show_atoms(has_current_attention_contribution(loc(_,_),_)))').
+qterm('display(_, no_show_atoms(has_old_attention_level(loc(_,_),_)))').
+qterm('display(_, no_show_atoms(has_normalised_attention_contribution(loc(_,_),_)))').
+qterm('display(_, no_show_atoms(belief(agent, has_current_attention_contribution(loc(_,_),_))))').
+qterm('display(_, no_show_atoms(belief(agent, has_old_attention_level(loc(_,_),_))))').
+qterm('display(_, no_show_atoms(belief(agent, has_normalised_attention_contribution(loc(_,_),_))))').
+qterm('display(_, sort_atoms_global)').
+qterm(cwa('performed(agent, assign_new_value_to(_, _))')).
+interval([], range(1, 2), and(is_at_location(nothing, loc(1, 1)), is_at_location(contact39, loc(1, 2)), is_at_location(nothing, loc(1, 3)), is_at_location(nothing, loc(2, 1)), is_at_location(nothing, loc(2, 2)), is_at_location(contact22, loc(2, 3)), is_at_location(nothing, loc(3, 1)), is_at_location(nothing, loc(3, 2)), is_at_location(nothing, loc(3, 3)))).
+interval([], range(round+1, round+2), and(is_at_location(nothing, loc(1, 1)), is_at_location(contact39, loc(1, 2)), is_at_location(nothing, loc(1, 3)), is_at_location(nothing, loc(2, 1)), is_at_location(contact22, loc(2, 2)), is_at_location(nothing, loc(2, 3)), is_at_location(nothing, loc(3, 1)), is_at_location(nothing, loc(3, 2)), is_at_location(nothing, loc(3, 3)))).
+interval([], range(round*2+1, round*2+2), and(is_at_location(nothing, loc(1, 1)), is_at_location(contact39, loc(1, 2)), is_at_location(nothing, loc(1, 3)), is_at_location(contact22, loc(2, 1)), is_at_location(nothing, loc(2, 2)), is_at_location(nothing, loc(2, 3)), is_at_location(nothing, loc(3, 1)), is_at_location(nothing, loc(3, 2)), is_at_location(contact05, loc(3, 3)))).
+interval([], range(1, 2), gaze_at_loc(1, 1)).
+interval([], range(round+1, round+2), gaze_at_loc(2, 2)).
+interval([], range(round*2+1, round*2+2), gaze_at_loc(3, 3)).
+interval([], range(0, 1), and(has_value_for(contact05, 0.7, brightness), has_value_for(contact22, 0.5, brightness), has_value_for(contact39, 0.01, brightness), has_value_for(nothing, 0.0, brightness))).
+interval([], range(0, 1), and(has_value_for(contact05, 0.5, size), has_value_for(contact22, 0.5, size), has_value_for(contact39, 0.01, size), has_value_for(nothing, 0.0, size))).
+interval([], range(0, endtime), desire(agent, has_attention_level(loc(1, 2), 0.2))).
+interval([x:between(1, max_x), y:between(1, max_y)], range(0, 1), has_attention_level(loc(x, y), a/ (max_x*max_y))).
+interval([x:between(1, max_x), y:between(1, max_y)], range(0, 1), belief(agent, has_attention_level(loc(x, y), a_ag/ (max_x*max_y)))).
+interval([x:between(1, max_x), y:between(1, max_y)], range(0, 1), and(not(has_attention_level(loc(x, y), 0.0)), not(has_attention_level(loc(x, y), 1.0)))).
+interval([x:between(1, max_x), y:between(1, max_y)], range(0, 1), and(not(belief(agent, has_attention_level(loc(x, y), 0.0))), not(belief(agent, has_attention_level(loc(x, y), 1.0))))).
+leadsto([x1:between(1, max_x), x2:between(1, max_x), y1:between(1, max_y), y2:between(1, max_y), v1:real, v2:real, o:object], and(is_at_location(o, loc(x1, y1)), gaze_at_loc(x2, y2), has_value_for(o, v1, brightness), has_value_for(o, v2, size)), has_current_attention_contribution(loc(x1, y1), (v1*w1+v2*w2)/ (1+alpha* ((x1-x2)^2+ (y1-y2)^2))), efgh(0, 0, 1, 1)).
+leadsto([x1:between(1, max_x), x2:between(1, max_x), y1:between(1, max_y), y2:between(1, max_y), v1:real, v2:real, o:object], and(is_at_location(o, loc(x1, y1)), gaze_at_loc(x2, y2), has_value_for(o, v1, brightness), has_value_for(o, v2, size)), belief(agent, has_current_attention_contribution(loc(x1, y1), (v1*w1_ag+v2*w2_ag)/ (1+alpha_ag* ((x1-x2)^2+ (y1-y2)^2)))), efgh(0, 0, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v:real, v1:real, v2:real, v3:real, v4:real, v5:real, v6:real, v7:real, v8:real, v9:real], and(has_current_attention_contribution(loc(x, y), v), has_current_attention_contribution(loc(1, 1), v1), has_current_attention_contribution(loc(1, 2), v2), has_current_attention_contribution(loc(1, 3), v3), has_current_attention_contribution(loc(2, 1), v4), has_current_attention_contribution(loc(2, 2), v5), has_current_attention_contribution(loc(2, 3), v6), has_current_attention_contribution(loc(3, 1), v7), has_current_attention_contribution(loc(3, 2), v8), has_current_attention_contribution(loc(3, 3), v9)), has_normalised_attention_contribution(loc(x, y), v*a/ (v1+v2+v3+v4+v5+v6+v7+v8+v9)), efgh(0, 0, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v:real, v1:real, v2:real, v3:real, v4:real, v5:real, v6:real, v7:real, v8:real, v9:real], and(belief(agent, has_current_attention_contribution(loc(x, y), v)), belief(agent, has_current_attention_contribution(loc(1, 1), v1)), belief(agent, has_current_attention_contribution(loc(1, 2), v2)), belief(agent, has_current_attention_contribution(loc(1, 3), v3)), belief(agent, has_current_attention_contribution(loc(2, 1), v4)), belief(agent, has_current_attention_contribution(loc(2, 2), v5)), belief(agent, has_current_attention_contribution(loc(2, 3), v6)), belief(agent, has_current_attention_contribution(loc(3, 1), v7)), belief(agent, has_current_attention_contribution(loc(3, 2), v8)), belief(agent, has_current_attention_contribution(loc(3, 3), v9))), belief(agent, has_normalised_attention_contribution(loc(x, y), v*a_ag/ (v1+v2+v3+v4+v5+v6+v7+v8+v9))), efgh(0, 0, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v:real], has_attention_level(loc(x, y), v), has_old_attention_level(loc(x, y), v), efgh(2, 2, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v:real], belief(agent, has_attention_level(loc(x, y), v)), belief(agent, has_old_attention_level(loc(x, y), v)), efgh(2, 2, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v1:real, v2:real], and(has_normalised_attention_contribution(loc(x, y), v1), has_old_attention_level(loc(x, y), v2)), has_attention_level(loc(x, y), d*v2+ (1-d)*v1), efgh(round-4, round-4, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v1:real, v2:real], and(belief(agent, has_normalised_attention_contribution(loc(x, y), v1)), belief(agent, has_old_attention_level(loc(x, y), v2))), belief(agent, has_attention_level(loc(x, y), d_ag*v2+ (1-d_ag)*v1)), efgh(round-4, round-4, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v:real], and(has_attention_level(loc(x, y), v), v>th), mouse_click_on(loc(x, y)), efgh(0, 0, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v1:real, v2:real], and(belief(agent, has_attention_level(loc(x, y), v1)), desire(agent, has_attention_level(loc(x, y), v2)), v1<v2), assessment(agent, has_attention_discrepancy(loc(x, y), v2-v1)), efgh(0, 0, 1, 1)).
+leadsto([x:between(1, max_x), y:between(1, max_y), v1:real, v2:real, o:object], and(assessment(agent, has_attention_discrepancy(loc(x, y), v1)), is_at_location(o, loc(x, y)), has_value_for(o, v2, brightness)), and(performed(agent, assign_new_value_to(o, 1.0, brightness)), performed(agent, assign_new_value_to(o, brightness))), efgh(0, 0, 1, 1)).
+leadsto([o:object, v:real, a:attribute], and(has_value_for(o, v, a), not(performed(agent, assign_new_value_to(o, a)))), has_value_for(o, v, a), efgh(0, 0, 1, 1)).
+leadsto([o:object, v:real, a:attribute], performed(agent, assign_new_value_to(o, v, a)), has_value_for(o, v, a), efgh(0, 0, 1, 1)).
+end_time(endtime).

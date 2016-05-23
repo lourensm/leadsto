@@ -1,0 +1,100 @@
+
+end_time(10).
+
+sort_element(sl(L), X) :-
+	member(X, L).
+
+
+
+
+/* implement fifos:
+   add(e:element), remove(e:element)
+   fifo_contains(f:fifo, e:element)
+   fifo_empty(f:fifo)
+   
+*/
+constant(nfifos, 2).
+
+constant(fifo, between(1, nfifos)).
+constant(zero_delay, efgh(0,0,1,1)).
+
+cwa(add).
+cwa(rm).
+
+interval([f:fifo], 0, 1, fifo_empty(f)).
+
+interval(3,4, add).
+interval(6,7, rm).
+leadsto([fempty:fifo],
+        and(add,
+	    not(rm),
+	    forall([(ffull:fifo) < fempty],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([(f1:fifo) >= fempty],
+		   fifo_empty(f1))
+	   ),
+	and(forall([(ffull:fifo) =< fempty],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([(frest:fifo)>fempty],fifo_empty(frest))),
+	zero_delay
+       ).
+
+
+/* fifo : 1,2
+   fempty = 1:
+   not(fifo_empty(1)) fifo_empty(2)
+   o--> fifo_empty(1), fifo_empty(2)
+   */
+leadsto([fempty:fifo],
+        and(not(add),
+	    rm,
+	    forall([ffull:fifo <= fempty],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([f1:fifo > fempty],
+		   fifo_empty(f1)
+		  )
+	   ),
+	and(forall([ffull:fifo < fempty],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([frest:fifo>= fempty],fifo_empty(frest))),
+	zero_delay
+       ).
+
+leadsto([fempty:fifo],
+        and(not(add),not(rm),
+	    forall([ffull:fifo < fempty:fifo],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([f1:fifo >= fempty],
+		   fifo_empty(f1)
+		  )
+	   ),
+	and(forall([ffull:fifo < fempty:fifo],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([frest:fifo>=fempty],fifo_empty(frest))),
+	zero_delay
+       ).
+/*
+leadsto([fempty:fifo],
+        and(add,
+	    rm,
+	    forall([ffull:fifo < fempty:fifo],
+		   not(fifo_empty(ffull))
+		  ),
+	     forall([f1:fifo >= fempty],fifo_empty(f1))
+	   ),
+	and(forall([ffull:fifo < fempty:fifo],
+		   not(fifo_empty(ffull))
+		  ),
+	    forall([frest:fifo>=fempty],fifo_empty(frest))),
+	zero_delay
+       ).
+*/
+
+
+

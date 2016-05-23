@@ -1,0 +1,4 @@
+content(type(save_lt_editor('f:/cygwin/home/lourens/wrk/ww/db3/pl/spec/a1.lt'))).
+content(generator(app(leadsto_software, 124, [lteditor:1, psprinting:1]))).
+content(run([date('Thu May 12 16:44:26 2005')])).
+interval([], range(0, 1), a(1)).

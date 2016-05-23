@@ -1,0 +1,9 @@
+content(type(save_lt_editor('spec/test12.fm'))).
+content(generator(app(leadsto_software, 53, [lteditor:1, psprinting:1]))).
+content(run([date('Fri Feb 28 14:09:14 2003')])).
+denotes(test1_weird_mix_time_atom_arg, exists([t:integer, 'R':'REAL'], holds(state(trace1, 'R':'REAL'), aap('R':'REAL'), true))).
+denotes(test2_ok, exists([t:integer, 'R':'REAL'], holds(state(trace1, t:integer), aap('R':'REAL'), true))).
+denotes(test3_in_assignment_yet_protest_instantiate_real, exists([t:integer, 'R':'REAL'], and('R':'REAL'=0.1, holds(state(trace1, t:integer), aap('R':'REAL'), true)))).
+denotes(test4_allow_multi_occ_of_new_variable, exists([t:integer, 'R':'REAL'], holds(state(trace1, t:integer), aap('R':'REAL', ('R':'REAL')+1), true))).
+denotes(test5, exists([t:integer, 'R':'REAL'], and(holds(state(trace1, t:integer), aap('R':'REAL'), true), holds(state(trace1, t:integer), aap('R':'REAL', ('R':'REAL')+1), true)))).
+denotes(test6, exists([t:integer, 'R':'REAL'], and(holds(state(trace1, t:integer), aap(('R':'REAL')-1), true), holds(state(trace1, t:integer), aap(('R':'REAL')-1, 'R':'REAL'), true)))).

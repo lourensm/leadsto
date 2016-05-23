@@ -1,0 +1,5 @@
+content(type(save_lt_editor('/Users/lourens/wrk/db3/pl/aap.fm'))).
+content(generator(app(leadsto_software, 127, [psprinting:1, lteditor:1]))).
+content(run([date('Wed Aug 15 18:37:26 2012')])).
+denotes([property_name], [formula]).
+/**/

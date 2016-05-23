@@ -1,0 +1,9 @@
+content(type(save_lt_editor('spec/sortextension.lt'))).
+content(generator(app(leadsto_software, 137, [lteditor:1, psprinting:1]))).
+content(run([date('Wed Jul 28 17:56:49 2004')])).
+/*Test the extra facilities for sorts*/
+sortdef(s1('X':between(1, 10)), [t('X':between(1, 10), 'Y':between(12, 15)), 'SUBSORT'(between(23, 25))]).
+sortdef(s2, [o1, o2]).
+sortdef(s3, [t('X':s2)]).
+interval(['Y':between(3, 4), 'X':s1('Y':between(3, 4))], range(0, 100), a('X':s1('Y':between(3, 4)))).
+/* a(X:s1(3)), a(X:s1(4)) */

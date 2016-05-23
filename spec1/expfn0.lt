@@ -1,0 +1,17 @@
+
+end_time(1).
+constant(deltat, 0.10).
+constant(lambda,0.3).
+
+%display_number_range(r(X),X, 'r(X)', 'X').
+
+interval([], 0, deltat, r(1.0)).
+
+leadsto([x:'REAL'],r(x), r(x*(1-lambda*deltat)), efgh(0,0,deltat,deltat)).
+/*
+  EXACT
+leadsto([x:'REAL'],r(x), r(x*exp(-lambda*deltat)), efgh(0,0,deltat,deltat)).
+*/
+
+
+

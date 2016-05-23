@@ -1,0 +1,5 @@
+content(type(save_lt_editor('/Users/lourens/wrk/db3/pl/aap.lt'))).
+content(generator(app(leadsto_software, 129, [psprinting:1, lteditor:1]))).
+content(run([date('Thu Aug  8 17:05:38 2013')])).
+interval([], range(10, 20), a).
+leadsto([], a, and(b, c), standard).

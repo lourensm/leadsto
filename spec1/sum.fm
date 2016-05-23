@@ -1,0 +1,5 @@
+content(type(save_lt_editor('mies.fm'))).
+content(generator(app(leadsto_software, 114, [lteditor:1, psprinting:1]))).
+content(run([date('Thu Mar 18 10:30:54 2004')])).
+denotes(p1, 1>case(exists(i:interval, holds(state(trace1, time(i:interval)), aap, true)), 0, 1)).
+denotes(p2, sum(['I':between(1, 20)], 2* ('I':between(1, 20)))>2+10).

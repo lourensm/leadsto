@@ -1,0 +1,9 @@
+content(type(save_lt_editor('spec/cwabug.lt'))).
+content(generator(app(leadsto_software, 104, [lteditor:1, psprinting:1]))).
+content(run([date('Tue Aug 31 17:02:04 2004')])).
+cwa(_).
+end_time(3).
+sortdef(abc, [a, b, c]).
+interval([], range(0, 1), a(a)).
+interval([], range(0, 1), a(b)).
+leadsto(['A':abc, 'B':abc, 'C':abc], and(a('A':abc), a('B':abc), not(a('C':abc)), 'A':abc\='B':abc, 'A':abc\='C':abc, 'B':abc\='C':abc), d, unit).

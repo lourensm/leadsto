@@ -1,0 +1,7 @@
+content(type(save_lt_editor('spec/lijn4normal.fm'))).
+content(generator(app(leadsto_software, 49, [lteditor:1, psprinting:1]))).
+content(run([date('Thu Feb 13 18:47:04 2003')])).
+denotes(ep2(t2:integer, e2:integer), forall([m:'TRACE', t:interval>=interval(t2:integer), e3:integer], implies(holds(state(m:'TRACE', time(t:interval)), day_used_energy(e3:integer), true), e3:integer=e2:integer))).
+denotes(ep2_24_8, ep2(24, 8)).
+denotes(ip1, implies(ep2(24, 8), forall([m:'TRACE', t2:interval>=interval(25), n:real], implies(holds(state(m:'TRACE', time(t2:interval)), eat_norm(n:real), true), and(((n:real)-8)/8> -0.1, ((n:real)-8)/8<0.1))))).
+denotes(ip11, implies(ep2(24, 8), forall([m:'TRACE', t2:interval>=interval(25), n:real], implies(holds(state(m:'TRACE', time(t2:interval)), eat_norm(n:real), true), abs(((n:real)-8)/8)<0.1)))).

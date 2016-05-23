@@ -1,0 +1,5 @@
+content(type(save_lt_editor('/home/lourens/wrk/ww/db3/pl/spec/ef.lt'))).
+content(generator(app(leadsto_software, 88, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Sep  1 14:05:15 2003')])).
+interval([], range(0, 1), a).
+leadsto([], a, b, efgh(1, 50, 1, 1)).

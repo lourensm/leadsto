@@ -1,0 +1,7 @@
+content(type(save_lt_editor('h:/research/tools/leadsto/bugje-nondeterminism.lt'))).
+content(generator(app(leadsto_software, 127, [lteditor:1, psprinting:1]))).
+content(run([date('Wed Jan 12 13:51:21 2011')])).
+end_time(5).
+interval([], range(0, 1), a).
+interval([], range(0, 1), b).
+leadsto([], and(a, b), c, efgh(0, 1, 1, 1)).

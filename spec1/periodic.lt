@@ -1,0 +1,14 @@
+
+cwa(r).
+cwa(a | 3 | _).
+
+
+sort_element(s1, X) :-
+	member(X, [a,b]).
+
+periodic(0,50,100,a).
+
+periodic(0,10,20, and(p, not(q), r)).
+
+periodic([x:s1,z:between(1,2)], 5,10,19, x | f(z + 1) | p(aap)).
+

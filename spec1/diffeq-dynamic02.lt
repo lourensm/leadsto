@@ -1,0 +1,24 @@
+content(type(save_lt_editor('diffeq-dynamic02.lt'))).
+content(generator(app(leadsto_software, 113, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Mar 13 15:17:28 2006')])).
+end_time(0.004).
+constant(smallstep, 1e-05).
+constant(bigstep, 0.0001).
+constant(w, 0.0001).
+display_number_range(x(V1), V1, 'x(V1)', 'V1').
+display_number_range(y(V2), V2, 'y(V2)', 'V2').
+display_number_range(n1(V3), V3, 'n1(V3)', 'V3').
+display_number_range(n2(V4), V4, 'n2(V4)', 'V4').
+display_number_range(prev_n1(V3), V3, 'prev_n1(V3)', 'V3').
+interval([], range(0, smallstep), step(smallstep)).
+interval([], range(0, smallstep), x(0.0)).
+interval([], range(0, smallstep), y(0.0)).
+interval([], range(0, smallstep), n1(10.0)).
+interval([], range(0, smallstep), n2(9.0)).
+interval([], range(0, smallstep), prev_n1(0.0)).
+leadsto([v3:'REAL', prev:'REAL'], and(step(bigstep), n1(v3), prev_n1(prev), 0* (prev+v3)\=1), test1, efgh(0, 0, bigstep, bigstep)).
+leadsto([v3:'REAL', prev:'REAL'], and(step(bigstep), n1(v3), prev_n1(prev), 0\=1), test2, efgh(0, 0, bigstep, bigstep)).
+leadsto([v1:'REAL', v2:'REAL', v3:'REAL', v4:'REAL', prev:'REAL'], and(step(smallstep), x(v1), y(v2), n1(v3), n2(v4), prev_n1(prev), abs(v3-prev)>0.001), and(step(smallstep), x(v1+ (2* (45.4327*w^2/ (0.021* (1+0.15*v3^2/ (20-v3-v4)^2+w^2)))-343*v4*v1/ ((0.17+v4)* (0.2+v1)))*smallstep), y(v2+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))-53.1328*v2/ (0.3+v2))*smallstep), n1(v3+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))+ (- (432.9* (20-v3-v4)*v3-133*v4^2))-3.2076*v3)*smallstep), n2(v4+ (-343*v4*v1/ ((0.17+v4)* (0.2+v1))-2* (- (432.9* (20-v3-v4)*v3-133*v4^2))+3.2076*v3)*smallstep), prev_n1(v3)), efgh(0, 0, smallstep, smallstep)).
+leadsto([v1:'REAL', v2:'REAL', v3:'REAL', v4:'REAL', prev:'REAL'], and(step(smallstep), x(v1), y(v2), n1(v3), n2(v4), prev_n1(prev), <=(abs(v3-prev), 0.001)), and(step(bigstep), x(v1+ (2* (45.4327*w^2/ (0.021* (1+0.15*v3^2/ (20-v3-v4)^2+w^2)))-343*v4*v1/ ((0.17+v4)* (0.2+v1)))*bigstep), y(v2+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))-53.1328*v2/ (0.3+v2))*bigstep), n1(v3+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))+ (- (432.9* (20-v3-v4)*v3-133*v4^2))-3.2076*v3)*bigstep), n2(v4+ (-343*v4*v1/ ((0.17+v4)* (0.2+v1))-2* (- (432.9* (20-v3-v4)*v3-133*v4^2))+3.2076*v3)*bigstep), prev_n1(v3)), efgh(0, 0, smallstep, bigstep)).
+leadsto([v1:'REAL', v2:'REAL', v3:'REAL', v4:'REAL', prev:'REAL'], and(step(bigstep), x(v1), y(v2), n1(v3), n2(v4), prev_n1(prev), <=(abs(v3-prev), 0.025)), and(step(bigstep), x(v1+ (2* (45.4327*w^2/ (0.021* (1+0.15*v3^2/ (20-v3-v4)^2+w^2)))-343*v4*v1/ ((0.17+v4)* (0.2+v1)))*bigstep), y(v2+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))-53.1328*v2/ (0.3+v2))*bigstep), n1(v3+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))+ (- (432.9* (20-v3-v4)*v3-133*v4^2))-3.2076*v3)*bigstep), n2(v4+ (-343*v4*v1/ ((0.17+v4)* (0.2+v1))-2* (- (432.9* (20-v3-v4)*v3-133*v4^2))+3.2076*v3)*bigstep), prev_n1(v3)), efgh(0, 0, bigstep, bigstep)).
+leadsto([v1:'REAL', v2:'REAL', v3:'REAL', v4:'REAL', prev:'REAL'], and(step(bigstep), x(v1), y(v2), n1(v3), n2(v4), prev_n1(prev), abs(v3-prev)>0.025), and(step(smallstep), x(v1+ (2* (45.4327*w^2/ (0.021* (1+0.15*v3^2/ (20-v3-v4)^2+w^2)))-343*v4*v1/ ((0.17+v4)* (0.2+v1)))*smallstep), y(v2+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))-53.1328*v2/ (0.3+v2))*smallstep), n1(v3+ (343*v4*v1/ ((0.17+v4)* (0.2+v1))+ (- (432.9* (20-v3-v4)*v3-133*v4^2))-3.2076*v3)*smallstep), n2(v4+ (-343*v4*v1/ ((0.17+v4)* (0.2+v1))-2* (- (432.9* (20-v3-v4)*v3-133*v4^2))+3.2076*v3)*smallstep), prev_n1(v3)), efgh(0, 0, bigstep, smallstep)).

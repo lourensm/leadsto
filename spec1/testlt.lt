@@ -1,0 +1,4 @@
+content(type(save_lt_editor('spec/testlt.lt'))).
+content(generator(app(leadsto_software, 99, [lteditor:1, psprinting:1]))).
+content(run([date('Fri Oct 03 15:59:16 2003')])).
+interval([x:between(1, 2)], range(10* (x:between(1, 2))+1, 100), a(x:between(1, 2))).

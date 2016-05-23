@@ -1,0 +1,4 @@
+end_time(30).
+interval([t1:between(1,5)],(t1*(t1+1))/2,(t1*(t1+1))/2  + t1, a). 
+
+leadsto([g:between(1, 6)], a, delay(0,0,g,g), efgh(0,0,g,g)).

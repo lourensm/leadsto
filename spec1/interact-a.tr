@@ -1,0 +1,28 @@
+content(type(savedtrace('interact5.lt'))).
+content(generator(app(leadsto_software, 54, [psprinting:1, showtrace:8, simalgo:11]))).
+content(source(file('interact5.lt', [size(1083), path('/home/tbosse/research/leadsto/interact5.lt'), mdate('Fri Feb 28 14:18:54 2003')]))).
+content(run([date('Fri Feb 28 14:19:02 2003')])).
+atom_trace('a1(1)', a1(1), [range(49, 70, false), range(44, 49, true), range(9, 44, false), range(4, 9, true), range(0, 4, false)]).
+atom_trace('a1(2)', a1(2), [range(14, 70, false), range(9, 14, true), range(0, 9, false)]).
+atom_trace('a1(3)', a1(3), [range(19, 70, false), range(14, 19, true), range(0, 14, false)]).
+atom_trace(a2, a2, [range(54, 70, false), range(49, 54, true), range(24, 49, false), range(20, 24, true), range(0, 20, false)]).
+atom_trace(arriving_at_door, arriving_at_door, [range(45, 70, false), range(40, 45, true), range(5, 40, false), range(0, 5, true)]).
+atom_trace(c, c, [range(18, 70, true), range(0, 18, false)]).
+atom_trace('d(5)', d(5), [range(0, 70, true)]).
+atom_trace(door_unlocked, door_unlocked, [range(55, 70, false), range(50, 55, true), range(25, 50, false), range(21, 25, true), range(0, 21, false)]).
+atom_trace('lock_reaction(1)', lock_reaction(1), [range(50, 70, false), range(45, 50, true), range(10, 45, false), range(5, 10, true), range(0, 5, false)]).
+atom_trace('lock_reaction(2)', lock_reaction(2), [range(15, 70, false), range(10, 15, true), range(0, 10, false)]).
+atom_trace('lock_reaction(3)', lock_reaction(3), [range(20, 70, false), range(15, 20, true), range(0, 15, false)]).
+atom_trace(o1, o1, [range(46, 70, false), range(41, 46, true), range(6, 41, false), range(1, 6, true), range(0, 1, false)]).
+atom_trace('o2(1)', o2(1), [range(51, 70, false), range(46, 51, true), range(11, 46, false), range(6, 11, true), range(0, 6, false)]).
+atom_trace('o2(2)', o2(2), [range(16, 70, false), range(11, 16, true), range(0, 11, false)]).
+atom_trace('o2(3)', o2(3), [range(21, 70, false), range(16, 21, true), range(0, 16, false)]).
+atom_trace('p1(1)', p1(1), [range(48, 70, false), range(43, 48, true), range(8, 43, false), range(3, 8, true), range(0, 3, false)]).
+atom_trace('p1(2)', p1(2), [range(13, 70, false), range(8, 13, true), range(0, 8, false)]).
+atom_trace('p1(3)', p1(3), [range(18, 70, false), range(13, 18, true), range(0, 13, false)]).
+atom_trace(p2, p2, [range(53, 70, false), range(48, 53, true), range(23, 48, false), range(19, 23, true), range(0, 19, false)]).
+atom_trace(s1, s1, [range(47, 70, false), range(42, 47, true), range(7, 42, false), range(2, 7, true), range(0, 2, false)]).
+atom_trace('s2(1)', s2(1), [range(52, 70, false), range(47, 52, true), range(12, 47, false), range(7, 12, true), range(0, 7, false)]).
+atom_trace('s2(2)', s2(2), [range(17, 70, false), range(12, 17, true), range(0, 12, false)]).
+atom_trace('s2(3)', s2(3), [range(22, 70, false), range(17, 22, true), range(0, 17, false)]).
+times(0, 70, 70).

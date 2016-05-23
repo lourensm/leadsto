@@ -1,0 +1,18 @@
+
+end_time(50).
+
+
+
+interval([],5,20, b).
+/*
+interval([],0,20, a).
+interval([],10,19, c).
+
+
+leadsto([], and(a,and(b,c)), d, efgh(10,10,10,10)).
+
+
+interval(0, 1, x).
+leadsto([], x, y, efgh(0,0,1,1)).
+*/
+

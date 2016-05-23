@@ -1,0 +1,6 @@
+content(type(save_lt_editor('smalldiff.lt'))).
+content(generator(app(leadsto_software, 93, [lteditor:1, psprinting:1]))).
+content(run([date('Wed Sep 10 18:15:21 2003')])).
+end_time(20).
+interval([], range(1, 2), a(1.0)).
+leadsto(['X':real], a('X':real), a(('X':real)+1e-009), efgh(0, 0, 1, 1)).

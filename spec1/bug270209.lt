@@ -1,0 +1,7 @@
+content(type(save_lt_editor('c:/Documents and Settings/Tibor/Bureaublad/bug270209.lt'))).
+content(generator(app(leadsto_software, 127, [lteditor:1, psprinting:1]))).
+content(run([date('Fri Feb 27 16:09:26 2009')])).
+end_time(5).
+interval([], range(0, 1), start).
+leadsto([], and(start, 0.1= (0.1+0.1)/2), test1, efgh(0, 0, 1, 1)).
+leadsto([], and(start, 0.1= (0.1+0.1+0.1)/3), test2, efgh(0, 0, 1, 1)).

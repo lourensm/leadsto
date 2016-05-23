@@ -1,0 +1,4 @@
+content(type(save_lt_editor('spec/s1.fm'))).
+content(generator(app(leadsto_software, 124, [lteditor:1, psprinting:1]))).
+content(run([date('Thu May 12 13:46:32 2005')])).
+denotes(s1_back, and(forall([m:'TRACE', t1:interval], implies('|='(state(m:'TRACE', time(t1:interval)), o1), exists([t2:interval>=t1:interval], '|='(state(m:'TRACE', time(t2:interval)), s1)))), forall([m:'TRACE', t2:interval], implies('|='(state(m:'TRACE', time(t2:interval)), s1), exists([<=(t1:interval, t2:interval)], '|='(state(m:'TRACE', time(t1:interval)), o1)))))).

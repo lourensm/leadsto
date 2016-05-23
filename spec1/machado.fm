@@ -1,0 +1,9 @@
+content(type(save_lt_editor('/home/lourens/wrk/ww/db3/pl/spec/machado.fm'))).
+content(generator(app(leadsto_software, 51, [lteditor:1, psprinting:1]))).
+content(run([date('Mon Feb 24 15:25:28 2003')])).
+sortdef(stimulus, [s1, s2]).
+denotes(stimulus_starts_at(gamma:'TRACE', i:interval, s1), holds(state(gamma:'TRACE', i:interval), s1(1), true)).
+denotes(stimulus_starts_at(gamma:'TRACE', i:interval, s2), holds(state(gamma:'TRACE', i:interval), s2(1), true)).
+denotes(stimulus_starts_within(gamma:'TRACE', i1:interval, delta_u:'REAL', sprime:stimulus), exists([iprime:interval>i1:interval], and(iprime:interval>i1:interval, stimulus_starts_at(gamma:'TRACE', iprime:interval, sprime:stimulus)))).
+denotes(has_preparation_level_at(gamma:'TRACE', i:interval, p:'REAL'), holds(state(gamma:'TRACE', time(i:interval)), r(p:'REAL'), true)).
+denotes(has_global_hill_prep(gamma:'TRACE', i1:interval, i2:interval, delta_u:'REAL'), forall([i1:interval<i_pp:interval<=interval(begin(i1:interval)+delta_u:'REAL'), i1:interval<=i_p:interval<i_pp:interval, p_p:'REAL', p_pp:'REAL'], implies(and(stimulus_starts_at(gamma:'TRACE', i1:interval, s1), not(stimulus_starts_within(gamma:'TRACE', i1:interval, delta_u:'REAL', sprime:stimulus)), has_preparation_level_at(gamma:'TRACE', iprime:interval, pprime:'REAL'), has_preparation_level_at(gamma:'TRACE', iprime:interval, pprime:'REAL')), and(implies(i_pp:interval<i2:interva, p_p:'REAL'<p_pp:'REAL'), implies(i2:interval<=i_pp:interval, p_p:'REAL'>p_pp:'REAL'))))).

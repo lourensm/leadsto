@@ -1,0 +1,46 @@
+
+end_time(5).
+
+
+
+display_number_range(x0(X),X, 'x0(X)', 'X').
+display_number_range(w0(X),X, 'w0(X)', 'X').
+display(_, show_atoms(s1(1.0))).
+display(_, show_atoms(s1(0.0))).
+display(_, show_atoms(s2(1.0))).
+display(_, show_atoms(s2(0.0))).
+display(_, show_atoms(instage(e))).
+display(_, show_atoms(instage(p))).
+display(_, show_atoms(instage(r))).
+
+periodic([], 0, 1,20, s1(1.0)).
+periodic([], 1,  20, 20, s1(0.0)).
+periodic([], 0, 6, 20, s2(0.0)).
+periodic([], 6,7,20, s2(1.0)).
+periodic([], 7,  20, 20, s2(0.0)).
+
+interval([], 0, 1, x0(0.0)).
+
+leadsto([x:'REAL',y:'REAL'],and(x0(x),s1(y)), x0(x*0.5+y), efgh(0,0,1,1)).
+
+interval([], 0, 1, w0(0.0)).
+
+
+interval([], 0, 1, instage(p)).
+%interval([], 1, 7, instage(e)). => makes deriv ok
+
+leadsto([],s1(1.0),instage(e),efgh(0,0,1,1)).
+leadsto([],and(instage(e),s2(0.0)),instage(e),efgh(0,0,1,1)).
+
+leadsto([x:'REAL',y:'REAL'],and(instage(e),x0(x),w0(y)), w0(y*(1-x*0.1)), efgh(0,0,1,1)).
+
+
+leadsto([y:'REAL'],and(instage(p),w0(y)), w0(y), efgh(0,0,1,1)).
+
+
+
+
+
+
+
+

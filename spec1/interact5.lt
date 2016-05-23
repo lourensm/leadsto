@@ -1,0 +1,50 @@
+/* A set of rules describing the dynamics of anorexia, boulimia and obesitas */
+
+end_time(70).
+global_lambda(0.5).
+cwa(_).
+
+% interact-b.tr: 
+constant(dsetup, 2).
+
+%interact-a.tr:
+% ltbare -constant dsetup=5 interact5.lt
+% OR
+% constant(dsetup, 5).
+
+/* INITIALISATION */
+
+interval(0, 5, arriving_at_door).
+interval(40, 45, arriving_at_door).
+interval(0, 70, d(dsetup)).
+
+
+/* PROPERTIES */
+
+leadsto([], arriving_at_door, o1, efgh(0,0,1,1)).
+
+leadsto([], o1, s1, efgh(0,0,1,1)).
+
+leadsto([], s1, p1(1), efgh(0,0,1,1)).
+
+leadsto([p:'INTEGER'], p1(p), a1(p), efgh(0,0,1,1)).
+
+leadsto([p:'INTEGER', t:'INTEGER'], and(a1(p), not(a2), d(t), p<t), lock_reaction(p), efgh(0,0,1,1)).
+
+leadsto([r:'INTEGER'], lock_reaction(r), o2(r), efgh(0,0,1,1)).
+
+leadsto([r:'INTEGER'], o2(r), s2(r), efgh(0,0,1,1)).
+
+leadsto([p:'INTEGER'], and(p1(p), s2(p), p<3, not(c)), p1(p+1), efgh(0,0,1,5)).
+
+leadsto([p:'INTEGER'], and(p1(p), s2(p), p>=3), c, efgh(0,0,1,1)).
+
+leadsto([], c, c, efgh(0,0,1,1)).
+
+leadsto([r:'INTEGER'], and(c, s2(r)), p2, efgh(0,0,1,1)).
+
+leadsto([], p2, a2, efgh(0,0,1,1)).
+
+leadsto([p:'INTEGER', t:'INTEGER'], and(a1(p), d(t), p>=t), door_unlocked, efgh(0,0,1,1)).
+
+leadsto([], a2, door_unlocked, efgh(0,0,1,1)).

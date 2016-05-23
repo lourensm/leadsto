@@ -1,0 +1,128 @@
+/* A set of rules describing the dynamics of anorexia, boulimia and obesitas */
+
+end_time(105).
+global_lambda(0.5).
+cwa(_).
+
+constant(alpha, 0.75).
+constant(beta, 1).
+constant(gamma, 0.2).
+
+/* INITIALISATION */
+
+interval(0, 1, atime(1)).
+
+interval(0, 2, intermediate_amount_eaten(0)).
+interval(25, 26, intermediate_amount_eaten(0)).
+interval(50, 51, intermediate_amount_eaten(0)).
+interval(75, 76, intermediate_amount_eaten(0)).
+interval(100, 102, intermediate_amount_eaten(0)).
+
+interval(24, 25, day_used_energy(8)).
+interval(49, 50, day_used_energy(8)).
+interval(74, 75, day_used_energy(8)).
+interval(99, 100, day_used_energy(8)).
+
+interval(0, 25, eat_norm(6)).
+interval(0, 25, weight(60)).
+
+/* PROPERTIES */
+
+leadsto([t:'INTEGER'],
+	atime(t),
+	atime(t+1),
+	efgh(0,0,1,1)).
+
+
+leadsto([e:'REAL', n:'REAL'],
+	and(intermediate_amount_eaten(e),
+		eat_norm(n), n-1<=e),
+	stimulus(do_not_eat),
+	efgh(0,0,1,1)).
+
+
+leadsto([e:'REAL', n:'REAL'],
+	and(intermediate_amount_eaten(e),
+		eat_norm(n), n-1>e),
+	stimulus(eat),
+	efgh(0,0,1,1)).
+
+
+leadsto([e:'REAL'],
+	and(intermediate_amount_eaten(e),
+		stimulus(eat)),
+	intermediate_amount_eaten(e+1),
+	efgh(0,0,1,1)).
+
+
+leadsto([e:'REAL'],
+	and(intermediate_amount_eaten(e),
+		stimulus(do_not_eat),
+		not(atime(25)),
+		not(atime(50)),
+		not(atime(75)),
+		not(atime(100))),
+	intermediate_amount_eaten(e),
+	efgh(0,0,1,1)).
+
+
+leadsto([e:'REAL'],
+	and(intermediate_amount_eaten(e),
+		atime(24)),
+	day_amount_eaten(e),
+	efgh(0,0,1,1)).
+
+leadsto([e:'REAL'],
+	and(intermediate_amount_eaten(e),
+		atime(49)),
+	day_amount_eaten(e),
+	efgh(0,0,1,1)).
+
+leadsto([e:'REAL'],
+	and(intermediate_amount_eaten(e),
+		atime(74)),
+	day_amount_eaten(e),
+	efgh(0,0,1,1)).
+
+leadsto([e:'REAL'],
+	and(intermediate_amount_eaten(e),
+		atime(99)),
+	day_amount_eaten(e),
+	efgh(0,0,1,1)).
+
+
+leadsto([e1:'REAL', e2:'REAL', w:'REAL'],
+	and(day_amount_eaten(e1),
+		day_used_energy(e2),
+		weight(w)),
+	weight(w + gamma * (e1-e2)),
+	efgh(0,0,1,25)).
+
+
+leadsto([s:'REAL', n:'REAL'],
+	and(day_used_energy(s),
+		eat_norm(n),
+		atime(25)),
+	eat_norm(n + alpha * n * (1 - n/(beta * s))),
+	efgh(0,0,1,25)).
+
+leadsto([s:'REAL', n:'REAL'],
+	and(day_used_energy(s),
+		eat_norm(n),
+		atime(50)),
+	eat_norm(n + alpha * n * (1 - n/(beta * s))),
+	efgh(0,0,1,25)).
+
+leadsto([s:'REAL', n:'REAL'],
+	and(day_used_energy(s),
+		eat_norm(n),
+		atime(75)),
+	eat_norm(n + alpha * n * (1 - n/(beta * s))),
+	efgh(0,0,1,25)).
+
+leadsto([s:'REAL', n:'REAL'],
+	and(day_used_energy(s),
+		eat_norm(n),
+		atime(100)),
+	eat_norm(n + alpha * n * (1 - n/(beta * s))),
+	efgh(0,0,1,25)).

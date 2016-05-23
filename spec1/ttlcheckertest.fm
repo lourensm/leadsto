@@ -1,0 +1,4 @@
+content(type(save_lt_editor('c:/Users/bshahzad/Desktop/ttlcheckertest.fm'))).
+content(generator(app(leadsto_software, 127, [lteditor:1, psprinting:1]))).
+content(run([date('Sun Jul 20 13:43:52 2014')])).
+denotes('GPI', exists([t:interval], holds(state(trace1, time(t:interval)), goes_to_p2, true))).
