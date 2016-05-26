@@ -1204,5 +1204,29 @@ doc:
 	$(DOC2TEX) leadsto.doc > leadsto.tex
 
 
+# gathered examples in spec1 directory, now test diif with spec directory
+
+diffspec:
+	cd spec;\
+	for f in *;\
+		do \
+			echo $$f;\
+			if [ -f ../spec1/$$f ] ;\
+			then\
+				echo "In spec1";\
+				diff $$f ../spec1/$$f;\
+				rm ../spec1/$$f;\
+			else \
+				echo "NOT";\
+			fi \
+		done
+
+ltall:
+	cd spec1;\
+	for f in *.lt;\
+		do \
+			echo "xxxxxxxxxxxxxxxxxxxxxxxxx$$f xxxxxxxxxxxxxxxxx";\
+			../leadsto -noshow -nologging $$f | grep -v "Specified no show" | grep -v "Option -noshow => no GUI" | grep -v "SAVED TRACE IN trace.tr" ;\
+		done
 
 

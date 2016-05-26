@@ -1,5 +1,7 @@
 :- module(algo,
 	  [
+	      save_random_state/0,
+	      runspecdo/1,
 	   trace_loaded/0,
 	   loaded_traces/5,
 	   tr_basic_element/3,
@@ -82,9 +84,7 @@ Two stages:
 
 
 @author Lourens van der Meij
-*/
 
-/*
   Allow:
   constant(name, value)
   effect: at certain places the constant will be substituted.
@@ -97,8 +97,7 @@ Two stages:
 
   at(Ranges, time, AndAntecedent).
   between(Ranges, time, time, AndAntecedent).
-*/
-/*
+
   ALGORITHM
 
   HandledTime:
@@ -174,6 +173,8 @@ local_option(ltsim, single('-pxor', set_option(pxor)),
 	     'Enable probabilistic or',[]).
 local_option(ltsim, single('-modelchecking', set_option(modelchecking)),
 	     'Modelchecking research',[]).
+local_option(ltsim, single('-randomseed', set_option(randomseed)),
+	     'Set random seed from saved seed (file randomstate.txt)',[]).
 /*
 local_option(ltsim, arg('-cmptrace', Trace, set_option(cmptrace(Trace)), 'TRACEFILE'),
 			'Compare with existing TRACEFILE').
@@ -379,7 +380,46 @@ readrunspec(File) :-
 	),
 	noprotocol.
 %:- debug(algo).
-runshowspec(Picture) :-
+
+:- dynamic dyn_random_start_state/2.
+
+/**
+ * save_random_state is det
+ * save the random seed into file randomstate.txt'
+ *
+ * At end of leadsto run, if you need to rerun, type save_random_state
+ * form prolog prompt and run leadsto again with option '-randomseed'
+ */
+save_random_state :-
+	(   dyn_random_start_state(RState, First)
+	->  open('randomstate.txt', write, S),
+	    portray_clause(S, randomstate(RState, First)),
+	    close(S)
+	;   format('No random state available')
+	).
+randomstatefromfile :-
+	open('randomstate.txt', read, S),
+	read(S, T),
+	    (	T = randomstate(RState, First),
+		set_random(state(RState))
+	    ->	First1 is random(10000),
+		format('setrandom seed First:~w~n', [First-First1])
+	    ;	fatal_error('Could not retrieve random seed ~w', [T])
+	    ),
+	    close(S).
+setupltrandom :-
+	(   get_option(randomseed)
+	->  randomstatefromfile
+	;   true
+	),
+	retractall(dyn_random_start_state(_, _)),
+	(   random_property(state(RState))
+	->  First is random(10000),
+	    assertz(dyn_random_start_state(RState, First))
+	;   warning('Cannot save random number state', [])
+	).
+runspecdo(Picture) :-
+	setupltrandom,
 	(retract(dyn_sim_status(File, loaded))
 	->	true
 	;	impl_error('Trying to run, no specification loaded'),
@@ -399,8 +439,14 @@ runshowspec(Picture) :-
 	->	assertz(dyn_sim_status(File, done))
 	;	impl_error('Running specification inconsistency'),
 		fail
-	),
+	).
+runshowspec(Picture) :-
+	runspecdo(Picture),
 	debug(algo, 'show results', []),
+	(   dyn_sim_status(File, done)
+	->  true
+	;   impl_error('show_results needs done sim')
+	),
 	show_results(File,Picture).
 
 
@@ -528,8 +574,7 @@ savetrace1(Trace) :-
 	),
 	(old_atom_key_id
 	->      true
-	;       set_prolog_flag(float_format, '%.17g')
-	),
+	;       set_prolog_flag(float_format, '%.17g')	),
 	(	member(AtomKey-Atoma-AtomTrace, Traces),
 		fill_trace1(AtomTrace, AtomKey, Atoma, TT),
 		portray_trace_entry(Trace,TT),
@@ -788,8 +833,8 @@ reset_run_info :-
 reset_sim_info :-
 	(	dyn_sim_status(File, _Status),
 		dyn_currently_loaded(sim, File)
-	->	retract(dyn_sim_status(_File, _Status1)),
-		retract(dyn_currently_loaded(sim, File))
+	->	retractall(dyn_sim_status(_File, _Status1)),
+		retractall(dyn_currently_loaded(sim, File))
 	;	fail
 	),
 	(	sim_entry(Entry),
@@ -2089,12 +2134,10 @@ reload_time(TStart) :-
 
 
 
-option(_) :-
-	fail.
 
 do_setup_time(TStart, TSetup) :-
 	(	member(Option, [setup_maxg, setup_maxfg]),
-		option(Option)
+		get_option(Option)
 	->	fatal_error('Option ~w temporarily unsupported, email lourens', [Option]),
 		leadsto_max_value(Option, Delay)
 	;	Delay = 0
@@ -2866,6 +2909,7 @@ rm_handled_var([R1|Rs], FVL, RsOut) :-
    firingtime. But there is a gap, other place deals with set_wait1
    */
 check_continue_fire([], THoldsPrev, THandled,THoldsNew,ConseRId) :-
+	debug(algo, check_continue_fire, []),
 	ensure_handled_time(HT),
 	assert_debug(cmp_lt(THoldsNew, HT)),
 	T3 = THandled,
@@ -2896,6 +2940,7 @@ check_continue_fire([ds_lh(lit(Atom,PN),_Id,_IdTerm)|AnteHolds], THoldsPrev,
   */
 update_lits_fired([], THoldsPrev, THandled, HoldLits, ConseRId, Delay,
 		  THoldsNew, Removed) :-
+	debug(algo, update_lits_fired, []),
 	%efgh0(Delay, _E, _F, G, H),
 	ensure_handled_time(HT),
 	(model_checking
@@ -3811,11 +3856,12 @@ rm_true_ds_litd([L|LIn], Last, LitsOut) :-
  * Also with THolds
  */
 
-/**  setup_lt_normed(AnteTodo, AnteHolds, TMin, TMax, ConseRId, PVOutC,
+/**
+ * setup_lt_normed(AnteTodo, AnteHolds, TMin, TMax, ConseRId, PVOutC,
  * Delay)
  *
- * We know AnteTodo holds in range(TMin, TMax), we need to continue
- * with AnteHolds.
+ * We know AnteHolds holds in range(TMin, TMax), we need to continue
+ * with AnteTodo.
  *
  * Addition: We need the FV: free variable instantiation of the last
  * true Literal
@@ -3839,9 +3885,11 @@ lambda_delay(Delay, D) :-
 	;global_lambda(Lambda)
 	->	D is E + Lambda*(F - E)
 	;	randomf(Fact),
-		D is E + (F - E) * Fact
+		D is E + (F - E) * Fact,
+	        debug(algo, 'lambda_delay(~w)~n', [D])
 	).
 schedule_fire(ConseRId, T3, T4) :-
+	debug(algo, '~w~n', [schedule_fire(ConseRId, T3, T4)]),
 	(ConseRId = ds_cr(ConseLits,RInfo),
 		ConseLits = [ds_litd(_,_,_,_,_)|_]
 	->	true
@@ -3879,6 +3927,7 @@ tr_consep(C, C).
   If model_checking then do not fire past
   */
 setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay,Removed) :-
+	debug(algo, 'setup_lt_conse(~w)~n', [AnteHolds]),
 	chk_inv(AnteHolds),
 	efgh0(Delay, _E, _F, G, H),
 	(model_checking
@@ -4202,23 +4251,24 @@ fail_filter_handleRR(FV,FV1,range(Tlo, Thi, TFUB), AT, TIn, Atom, PN, ToDoAnte,
 	assert_debug(uchecklist(var, FV1)),
 	(pntf(PN, TFUB)
 	->	(cmp_lt(Thi, HT)
-		->	\+ \+ (FV1 = FV,
-				      check_fire_isolated(TIn, Thi,
-							  ToDoAnte,
-							  ConseRId,Delay)
+		->	\+ \+ (
+		              FV1 = FV,
+			      check_fire_isolated(TIn, Thi,
+						  ToDoAnte,
+						  ConseRId,Delay)
 			),
 			fail_filter_handleR(AT, FV,FV1,Thi, Atom, PN, ToDoAnte,
 					    AnteHolds,THolds,ConseRId, PV,
 					    Delay, Id, IdTerm,Thi, Removed)
 		;	min_new(Thi, THolds, THoldsNew),
 			\+ \+ (
-				copy_term(Removed, Removed1),
-			FV1 = FV,
-			setup_lt_normed(ToDoAnte,
-					[ds_lh(lit(Atom, PN),Id,IdTerm)|AnteHolds],
-					TIn, THoldsNew,
-					ConseRId, PV, Delay, Removed1)
-			      )
+			     copy_term(Removed, Removed1),% SUSPECT, use Removed?
+			     FV1 = FV,
+			     setup_lt_normed(ToDoAnte,
+					     [ds_lh(lit(Atom, PN),Id,IdTerm)|AnteHolds],
+					     TIn, THoldsNew,
+					     ConseRId, PV, Delay, Removed1)
+			)
 		)
 	;	cmp_lt(Thi, HT)
 	->	fail_filter_handleR(AT, FV,FV1,Thi, Atom, PN, ToDoAnte,
@@ -4418,6 +4468,7 @@ check_isolated_fire_restl(ToDoAnte, Tlo2, Thi2, ConseRId,PV,Delay) :-
 	check_isolated_fire_restl1(ToDoAnte, Tlo2, Thi2, ConseRId,PV,Delay).
 
 check_isolated_fire_restl1([], Tlo, Thi, ConseRId,_PV,Delay) :-
+	debug(algo, check_isolated_fire_restl1, []),
 	efgh0(Delay, _E, _F, G, H),
 	assert_debug(cmp_ge(Thi - Tlo, G)),
 	lambda_delay(Delay, D),
@@ -4514,7 +4565,7 @@ rm_gc_wait_vars_th(Atom,PN,Id1, IdTerm1, AnteHolds,AHDone,ToDoAnte, Id,
   range but that have not been checked w.r.t. truthness up to THandled:
         We should remove all pending activities depending on them.
   AnteHoldsDone is  instantiated literals before the current one: They have been
-        dealt with, i.e. they are true up to THandeled at least.
+        dealt with, i.e. they are true up to THandled at least.
   ToDoAnteL is list of (uninstantiated) literals that are waiting to be handled.
 
   So: AnteHoldsDone, lit(Atom, PN), AnteHolds, ToDoAnteL represent the whole
@@ -4529,8 +4580,8 @@ rm_gc_wait_vars_th(Atom,PN,Id1, IdTerm1, AnteHolds,AHDone,ToDoAnte, Id,
 
   So lit(Atom, PN) should be present in wait_var Id1 as an FV in FVL
 
-  Now we must invalidate this entry in wait_var + all dependant wait activities,
-  i.e. wait_fired, wait_true and other wait_var entries.
+  Now we must invalidate this entry in wait_var + all dependent wait
+  activities, i.e. wait_fired, wait_true and other wait_var entries.
 
   First remove entry from wait_var.
   Then:
@@ -4735,6 +4786,7 @@ check_fire_isolated(TIn, Thi, ToDoAnte, ConseRId,Delay) :-
 	;	true
 	).
 isolated_fire_all([], Tlo, Thi,ConseRId,Delay) :-
+	debug(algo, isolated_fire_all, []),
 	efgh0(Delay, _E, _F, G, H),
 	(cmp_ge(Thi - Tlo, G)
 	->	lambda_delay(Delay, D),
@@ -6451,7 +6503,7 @@ log_entry(readterm, 'input terms as they are handled', readterm,off).
 log_entry(leadsto, 'leadsto rule setup', leadsto,off).
 log_entry(leadstoinst, 'leadsto rule instantiations', 'DOnontrleads',off).
 log_entry(uatid, 'DEBUGGING:update_activity id', db(uatid), off).
-
+log_entry(setrandom, 'set randomseed message', ht, on).
 /*
 log_entry(cb).
 log_entry(o1_o2).

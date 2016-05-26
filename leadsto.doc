@@ -325,5 +325,93 @@ yet.
 Within algo the two choices for representing algorithm state are mixed too much with
 the rest of the code. recwait/0 is the switch between storage as recorded and storage as
 a dynamic clause. Sometimes code seems to be copy/pasted almost. But, it seems
-that backtracking in the recorded database and backtracking in the asserted database
-works differently, see update_activity_times1/1.
+that backtracking in the recorded database and backtracking in the asserted
+database works differently, see update_activity_times1/1.
+
+\subsection{schedule_fire/3}
+
+What is the reason for schedule_fire/3, why postpone?
+
+\subsection{Following the progress of leadsto rules}
+
+We start with setup_leadsto(TStart, Vars, LitDisConj, AndLiterals, Delay,RId)
+where the arguments are almost identical to the values in the Leadsto
+specification.
+
+Then init_interval_callbacks/9 transforms some constructs such as forall.
+Need to check what happens with variables.
+
+After a number of steps involving normalizing conjunctions and disjunctions and
+partial evaluation pruning out true and false results,
+setup_lt(Ante, Conse, Vars, Delay, Id, RId) is called.
+
+The encoding of the antecedent is responsible for generating code. If a
+Term is a comparison operator, code is generated for that, if a term is
+an arithmetic expression, code is also generated.
+
+We pass on some (incomplete) data structures. code_form/4 uses
+ds_d(AnteResult, VarsIn, PVIn) and ds_d(AnteTail, VarsOut, PVOut).
+AnteResult is a difference list. Therefor often AnteTail is set to [].
+
+code_form/4 is used for Antecedent and Consequent.
+
+Each AnteConseTerm is translated as a list element in AnteResult.
+L = ds_litd(Atom, PosNeg, PreOps, PostOps, PostConds) where
+Atom can be true or any other value. It seems that its translated value
+is not tested in any way.
+
+Within code_form/4, tr_arg_prolog1(Term, PVIn, Term1, Inst, DSTAIn, DSTAOut)
+is used where
+\begin{code}
+DSTAIn = ds_ta(VIn, PVIn, [], [], []),
+...
+DSTAOut = ds_ta(VOut, PVOut, PreOpsOut, PostOpsOut, PostCondsOut),
+\end{code}
+Inst should result in Inst == inst.
+
+tr_arg_prolog1/6 translates leadsto variables into Prolog variables,
+their relation is stored and retrieved in PVIn/PVOut, by
+var_pl_to_var_list/6 and var_pl_from_var_list/5.
+
+The first encounter of a leadsto variable in a code_form/4 has Inst= next,
+a later one gets Inst = inst. Inst values can be inst, next, var, mixed.
+
+
+tr_arg_prolog1/6 is also responsible for substituting \jargon{spec_constant}s.
+
+TODO: Check whether Atoms could end up as Prolog variables, look at
+code_atom/4 where Inst is ignored in the code. Can Inst be var or mixed there?
+
+code_conse(Conse, VOut, PVOut, Id, ConseRId, PVOutC) translates
+Conse through code_form/4, but true ConseLits are removed.
+(TODO: why not from Ante?).
+
+The consequent is encoded as ds_cr(ConseLits, ds_ri(Id)), but pxor
+consequents are treated differently, TODO.
+
+The result is stored as dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)
+but more important, setup_lt_normed(AnteLits, AnteHolds, TMin, THolds,
+ConseRId, PV, Delay, Removed), it leads to setup_lt_wait_var/12.
+
+TODO: Looking at the code, it seems that we do not reorder the AnteLiterals
+depending on intermediate results.
+
+
+\subsection{Handled Time, Setup Time, Start Time}
+
+Handled time is initialized by setup_unknown_or_cwa/2 to TStart.
+There is an additional implied condition on handled time:
+"You should never ask for values before TSetup" and
+"All atoms that have no explicit trace entry before THandled have
+value false if cwa, unknown otherwise. Depending on our choice for
+TSetup, this defines values at or before TSetup, independent on any 
+leadsto rule firing. We should probably ensure that leadsto rules
+cannot fire results before TSetup.
+
+\subsection{Focus points}
+
+How are leadsto rules handled? Is there one pointer to the next activity w.r.t.
+the rule per instantiation?
+
+
+

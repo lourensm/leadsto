@@ -12,3 +12,14 @@ algo.pl:
 setup_leadsto/6 accompanied by setup_leadsto/5 which checks for failure.
 Verify that it should not fail.
 
+algo.pl:
+fail_filter_handleRR/16:
+copy_term(Removed, Removed1),
+
+
+machado.lt:
+	Multiple runs, multiple results,
+Atom Trace varying results:r(0.020493591451514602)
+algo:[range(9.950950000000008,10,unknown),range(9.900000000000027,9.950950000000008,true),range(0,9.900000000000027,unknown)]
+ltrace:[range(9.95095000000001,10,unknown),range(9.900000000000027,9.95095000000001,true),range(0,9.900000000000027,unknown)]
+

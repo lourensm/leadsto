@@ -3,7 +3,7 @@
 	      cmptraces/3
 	  ]).
 :- use_module(algo).
-
+:- use_module(util).
 /** <module> cmptrace Comparing traces
  * compare traces.
  *
@@ -28,6 +28,160 @@
 user:cmptraces :-
 	cmptraces('test/heartn.tr', LoadedFile, Result),
 	format('Loaded sim:~w, Result:~w~n', [LoadedFile, Result]).
+
+user:tstcmp :-
+	reset_error_log,
+	reset_algo([]),
+	runspec('spec1/error1.lt', results),
+	error_log_term(ErrorTerm),
+	format('~w~n', [ErrorTerm]).
+
+get_lt_name(LTFile, Name) :-
+	file_base_name(LTFile, BaseName),
+	(   atom_concat(Name, '.lt', BaseName)
+	->  true
+	;   fatal_error('Expected filename with lt extension, got ~w', [LTFile])
+	).
+
+user:tstrun :-
+	shell('rm -rf resulttmp'),
+	rundir('spec1', resulttmp, Result),
+	format('Result~w~n', [Result]).
+
+user:cmpdir:-
+	cmprundir(spec1, resulttmp).
+
+/**
+ * rundir(+LTDir, +ResultDir) is det
+ *
+ * ResultDir is created or must be empty.
+ * All lt specifications will run and result stored in resultDir
+ *
+ */
+rundir(LTDir, ResultDir, Result) :-
+	set_fatal_throw,
+	reset_algo([]),
+	make_directory_path(ResultDir),
+	(   member(F, ['/*.tr', '/*.txt']),
+	    atom_concat(ResultDir, F, E1),
+	    expand_file_name(E1, L1),
+	    L1 \= []
+	->  error('result directory not empty:~w', [L1]),
+	    Result = error('resultdir not empty')
+	;   atom_concat(LTDir, '/*.lt', LT1),
+	    expand_file_name(LT1, LTs),
+	    (	member(LT, LTs),
+		format('****************~nRunning ~w~n', [LT]),
+		runspec(LT, ResultDir),
+		reset_algo([]),
+		fail
+	    ;	true
+	    ),
+	    Result = []
+	).
+
+cmprunspeclist([], _, []).
+cmprunspeclist([LT|LTs], ResultDir, CmpResult) :-
+	format('****************~nRunning ~w~n', [LT]),
+	cmprunspec(LT, ResultDir, CmpResult1, CmpResult),
+	reset_algo([]),
+	cmprunspeclist(LTs, ResultDir, CmpResult1).
+
+/**
+ * cmprundir(+LTDir, +ResultDir) is det
+ * run all leadsto specs in LTDir and compare results with
+ * earlier results in ResultDir
+ */
+
+cmprundir(LTDir, ResultDir) :-
+	set_fatal_throw,
+	reset_algo([]),
+	atom_concat(LTDir, '/*.lt', LT1),
+	expand_file_name(LT1, LTs),
+	cmprunspeclist(LTs, ResultDir, CmpResult),
+	(   CmpResult == []
+	->  format('Directories ~w and ~w compare OK~n', [LTDir, ResultDir])
+	;   format('MISMATCH:Directories ~w and ~w comparison:~n~w~n', [LTDir, ResultDir, CmpResult])
+	).
+
+cmprunspec(LTFile, ResultDir, MatchIn, MatchOut) :-
+	get_lt_name(LTFile, LTName),
+	(   exists_file('trace.tr')
+	->  delete_file('trace.tr')
+	;   true
+	),
+	reset_error_log,
+	catch((
+	       load_simulation(LTFile),
+	       runspecdo([])
+	      ),
+	      finalhalt(E),  dofinal(E)),
+	error_log_term(ErrorTerm),
+	(   var(E)
+	->  ErrorTerm1 = ErrorTerm
+	;   ErrorTerm1 = [finalhalt(E)|ErrorTerm]
+	),
+	(   exists_file('trace.tr')
+	->  concat_atom([ResultDir, '/', LTName, '.tr'], TraceName),
+	    cmptraces(TraceName, LTFile, CmpTraceResult),
+	    Term1 = ErrorTerm1
+	;   Term1 = [error('no trace generated')|ErrorTerm1],
+	    TraceName = [],
+	    CmpTraceResult = []
+	),
+	concat_atom([ResultDir, '/', LTName, '.txt'], ResName),
+	open(ResName, read, S),
+	LtResultNew = ltresult(LTName, TraceName, Term1),
+	read(S, LtResult),
+	(   CmpTraceResult == [],
+	    LtResult = LtResultNew
+	->  format('MATCH~n', []),
+	    MatchOut = MatchIn
+	;   format('Mismatch:LTResult:~w - ~w   CmpTrace:~w~n', [LtResultNew, LtResult, CmpTraceResult]),
+	    MatchOut = [LTName-l(LtResultNew, LtResult)-CmpTraceResult|MatchIn]
+	).
+
+/**
+ * runspec(+LTFile, +ResultDir) is det.
+ *
+ * runs leadsto specification LTFile, stores Result Trace and result
+ * into ResultDir directory as two sparate files.
+ *
+ *
+ *
+ */
+runspec(LTFile, ResultDir) :-
+	get_lt_name(LTFile, LTName),
+	(   exists_file('trace.tr')
+	->  delete_file('trace.tr')
+	;   true
+	),
+	reset_error_log,
+	catch((
+	       load_simulation(LTFile),
+	       runspecdo([])
+	      ),
+	      finalhalt(E),  dofinal(E)),
+	error_log_term(ErrorTerm),
+	(   var(E)
+	->  ErrorTerm1 = ErrorTerm
+	;   ErrorTerm1 = [finalhalt(E)|ErrorTerm]
+	),
+	(   exists_file('trace.tr')
+	->  concat_atom([ResultDir, '/', LTName, '.tr'], TraceName),
+	    rename_file('trace.tr', TraceName),
+	    Term1 = ErrorTerm1
+	;   Term1 = [error('no trace generated')|ErrorTerm1],
+	    TraceName = []
+	),
+	concat_atom([ResultDir, '/', LTName, '.txt'], ResName),
+	open(ResName, write, S),
+	portray_clause(S, ltresult(LTName, TraceName, Term1)),
+	close(S),
+	format('~w~n', [Term1]).
+
+dofinal(E) :-
+	format('finalhalt(~w)~n', [E]).
 
 /**
  * cmptraces(+TraceFile, -LoadedSimFile, -Result) is det

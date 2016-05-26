@@ -1,5 +1,8 @@
 :- module(util,
 	  [
+	      set_fatal_throw/0,
+	      reset_error_log/0,
+	      error_log_term/1,
 	   mk_oldnewregex/3,
 	   convertToDnf/2,
 	   push_sprop_ops/0,
@@ -1449,6 +1452,10 @@ halt_message(E) :-
 	).
 
 finalhalt(E) :-
+	dyn_fatal_throw,
+	assert_debug(ground(E)),
+	throw(finalhalt(E)).
+finalhalt(E) :-
 	halt_message(E),
 	(prolog_flag(arch, 'i386-win32')
 	->	send(@pce, confirm, 'PROGRAM ended, close window?'),
@@ -1525,6 +1532,12 @@ log(Format, Args) :-
 
 :- module_transparent fatal_fail/1.
 
+:- dynamic dyn_fatal_throw/0.
+set_fatal_throw :-
+	(   dyn_fatal_throw
+	->  true
+	;   assertz(dyn_fatal_throw)
+	).
 fatal_fail(Call) :-
 	is_local,
 	!,
@@ -1538,6 +1551,7 @@ fatal_fail(Call) :-
 fatal_error(Format) :-
 	fatal_error(Format, []).
 fatal_error(Format, Args) :-
+	logferror(Format, Args),
 	format(user_error, '~nFATAL ERROR:',[]),
 	lformat(Format, Args),
 	nl,
@@ -1598,6 +1612,7 @@ error(Format) :-
 	error(Format, []).
 
 error(Format, Args) :-
+	logerror(Format, Args),
 	telling(Old),
 	tell(user),
 	write('***ERROR:'),
@@ -1605,6 +1620,27 @@ error(Format, Args) :-
 	nl,nl,
 	tell(Old).
 
+:- dynamic dyn_log_error/1.
+/**
+ * reset_error_log is det
+ *
+ * error_log_term(-ErrorTerm) is det
+ *
+ *
+ */
+reset_error_log :-
+	retractall(dyn_log_error(_)).
+
+logferror(Format, Args) :-
+	assertz(dyn_log_error(f(Format, Args))).
+logerror(Format, Args) :-
+	assertz(dyn_log_error(e(Format, Args))).
+
+log_error(Term) :-
+	dyn_log_error(Term),
+	numbervars(Term).
+error_log_term(Term) :-
+	findall(Term1, log_error(Term1), Term).
 
 construct_format1(0, '') :-
 	!.
