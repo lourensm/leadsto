@@ -56,7 +56,7 @@ This leadsto specification is loaded into the leadsto runtime:
 
   Some translation of sortdefs is performed. If a sort contains less
   than 100 ground terms, it is instantiated, otherwise the sort
-  definition is left as is. This leads to spec:sortdef(Sort, Terms). The
+definition is left as is. This leads to spec:sortdef(Sort, Terms). The
   source contains a beginning of a new way of encoding sort definitions.
 
 \item
@@ -182,7 +182,7 @@ after checking that there is only one such term.
 cwa(F/A) is translated into dyn_cwa(FunctorTerm).
 
 The most interesting things happen with interval like leadsto specification terms.
-initialise_interval/3 and inialise_interval_periodic/4 deal with them. These
+initialise_interval/3 and initialise_interval_periodic/4 deal with them. These
 predicates normalise all interval specification terms into:
 dyn_interval(i(Interval, Vars, Form)) and dyn_interval(i(Interval, P, Vars, Form))
 facts.
@@ -307,7 +307,8 @@ util:load_cmd_constants/0 loads those constants into module \const{spec} as
 
 \subsection{Model Checking} \label{sec:modelchecking}
 
-The source contains code labelled \jargon{model checking}. I do not remember whether
+The source contains code labelled \jargon{model checking}. I do not remember
+whether
 this code ever worked. I seem to remember I tried converting the leadsto model
 into some state based form.
 
@@ -317,8 +318,12 @@ into some state based form.
 \end{code}
 The only visible result seems to be some debugging info on the screen.
 
-A first look at the code in \jargon{modelchecking.pl} does not make anything clear
-yet.
+A first look at the code in \jargon{modelchecking.pl} does not make anything
+clear yet.
+
+There is a document modelchecking.doc that should provide some background.
+I fear that the code that is still present in algo.pl never really did
+anything.
 
 \subsection{recwait}
 
@@ -393,6 +398,22 @@ The result is stored as dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)
 but more important, setup_lt_normed(AnteLits, AnteHolds, TMin, THolds,
 ConseRId, PV, Delay, Removed), it leads to setup_lt_wait_var/12.
 
+A number of facts:
+\begin{itemize}
+\item
+If AnteLits becomes \const{[]}, setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed) is called. If $THolds >= TMin + G$, we calculate $ T3 is  TMin + G + Delay$ and
+$T4 is THolds + Delay + H$ and then do schedule_fire(ConseRId, T3, T4) which sets
+dyn_schedule_fire(ConseRId, T3, T4).\footnote{I left out details dealing with pxor aspects.}
+They are fired by the \code{repeat, set_state, handle_fired} sequence in runspec_rest/0.~\footnote{Why not fire immediately?
+After schedule_fire/3 we do setup_lt_wait_fired/6. If $THolds < TMin + G$ we do
+setup_lt_wait_true/5.
+
+setup_lt_wait_fired stores a wait_fired/5 fact.~\footnote(It is confusing that two implementations of this waiting are present in the code, depending on the recwait/0 switch.
+\item
+We need to study the FV, FVL aspects in more detail.
+\end{itemize}
+
+
 TODO: Looking at the code, it seems that we do not reorder the AnteLiterals
 depending on intermediate results.
 
@@ -413,5 +434,229 @@ cannot fire results before TSetup.
 How are leadsto rules handled? Is there one pointer to the next activity w.r.t.
 the rule per instantiation?
 
+\section{Working backwards}
+Meaning, trying to reconstruct the algorithm from the start.
+
+\subsection{Aspects}
+
+We limited e, f, g, h: $e,f, g, h >= 0$ and if h == 0 then  g must be 0. But also,
+e + f + g + h > 0$. Why those requirements? We probably do not want to reason without delay.
+
+e, f, g, h:
+Once an antecedent holds for duration \const{g} + T, a delay is set between e and f, and
+the antecedent will hold during \const{h} + T. So, even if a rule has fired, we need to 
+remember that it has fired and as long as the antecedent may continue to hold, the consequent
+will be propagated for a longer time.
 
 
+\subsection{Invariant}
+
+HandledTime: Everything that can be derived, has been derived for $T <= HandledTime$.  
+CWA atom values do not have to be instantiated, probably will not be instantiated to false
+values.
+
+\subsection{Sketch of the algorithm}
+
+All rules that could still fire are inspected, their antecedent effect is exhaustively tested 
+up to HandledTime at least. 
+
+After everything has fired, we inspect all waiting antecedents, and look at time
+their first result could come in. And the minimum value becomes the next HandledTime, unless
+this minimum value is not after HandledTime (could it be smaller?). It looks like the
+algorithm currently simply gives up if there is a rule that could fire at HandledTime.
+
+It is probably important that together with setting HandledTime, every rule that
+has some continuation has its effect propagated till the new HandledTime. 
+
+This would make the invariant more precise: Every rule has its state updated
+in such a way that the antecedents have been checked up to the new HandledTime.
+
+\subsection{Rule States}
+
+Rules can contain variables, that is, antecedent literals can have variables.
+There can be more than one separate states per rule.
+
+It could be that the first N literals of the antecedent with some specific 
+instantiation
+are valid in some time range T1 - T2. 
+
+We will look strictly left to right.
+
+But, the extending of the fired rules is done in reverse, why? Probably because
+we wish to extend the range as far as possible.
+
+\subsection{Garbage collection}
+
+Is complex and not documented. In the source some explanation is given,
+bugdev.txt also contains some explanation.
+
+\subsection{Understanding}
+
+setup_lt_notground_fv analyses the current LitData first for all AtomTraces 
+and all cwa matches, handles those separately by check_fire_isolated or setup_lt_normed.
+
+Finally setup_wait_var is called with Atom, FV, FVL values implying that FV 
+from FVL has been handled, but we need to check other instantiations.
+
+setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
+		      ConseRId,PV,Delay, Id, IdTerm, Removed):
+AnteHolds holds for Time Interval between TStart and THolds. ToDoAnte is the conjunction that needs to hold.
+LitData is the Literal under investigation. FV are the free variables of the Literal and FVL is a list
+of instantiations that have been dealt with elsewhere.
+
+Delay is efgh(E,F,G,H), ConseRId is the consequent.
+
+Removed indicates the source of the call. In case ofupdate_activity_time1(wait_var...), the
+wait_var  term is Removed and the Removed is propagated along.
+
+PV is probably the characterization of the  variables:pv(Arga, Sorta,Kinda,Arg1a).
+
+setup_lt_notground_fv is called by setup_lt_notground, by setup_lt_normed, by setup_lt.
+setup_lt is called from setup_nontrivial_leadsto.
+setup_lt_normed is also called by instantiate_op and fail_filter_handleRR.
+
+We probably handle the rule in this call up to HandledTime.
+
+Now, if at the call THolds < HandledTime, we start all over, for this partially 
+instantiated sequence
+of literals by calling get_new_tholds. Apparently the order of literals is reversed here.
+get_new_tholds is called here and by get_new_tholds itself.
+get_new_tholds(AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
+ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed):
+AnteHoldsTODO is an earlier instantiated sequence of literals that needs to be extended 
+in range up to
+THandled (or further?). AHDone is the sequence that has been checked and hold between 
+TStart and THoldsNew1.
+Tholds is the result. TODO: Details of Tholds, is this a return parameter?
+
+Be aware that in get_new_tholds the Atom in [ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO] is ground, 
+and has nothing to
+do with FV and FVL.
+
+First, if AnteHoldsTODO == [], we continue with setup_lt_notground_fv with the 
+increased interval.
+Otherwise we follow AnteHoldsTODO Literals.
+NEXT: What does find_min_range_ground(Atom, PN, Tholds, O2) do? Probably: Inspect 
+Literal starting from Tholds.
+
+
+
+
+setup_lt_wait_var(FV, FVL, LitData, ToDoAnte, AnteHolds,
+			  TMin, THolds, ConseRId, PV, Delay, Id, IdTerm):
+
+Probably: We know AnteHolds is ok between TMin and THolds.
+LitData is the current literal that has been analyzed. FV are the free variables in the 
+Literal, FVL is the list of instantiations of FV that have been dealt with, for which 
+this setup is not responsible at all. Called by setup_lt_notground1default/12 ( same 
+arguments) which is only called as last call in 
+setup_lt_notground_fv/13.
+
+TODO: Really nail down the meaning of wait_var, also at what stage are what values for TMin and THolds set.
+TODO: Will wait_vars become invalidated? Inspect get_new_tholds.
+
+\section{So far}
+
+Try documenting the whole data structure that describes the state of each leadsto
+rule first. All invariants, the understanding of having every possible 
+outcome of a leadsto rule represented.
+
+At what stage the HandledTime invariant is. Understanding the get_new_tholds,
+the reverse is on purpose as that is part of the invariant, having a partial
+instantiation left to right.
+
+After that, try understanding the cleanup efforts of wait_var.
+
+BUT: start describing in detail. Look at what I did so far, can I reuse documentation.
+Step1: Can leadsto.doc be printed out?
+
+\section{"Syntax" of Leadsto Specifications}
+
+Copied from syntax.txt:
+\begin{code}
+The leadsto input syntax is prolog syntax, but with the
+following added/changed operator definitions.
+(For input of leadsto specs in prolog, the : redefinition is 
+ awkward. I do a push/pop operator call for reading)
+
+			op(150, xfx, :),
+			op(700, xfy, <),
+			op(700, xfy, <=),
+			op(700, xfy, =<),
+			op(700, xfy, >),
+			op(700, xfy, >=)
+			]).
+
+Currently, only the top level terms are described. I am working
+on syntax (+minimal explanation of semantics) of the top level
+terms, but especially the sub terms.
+
+sub terms:
+
+% VAR:PLPCE:
+    VAR, in principle, a prolog term, although Uppercase atoms 
+    are allowed. Quotes around atoms are allowed.
+     TODO: are unquoted uppercase functors allowed?
+     e.g. P(a) TODO: what are further restrictions and 
+     interpretations of PLPCE terms TODO: junk this stupid 
+     name "PLPCE".
+
+% start_time(PLPCE)
+% end_time(PLPCE)
+% global_lambda(PLPCE)
+
+
+TODO: why those qterms?
+% qterm(cwa(X))        cwa_node 
+% qterm(external(X))   external_node
+% qterm(X) ...         other_node
+
+% display(_,_)
+% display_number_range(_,_,_,_)
+
+% periodic(Vars, Range, Period:PLPCE, Formula) is_list(Vars)
+		 * handle_interval(Vars, Range, Formula, Root, Son, Extra)
+% periodic(ST, ET, Period:PLPCE, Formula)
+	         * handle_interval([], range(ST, ET), Formula, Root,Son,Extra),
+% periodic(Vars, ST, ET, Period:PLPCE, Formula)
+		 * handle_interval(Vars, range(ST, ET),Formula,Root,Son,Extra)
+% interval(Vars, ST, ET, Formula)
+		 * handle_interval(Vars, Range, Formula, Root, _Son, Extra)
+% interval(Vars, ST, ET, Formula)
+		 * handle_interval(Vars, range(ST, ET),Formula,Root,_Son,Extra)
+% interval(ST, ET, Formula)
+		 * handle_interval([], range(ST, ET), Formula,Root,_Son,Extra)
+
+% leadsto(AnteFormula, ConseFormula, Delay)
+	* handle_leadsto1(Root, AnteFormula, ConseFormula, Delay, Extra, _Son)
+% leadsto(Vars, AnteFormula, ConseFormula, Delay)
+	* handle_leadsto1(Root, AnteFormula, ConseFormula, Delay, Extra, Son)
+% specification(_) 
+		   * IGNORED
+% content(C)
+		* TODO? assertz(dyn_content(C))
+% denotes(Header, Formula)
+		  * term_to_formula_node(Formula, FormulaNode, Extra),
+		new(PN, property_def_node(@off)),
+		send(PN, fill_header, Header),
+		send(PN, son, FormulaNode),
+		send(Root, son, PN)
+% (sort_element(SortName:PLPCE, Term):- member(Term2, List) with Term==Term2
+		* test_sort_def(SortName, List, Extra),
+	ensure_sort_son(Root, SortName1, SNode),
+	add_sort_contents(SNode, List).
+% constant(Name, Value)
+  * check_constant(Name, Value),
+	send(Root, son, new(N, constant_def_node)),
+	send(N, fill_header, Name),
+	send(N, fill_value, Value)
+% sortdef(SortName:PLPCE, Objs)
+  * test_sort_def(SortName, Objs, Extra),
+	send(Root, son, new(SN, sort_node)),
+	send(SN, change_gui_prop, sort_name, SortName1),
+	add_sort_contents(SN, Objs).
+% cwa(PLPCE)
+% model(PLPCE)
+% [specification_element] 
+  * generic node
+\end{code}

@@ -394,7 +394,8 @@ save_random_state :-
 	(   dyn_random_start_state(RState, First)
 	->  open('randomstate.txt', write, S),
 	    portray_clause(S, randomstate(RState, First)),
-	    close(S)
+	    close(S),
+	    debug(random, 'saved randomstate to file', [])
 	;   format('No random state available')
 	).
 randomstatefromfile :-
@@ -407,15 +408,20 @@ randomstatefromfile :-
 	    ;	fatal_error('Could not retrieve random seed ~w', [T])
 	    ),
 	    close(S).
+:- debug(random).
+
 setupltrandom :-
+	debug(random, setupltrandom, []),
 	(   get_option(randomseed)
-	->  randomstatefromfile
+	->  debug(random, randomstatefromfile, []),
+	    randomstatefromfile
 	;   true
 	),
 	retractall(dyn_random_start_state(_, _)),
 	(   random_property(state(RState))
 	->  First is random(10000),
-	    assertz(dyn_random_start_state(RState, First))
+	    assertz(dyn_random_start_state(RState, First)),
+	    debug(random, 'set dyn_random', [])
 	;   warning('Cannot save random number state', [])
 	).
 runspecdo(Picture) :-
@@ -425,7 +431,8 @@ runspecdo(Picture) :-
 	;	impl_error('Trying to run, no specification loaded'),
 		fail
 	),
-	assertz(dyn_sim_status(File, running)),
+	assertz(
+	    dyn_sim_status(File, running)),
 	doprof,
 	debug(algo, 'running', []),
 	(runspec(Picture)
@@ -1875,6 +1882,7 @@ find_atom_trace(Atom, AtomTrace) :-
 	(ground(Atom)
 	->	atom_key(Atom, AtomKey),
 		dyn_atom_trace(AtomKey, _Atoma, AtomTrace)
+		% TODO: check identity Atoma == Atom (term_to_atom for numbers)
 	;	dyn_atom_trace(_AtomKey, Atom, AtomTrace)
 	).
 /*	;       rm_real_args(Atom, Atom1, Args, Insts),
@@ -1922,6 +1930,16 @@ find_min_range(Atom, PN, FV, FVL, TMin, O2) :-
 		find_min_range_rest(Range, Ranges, Atom, PN, TMin, O2)
 	).
 
+
+/**
+ * find_min_range(Atom, PN, TMin, O2) is det
+ *
+ * Inspect atom trace, but also check cwa
+ * Range ending at TMin, or overlapping.
+ *
+ *
+ *
+ */
 find_min_range(Atom, PN, TMin, O2) :-
 	overlapping_ground_range1(Atom, TMin, Range, Ranges),
 	find_min_range_rest(Range, Ranges, Atom, PN, TMin, O2).
@@ -2881,6 +2899,7 @@ update_activity_time1(wait_var(Id, IdTerm, HT,TMin,FV, FVL, LitData,
 	Removed = wait_var(Id,IdTerm,HT,TMin,FV, FVL, LitData,ToDoAnte,
 			   AnteHolds,THolds, ConseRId,PV,Delay),
 	assert_debug(ground(AnteHolds)),
+	debug(algo, 'update_activity_time1_wait_var_fv ~w', [LitData]),
 	setup_lt_notground_fv(HT, FV, FVL, LitData, ToDoAnte,AnteHolds,THolds,
 			      ConseRId,PV,Delay,Id,IdTerm,Removed).
 
@@ -2965,6 +2984,7 @@ update_lits_fired([], THoldsPrev, THandled, HoldLits, ConseRId, Delay,
   */
 update_lits_fired([ds_lh(lit(Atom,PN),Id, IdTerm)|AnteHolds], THoldsPrev,
 		  THandled,HoldLits,ConseRId, Delay, THoldsNew, Removed) :-
+	debug(algo, 'update_lits_fired ~w', [lit(Atom, PN)]),
 	reverse(HoldLits, HoldLits1),
 	append(HoldLits1, [ds_lh(lit(Atom,PN),Id,IdTerm)|AnteHolds],
 	       L1),
@@ -3101,6 +3121,7 @@ update_new_true_range([], Tlo, Thi, AnteHolds, ConseRId, Delay, Removed) :-
 
 update_new_true_range([ds_lh(lit(Atom,PN),Id,IdTerm)|LitsToHold], Tlo, Thi,
 		      AnteHolds,ConseRId, Delay, Removed) :-
+	debug(algo, 'update_new_true_range ~w', [lit(Atom, PN)]),
 	ensure_handled_time(HT),
 	assert_debug(cmp_ge(Thi, HT)),
 	chknotandyes(LitsToHold, Atom, PN, Id, IdTerm,AnteHolds, new_true1),
@@ -3439,12 +3460,13 @@ setup_leadsto(TStart,Vars, Ante, Conse, Delay, RId) :-
 	init_interval_callbacks(Delay, Vars, [Ante,Conse], TimeInfo1, Vars1,
 				Forms2,
 			fail, invalid_delay(TimeInfo1),
-			setup_lt_internalL(TimeInfo1, Vars1,Forms2, TStart,RId)).
+			setup_lt_internalL(TimeInfo1, Vars1,Forms2, TStart,RId)),
+	!.
 
 
 
-setup_leadsto(TStart,Vars, LitDisConj, Conse, Delay) :-
-	fatal_fail(setup_leadsto(TStart,Vars, LitDisConj, Conse,Delay)).
+setup_leadsto(TStart,Vars, LitDisConj, Conse, Delay, RId) :-
+	fatal_fail(setup_leadsto(TStart,Vars, LitDisConj, Conse,Delay, RId)).
 
 
 /*
@@ -4052,9 +4074,9 @@ setup_lt_notground(LitData, ToDoAnte, AnteHolds, TMin, THolds, ConseRId,
 
 /**
  * setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
- *		      ConseRId,PV,Delay, Id, IdTerm, Removed)
+ *		      ConseRId,PV, +Delay, Id, IdTerm, Removed)
  *
- *
+ * Delay = efgh(E, F, G, H)
  * Comment probably for first clause.
  * We know AnteHolds is true between TStart and THolds
  * We have possibly removed some wait_var entry and need to restore it.
@@ -4076,7 +4098,8 @@ setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 	flag(uatid, UAT, UAT),
 	assert_debug(ground(AnteHolds)),
 	ensure_handled_time(HT),
-	cmp_gt(HT, THolds),
+	debug(algo, 'setup_lt_notground_fv(~w)', [[TStart, HT, THolds, LitData]]),
+	cmp_gt(HT, THolds), % So, extend holdsinterval up to HT at least
 	!,
 	reverse(AnteHolds, AnteHolds1),
 	chk_inv(AnteHolds),
@@ -4085,8 +4108,11 @@ setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 
 
 /**
- * We know AnteHolds holds up to THolds, but do not
- * know enough about T <= THandled
+ * AnteHolds ok for HoldsInterval up to or past HandledTime.
+ * Now continue with current Literal, LitData
+ * LATER: It seems that FVL contains variable instantiations that
+ * have been dealt with. (See find_atom_trace_op where FV instantiations
+ * occurring in FVL are filtered out.
  */
 setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 		      ConseRId,PV,Delay, Id, IdTerm, Removed) :-
@@ -4115,6 +4141,7 @@ setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
 			ToDoAnte, AnteHolds,THolds,ConseRId,PV,Delay, Id,
 			IdTerm, Removed),
 	(	retract(dyn_handled_wait_var_instance(Id,IdTerm,FV,PN1)),
+		debug(algo, 'retract(~w)', [dyn_handled_wait_var_instance(Id,IdTerm,FV,PN1)]),
 		assert_debug(PN == PN1),
 		(	PN == neg,
 			cwa(Atom)
@@ -4262,7 +4289,7 @@ fail_filter_handleRR(FV,FV1,range(Tlo, Thi, TFUB), AT, TIn, Atom, PN, ToDoAnte,
 					    Delay, Id, IdTerm,Thi, Removed)
 		;	min_new(Thi, THolds, THoldsNew),
 			\+ \+ (
-			     copy_term(Removed, Removed1),% SUSPECT, use Removed?
+			     copy_term(Removed, Removed1),
 			     FV1 = FV,
 			     setup_lt_normed(ToDoAnte,
 					     [ds_lh(lit(Atom, PN),Id,IdTerm)|AnteHolds],
@@ -4270,7 +4297,7 @@ fail_filter_handleRR(FV,FV1,range(Tlo, Thi, TFUB), AT, TIn, Atom, PN, ToDoAnte,
 					     ConseRId, PV, Delay, Removed1)
 			)
 		)
-	;	cmp_lt(Thi, HT)
+	;	cmp_lt(Thi, HT)   % We have blank here? i.e. TFUB == blank?
 	->	fail_filter_handleR(AT, FV,FV1,Thi, Atom, PN, ToDoAnte,
 				    AnteHolds,
 				    THolds,ConseRId, PV,Delay, Id, IdTerm, Thi,
@@ -4300,12 +4327,14 @@ fail_filter_handleRR(FV,FV1,range(Tlo, Thi, TFUB), AT, TIn, Atom, PN, ToDoAnte,
 
 get_new_tholds([], AHDone, TStart, THoldsNew, _THolds, FV, FVL,
 	       LitData, ToDoAnte, ConseRId,PV,Delay, Id, IdTerm, Removed) :-
+	debug(algo, 'get_new_tholds[]~w', [AHDone, TStart, THoldsNew]),
 	setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AHDone,
 			      THoldsNew,ConseRId,PV,Delay, Id, IdTerm,Removed).
 
 get_new_tholds([ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHolds], AHDoneOut, TStart,
 	       THoldsNew, Tholds, FV, FVL, LitData, ToDoAnte, ConseRId,PV,
 	       Delay, Id, IdTerm, Removed) :-
+	debug(algo, get_new_tholdsA, []),
 	chknotandyes(AnteHolds, Atom, PN,Id1,IdTerm1,AHDoneOut,get_new_tholds),
 	chk_not_inv(AnteHolds, Atom, IdTerm1),
 	find_min_range_ground(Atom, PN, Tholds, O2),
@@ -4953,6 +4982,17 @@ missing_range1(Tlo, Thi,DefFU, range(Tlo, Thi1,FUB)) :-
 		FUB = unknown
 	).
 
+
+
+/**
+ * add_default_cwa(Atom, PN, TMin, PostOps, PostConds, FV, FVLIn, FVLOut,
+ *		ToDoAnte, AnteHolds,THolds,ConseRId,PV,Delay, Id,IdTerm,
+ *		Removed)
+ *
+ * Understood: instantiate_op calls PostOps and PostConds.
+ * PostConds intstantiates
+ */
+
 add_default_cwa(Atom, PN, TMin, PostOps, PostConds, FV, FVLIn, FVLOut,
 		ToDoAnte, AnteHolds,THolds,ConseRId,PV,Delay, Id,IdTerm,
 		Removed) :-
@@ -5045,7 +5085,19 @@ select_po_o2(true(_,THi,_)) :-
 
 
 
-
+/**
+ * find_min_range_ground(+Atom, +PN, +TMin, -O2) is det
+ *
+ * Starting or ending? from time TMin, what value does Atom have?
+ * Atom must be ground.
+ *
+ * O2:  true(Tlo, THi, Cont)
+ *      blank
+ *      fail(TEnd, By)       conflicting or explicit unknown value
+ *
+ *
+ *
+ */
 find_min_range_ground(Atom, PN, TMin, O2) :-
 	assert_debug(ground(Atom)),
 	(find_min_range(Atom, PN, TMin, O2)
