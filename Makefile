@@ -1,15 +1,16 @@
 .PHONY: aap
-.SUFFIXES: .tex .dvi .doc .txt .pl
+.SUFFIXES:  .dvi .doc .txt .pl
 
 FLUIT=flits
 MACHINE:=$(shell gcc -dumpmachine)
 ifeq ($(MACHINE), x86_64-linux-gnu)
 PLATFORM=linux
-PL=pl
+PLBINDIR=$(HOME)/bin/
+PL=swipl
 XPCE=xpce
 PLRT="/usr/local/swi/rt/bin/xpce"
 XPCEBIN=$(PLBINDIR)$(XPCE)
-PLBIN=$(PLBINDIR)pl
+PLBIN=$(PLBINDIR)$(PL)
 PLLIBDIR:=$(shell eval `$(PLBIN) -dump-runtime-variables`;echo $$PLBASE)
 SOLRTPLDIR:=$(shell dirname `dirname $(PLLIBDIR)`)
 else
@@ -1188,6 +1189,9 @@ TEX=$(DOC).tex
 DVI=$(DOC).dvi
 PDF=$(DOC).pdf
 HTML=$(DOC).html
+
+pdf:
+	$(MAKE) $(DOC).pdf
 
 $(HTML):	$(TEX)
 		latex2html $(DOC)

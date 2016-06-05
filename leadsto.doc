@@ -83,12 +83,13 @@ Saving the generated trace
 
 \subsubsection{Sources for information}
 
-The file \url{userman.html} contains the documentation for most allowed
+The file \file{userman.html} contains the documentation for most allowed
 constructs in LeadsTo specifications. Apart from that we will use the
 source to check whether there are more features.
 
-There are some problems with the way leadsto constructs are specified.
-They are translated into Prolog facts yet we do not put quotes around upper case
+There are some problems with the way leadsto constructs are specified there.
+They are translated into Prolog facts yet we do not put quotes around upper
+case
 atoms.
 
 \begin{code}
@@ -97,12 +98,13 @@ interval([], range(0, 1), a).
 leadsto([], a, b, efgh(Delay, Delay, 1, 1)).
 \end{code}
 
-Here Delay should be quoted. The leadsto terms allowed seem to be relatively
-exaustive. Probabilistic constructs are missing though.
+Here Delay should be quoted. The leadsto terms described there seem to be
+relatively
+complete. Probabilistic constructs are missing though.
 
 \section{Details}
 
-\subsubsection{Times}
+\subsection{Times}
 
 \begin{description}
 \item[setuptime]
@@ -111,25 +113,31 @@ exaustive. Probabilistic constructs are missing though.
 \item[endtime] If not specified there currently is a default of 200 (see end_time/1)
 \end{description}
 
-Looking at do_setup_time(TStart, TSetup) it looks like TSetup is identical to TStart, although
-it may have been foreseen that options setup_maxg and setup_maxfg could lead to the algorithm
-starting before TStartup. start_time is only used when refering to traces, in the algorithm
-only setuptime is used.
+Looking at \exam{do_setup_time(TStart, TSetup)} it looks like \exam{TSetup}
+is identical to \exam{TStart}, although
+it may have been foreseen that options \prologflag{setup_maxg} and
+\prologflag{setup_maxfg} could lead to the algorithm
+starting before \exam{TStart}. start_time is only used when referring to
+traces, in the algorithm
+only \exam{TSetup} is used.
 
-HandledTime is incremented in handled_time_step/1 and runspec_rest/0 ensures that
-at the end of the leadsto algorithm handledtime >= Endtime.
+\exam{HandledTime} is incremented in handled_time_step/1 and
+runspec_rest/0 ensures that
+at the end of the leadsto algorithm \exam{handledtime >= Endtime}.
 \subsection{Traces}
 
 \subsubsection{Datastructures}
 
-Traces are stored as Prolog facts, each fact represents values of a single ground atom.
+Traces are stored as Prolog facts, each fact represents values of a single
+ground atom.
 
 Values of an atom over time are represented as a list:
  [range(23.0, 24.0, true), range(17, 18, true)].
 
 The ranges are ordered, the latest time range first. During the execution of our
-leadsto algorithm, only necessary values are stored, unknown ranges or false ranges
-while cwa(Atom) holds are not part of the trace.
+leadsto algorithm, only necessary values are stored, unknown ranges or false
+ranges
+while \exam{cwa(Atom)} holds are not part of the trace.
 
 In saved traces all values are represented. Saved traces will only contain
 atom values in the range start_time to end_time. The leadsto algorithm may derive values
@@ -141,8 +149,8 @@ TODO: We should discuss alternatives:
 Why not save only necessary values in saved traces?
 \item
 If saving everything, why not compact the timerange?
-[range(T1, T2, TFU1), range(T2, T3, TFU3), ...]
-into [T1-TFU1, T2-TFU2, .. TE-[]]
+\exam{[range(T1, T2, TFU1), range(T2, T3, TFU3), ...]}
+into \exam{[T1-TFU1, T2-TFU2, .. TE-[]]}
 
 \end{enumerate}
 
@@ -172,23 +180,25 @@ module.
 Command line constants are added to module spec (see \secref{cmdlineconstants}).
 
 Then, the leadsto specification is read one more time, and each Term is
-passed on to \handle_term/1.
+passed on to handle_term/1.
 Most terms are handled by asserting dynamic facts into module algo.
 Some of those are 1-1 translations, others don't.
 
 model(Model) is translated into dyn_model(Model),
 after checking that there is only one such term.
 
-cwa(F/A) is translated into dyn_cwa(FunctorTerm).
+\exam{cwa(F/A)} is translated into \exam{dyn_cwa(FunctorTerm)}.
 
-The most interesting things happen with interval like leadsto specification terms.
+The most interesting things happen with interval like leadsto specification
+terms.
 initialise_interval/3 and initialise_interval_periodic/4 deal with them. These
 predicates normalise all interval specification terms into:
-dyn_interval(i(Interval, Vars, Form)) and dyn_interval(i(Interval, P, Vars, Form))
+\exam{dyn_interval(i(Interval, Vars, Form))} and 
+\exam{dyn_interval(i(Interval, P, Vars, Form))}
 facts.
 
 Leadsto rule terms are translated into
-dyn_leadsto(I, Vars, LitDisConj, AndLiterals, Delay) facts.
+\exam{dyn_leadsto(I, Vars, LitDisConj, AndLiterals, Delay)} facts.
 
 Finally update_sorts/0 performs some pre compilation of sort definitions.
 
@@ -207,14 +217,15 @@ There are question surrounding load_simulation/1:
 Why is the leadsto specification scanned twice. The terms will be probably be
 walked through even one more time to set up the algorithm.
 \end{itemize}
-load_simulation/1 sets dyn_sim_status(TraceFile, loaded).
+load_simulation/1 sets \exam{dyn_sim_status(TraceFile, loaded)}.
 
 \predicate{reset_sim_info}{0}{}
 clears the content of spec together with other run time information.
 \predicate{runshowspec}{1}{+Frame}
 Two parts, runspec/1 and show_results/2.
-runspec/2 should probably be responsible for first setting dyn_sim_status(File, running)
-and at the end to dyn_sim_status(File, done).
+runspec/2 should probably be responsible for first setting
+\exam{dyn_sim_status(File, running)}
+and at the end to \exam{dyn_sim_status(File, done)}.
 
 \predicate{runspec}{1}{+Frame}
 If we are dealing with a model, we initialize the output trace common to all
@@ -229,8 +240,10 @@ before start_time, based on the maximum leadsto rule values for \jargon{f} and \
 
 We had options \const{setup_maxg} and \const{setup_maxfg} for that purpose. But the code says this is not supported.
 
-Apparently start_time and end_time may contain constants. The values are passed through
-tr_basic_element(Term, [], TermOut) that will substitute spec:constant(Name, Val)
+Apparently start_time and end_time may contain constants. The values are
+passed through
+\exam{tr_basic_element(Term, [], TermOut)}
+that will substitute \exam{spec:constant(Name, Val)}
 occurrences.
 QUESTION: Is this constant substitution (and variable instantiation) done on an ad hoc basis?
 If so, can we improve on that?
@@ -257,10 +270,12 @@ TODO: \jargon{modelchecking}? Where that comes in is unclear for now. See \secre
 
 But, the result seems to be relatively straightfoward, some initial atom_trace/3 values.
 \predicate{setup_leadsto}{6}
-Also uses init_interval_callbacks/10. It sets dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId) 
+Also uses init_interval_callbacks/10. It sets
+\exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)} 
 \predicate{init_interval_callbacks}{10}{TimeInfo, Vars, Forms, TimeInfo1, Vars1,
 Forms2, InvalidVars, InvalidTimeInfo, ActPreInstantiated}
-is used for setting up interval rules and leadsto rules. Probably instantiates variables,
+is used for setting up interval rules and leadsto rules. Probably instantiates
+variables,
 also takes care of forall/2 terms.
 
 TODO FIRST: Lets first get into the details of this important predicate. After that,
@@ -272,13 +287,13 @@ inspect what setup_leadsto/6 does.
 
 Traces are generated by the main algorithm in module algo.
 They are internally stored
-as dyn_atom_trace(AtomKey, Atom, AtomTrace) facts. For performance reasoning
+as \exam{dyn_atom_trace(AtomKey, Atom, AtomTrace)} facts. For performance reasoning
 traces that can no longer play a role in the algorithm are backed up into
 dyn_atom_trace_backup/3 facts.
 
 
 
-\subssubsection{Saving traces}
+\subsubsection{Saving traces}
 
 Traces are saved in two stages by
 \begin{description}
@@ -404,7 +419,7 @@ A number of facts:
 If AnteLits becomes \const{[]}, setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed) is called. If $THolds >= TMin + G$, we calculate $ T3 is  TMin + G + Delay$ and
 $T4 is THolds + Delay + H$ and then do schedule_fire(ConseRId, T3, T4) which sets
 dyn_schedule_fire(ConseRId, T3, T4).\footnote{I left out details dealing with pxor aspects.}
-They are fired by the \code{repeat, set_state, handle_fired} sequence in runspec_rest/0.~\footnote{Why not fire immediately?
+They are fired by the \exam{repeat, set_state, handle_fired} sequence in runspec_rest/0.~\footnote{Why not fire immediately?}
 After schedule_fire/3 we do setup_lt_wait_fired/6. If $THolds < TMin + G$ we do
 setup_lt_wait_true/5.
 
@@ -439,8 +454,9 @@ Meaning, trying to reconstruct the algorithm from the start.
 
 \subsection{Aspects}
 
-We limited e, f, g, h: $e,f, g, h >= 0$ and if h == 0 then  g must be 0. But also,
-e + f + g + h > 0$. Why those requirements? We probably do not want to reason without delay.
+We limited e, f, g, h:\exam{e,f, g, h >= 0} and if \exam{h == 0} then  \exam{g} must be 0. But 
+also,
+\exam{e + f + g + h > 0}. Why those requirements? We probably do not want to reason without delay.
 
 e, f, g, h:
 Once an antecedent holds for duration \const{g} + T, a delay is set between e and f, and
@@ -451,7 +467,8 @@ will be propagated for a longer time.
 
 \subsection{Invariant}
 
-HandledTime: Everything that can be derived, has been derived for $T <= HandledTime$.  
+\exam{HandledTime}: Everything that can be derived, has been derived for 
+\exam{T <= HandledTime}.  
 CWA atom values do not have to be instantiated, probably will not be instantiated to false
 values.
 
@@ -660,3 +677,4 @@ TODO: why those qterms?
 % [specification_element] 
   * generic node
 \end{code}
+\end{document}
