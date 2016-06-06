@@ -1,0 +1,89 @@
+
+leadsto "syntax"
+
+The leadsto input syntax is prolog syntax, but with the
+following added/changed operator definitions.
+(For input of leadsto specs in prolog, the : redefinition is 
+ awkward. I do a push/pop operator call for reading)
+
+			op(150, xfx, :),
+			op(700, xfy, <),
+			op(700, xfy, <=),
+			op(700, xfy, =<),
+			op(700, xfy, >),
+			op(700, xfy, >=)
+			]).
+
+Currently, only the top level terms are described. I am working
+on syntax (+minimal explanation of semantics) of the top level
+terms, but especially the sub terms.
+
+sub terms:
+
+% VAR:PLPCE:
+    VAR, in principle, a prolog term, although Uppercase atoms 
+    are allowed. Quotes around atoms are allowed.
+     TODO: are unquoted uppercase functors allowed?
+     e.g. P(a) TODO: what are further restrictions and 
+     interpretations of PLPCE terms TODO: junk this stupid 
+     name "PLPCE".
+
+% start_time(PLPCE)
+% end_time(PLPCE)
+% global_lambda(PLPCE)
+
+
+TODO: why those qterms?
+% qterm(cwa(X))        cwa_node 
+% qterm(external(X))   external_node
+% qterm(X) ...         other_node
+
+% display(_,_)
+% display_number_range(_,_,_,_)
+
+% periodic(Vars, Range, Period:PLPCE, Formula) is_list(Vars)
+		 * handle_interval(Vars, Range, Formula, Root, Son, Extra)
+% periodic(ST, ET, Period:PLPCE, Formula)
+	         * handle_interval([], range(ST, ET), Formula, Root,Son,Extra),
+% periodic(Vars, ST, ET, Period:PLPCE, Formula)
+		 * handle_interval(Vars, range(ST, ET),Formula,Root,Son,Extra)
+% interval(Vars, ST, ET, Formula)
+		 * handle_interval(Vars, Range, Formula, Root, _Son, Extra)
+% interval(Vars, ST, ET, Formula)
+		 * handle_interval(Vars, range(ST, ET),Formula,Root,_Son,Extra)
+% interval(ST, ET, Formula)
+		 * handle_interval([], range(ST, ET), Formula,Root,_Son,Extra)
+
+% leadsto(AnteFormula, ConseFormula, Delay)
+	* handle_leadsto1(Root, AnteFormula, ConseFormula, Delay, Extra, _Son)
+% leadsto(Vars, AnteFormula, ConseFormula, Delay)
+	* handle_leadsto1(Root, AnteFormula, ConseFormula, Delay, Extra, Son)
+% specification(_) 
+		   * IGNORED
+% content(C)
+		* TODO? assertz(dyn_content(C))
+% denotes(Header, Formula)
+		  * term_to_formula_node(Formula, FormulaNode, Extra),
+		new(PN, property_def_node(@off)),
+		send(PN, fill_header, Header),
+		send(PN, son, FormulaNode),
+		send(Root, son, PN)
+% (sort_element(SortName:PLPCE, Term):- member(Term2, List) with Term==Term2
+		* test_sort_def(SortName, List, Extra),
+	ensure_sort_son(Root, SortName1, SNode),
+	add_sort_contents(SNode, List).
+% constant(Name, Value)
+  * check_constant(Name, Value),
+	send(Root, son, new(N, constant_def_node)),
+	send(N, fill_header, Name),
+	send(N, fill_value, Value)
+% sortdef(SortName:PLPCE, Objs)
+  * test_sort_def(SortName, Objs, Extra),
+	send(Root, son, new(SN, sort_node)),
+	send(SN, change_gui_prop, sort_name, SortName1),
+	add_sort_contents(SN, Objs).
+% cwa(PLPCE)
+% model(PLPCE)
+% [specification_element] 
+  * generic node
+

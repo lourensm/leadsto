@@ -20,7 +20,9 @@
 \maketitle
 
 \begin{abstract}
-This document describes the LeadsTo software.
+This document describes the LeadsTo software in detail. It starts out as an investigation
+into details of the algorithm.
+
 \end{abstract}
 
 \pagebreak
@@ -35,16 +37,18 @@ This document describes the LeadsTo software.
 
 \subsection{Introduction}
 
-A leadsto specification is encoded as a pl file containing predicates. We should
-have an exhaustive documentation of all allowed predicates.
+A leadsto specification is encoded as a pl file containing predicates.
 
-Here we describe the main leadsto procedure algo:run_simulation/2.
-This leadsto specification is loaded into the leadsto runtime:
+\subsection{run_simulation/2}
+
+Here we describe the main leadsto procedure run_simulation/2,
+\exam{run_simulation(File, Frame}}
+This leadsto specification \arg{File} is loaded into the leadsto runtime:
 
 \begin{enumerate}
 
 \item
-  The predicates are loaded into module called "spec".
+  The predicates are loaded into module \exam{spec}.
 
 \item
   After that, all terms in the input file are preprocessed, often
@@ -84,23 +88,21 @@ Saving the generated trace
 \subsubsection{Sources for information}
 
 The file \file{userman.html} contains the documentation for most allowed
-constructs in LeadsTo specifications. Apart from that we will use the
-source to check whether there are more features.
-
-There are some problems with the way leadsto constructs are specified there.
-They are translated into Prolog facts yet we do not put quotes around upper
-case
-atoms.
-
+constructs in LeadsTo specifications. \footnote{
+	   There are some problems with the way leadsto constructs are specified there.
+	   They are translated into Prolog facts yet we do not put quotes around upper
+	   case atoms.
 \begin{code}
 model(m1(Delay:between(10, 12))).
 interval([], range(0, 1), a).
 leadsto([], a, b, efgh(Delay, Delay, 1, 1)).
 \end{code}
 
-Here Delay should be quoted. The leadsto terms described there seem to be
-relatively
+Here Delay should be quoted.}
+The leadsto terms described there seem to be relatively
 complete. Probabilistic constructs are missing though.
+
+The file \file{olddoc/syntax.txt} also describes the syntax. See \secref{ltsyntax}
 
 \section{Details}
 
@@ -109,7 +111,7 @@ complete. Probabilistic constructs are missing though.
 \begin{description}
 \item[setuptime]
 \item[handledtime]
-\item[starttime]
+\item[starttime, \exam{TStart}]
 \item[endtime] If not specified there currently is a default of 200 (see end_time/1)
 \end{description}
 
@@ -117,13 +119,14 @@ Looking at \exam{do_setup_time(TStart, TSetup)} it looks like \exam{TSetup}
 is identical to \exam{TStart}, although
 it may have been foreseen that options \prologflag{setup_maxg} and
 \prologflag{setup_maxfg} could lead to the algorithm
-starting before \exam{TStart}. start_time is only used when referring to
+starting before \exam{TStart}. \exam{starttime} is only used when referring to
 traces, in the algorithm
 only \exam{TSetup} is used.
 
 \exam{HandledTime} is incremented in handled_time_step/1 and
 runspec_rest/0 ensures that
-at the end of the leadsto algorithm \exam{handledtime >= Endtime}.
+at the end of the leadsto algorithm \exam{HandledTime >= Endtime}.
+
 \subsection{Traces}
 
 \subsubsection{Datastructures}
@@ -132,18 +135,20 @@ Traces are stored as Prolog facts, each fact represents values of a single
 ground atom.
 
 Values of an atom over time are represented as a list:
- [range(23.0, 24.0, true), range(17, 18, true)].
+\begin{code}
+[range(23.0, 24.0, true), range(17, 18, true)]
+\end{code}
 
 The ranges are ordered, the latest time range first. During the execution of our
 leadsto algorithm, only necessary values are stored, unknown ranges or false
 ranges
-while \exam{cwa(Atom)} holds are not part of the trace.
+where \exam{cwa(Atom)} holds are not part of the trace.
 
 In saved traces all values are represented. Saved traces will only contain
-atom values in the range start_time to end_time. The leadsto algorithm may derive values
-outside of that range.
+atom values in the range \exam{start_time} to \exam{end_time}. The leadsto algorithm may
+derive values outside of that range.
 
-TODO: We should discuss alternatives:
+\footnote{TODO: We should discuss alternatives:
 \begin{enumerate}
 \item
 Why not save only necessary values in saved traces?
@@ -151,9 +156,8 @@ Why not save only necessary values in saved traces?
 If saving everything, why not compact the timerange?
 \exam{[range(T1, T2, TFU1), range(T2, T3, TFU3), ...]}
 into \exam{[T1-TFU1, T2-TFU2, .. TE-[]]}
-
 \end{enumerate}
-
+}
 
 \subsubsection{Variables}
 
@@ -164,27 +168,27 @@ algo algorithm is. \arg{Status} is \const{loaded}, \const{running} or \const{don
 
 \predicate{dyn_currently_loaded}{2}{Kind, File}
 says what \arg{File} is loaded and what \arg{Kind}, where \arg{Kind} is \const{trace} or
-\arg{sim}.
+\const{sim}.
 \end{description}
 \subsubsection{Loading and Trace Generation}
 
 
 \begin{description}
 \predicate{load_simulation}{1}{+File}
-The specification \arg{File} is loaded into module \const{spec}.
-The source code seems somewhat complex: The module spec is defined,
+The specification \arg{File} is loaded into module \exam{spec}.
+The source code seems somewhat complex: The module \exam{spec} is set up,
 discontinous/1 directives are generated for all leadsto specification terms,
 the terms are read from \arg{File} and asserted one by one into the \const{spec}
 module.
 
 Command line constants are added to module spec (see \secref{cmdlineconstants}).
 
-Then, the leadsto specification is read one more time, and each Term is
+Then, the leadsto specification is read one more time, and each \exam{Term} is
 passed on to handle_term/1.
-Most terms are handled by asserting dynamic facts into module algo.
+Most terms are handled by asserting dynamic facts into module \exam{algo}.
 Some of those are 1-1 translations, others don't.
 
-model(Model) is translated into dyn_model(Model),
+\exam{model(Model)} is translated into \exam{dyn_model(Model)},
 after checking that there is only one such term.
 
 \exam{cwa(F/A)} is translated into \exam{dyn_cwa(FunctorTerm)}.
@@ -201,8 +205,8 @@ Leadsto rule terms are translated into
 \exam{dyn_leadsto(I, Vars, LitDisConj, AndLiterals, Delay)} facts.
 
 Finally update_sorts/0 performs some pre compilation of sort definitions.
-
-TODO: It is unclear what happeens to sortdefs at this stage. Questions are:
+\footnote{
+TODO: It is unclear what happens to sortdefs at this stage. Questions are:
 \begin{itemize}
 \item
 What terms are used? Are they spec:sortdef/2 and spec:sortdef/4?
@@ -211,13 +215,15 @@ What is the role of dyn_sortdef/5?
 \item
 Are constants somehow substituted into sortdef elements?
 \end{itemize}
-There are question surrounding load_simulation/1:
+Question surrounding load_simulation/1:
 \begin{itemize}
 \item
 Why is the leadsto specification scanned twice. The terms will be probably be
 walked through even one more time to set up the algorithm.
 \end{itemize}
-load_simulation/1 sets \exam{dyn_sim_status(TraceFile, loaded)}.
+}
+
+load_simulation/1 sets \exam{dyn_sim_status(File, loaded)}.
 
 \predicate{reset_sim_info}{0}{}
 clears the content of spec together with other run time information.
@@ -587,7 +593,7 @@ After that, try understanding the cleanup efforts of wait_var.
 BUT: start describing in detail. Look at what I did so far, can I reuse documentation.
 Step1: Can leadsto.doc be printed out?
 
-\section{"Syntax" of Leadsto Specifications}
+\section{"Syntax" of Leadsto Specifications}~\label{sec:ltsyntax}
 
 Copied from syntax.txt:
 \begin{code}
