@@ -1007,7 +1007,11 @@ cleanall:
 	rm -rf ../pl/home/
 	rm -rf generated
 
+%.cleantex:
+	rm -f $*.aux $*.idx $*.ilg $*.ind $*.out $*.toc
+
 clean:
+	$(MAKE) leadsto.cleantex
 	rm -f *~ scratch.eps trace.tr leadsto$(EXESUFFIX) ltbare$(EXESUFFIX) lteditor$(EXESUFFIX) abmptr$(EXESUFFIX) fv$(EXESUFFIX)
 	rm -f ttleditor$(EXESUFFIX) ttlchecker$(EXESUFFIX) log2trace$(EXESUFFIX)
 	rm -f  log ltpl.zip ltrhlinux71.tgz

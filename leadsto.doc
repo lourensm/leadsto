@@ -42,7 +42,7 @@ A leadsto specification is encoded as a pl file containing predicates.
 \subsection{run_simulation/2}
 
 Here we describe the main leadsto procedure run_simulation/2,
-\exam{run_simulation(File, Frame}}
+\exam{run_simulation(File, Frame)}
 This leadsto specification \arg{File} is loaded into the leadsto runtime:
 
 \begin{enumerate}
@@ -88,40 +88,49 @@ Saving the generated trace
 \subsubsection{Sources for information}
 
 The file \file{userman.html} contains the documentation for most allowed
-constructs in LeadsTo specifications. \footnote{
-	   There are some problems with the way leadsto constructs are specified there.
-	   They are translated into Prolog facts yet we do not put quotes around upper
-	   case atoms.
-\begin{code}
-model(m1(Delay:between(10, 12))).
-interval([], range(0, 1), a).
-leadsto([], a, b, efgh(Delay, Delay, 1, 1)).
-\end{code}
+constructs in LeadsTo specifications. 
 
-Here Delay should be quoted.}
-The leadsto terms described there seem to be relatively
-complete. Probabilistic constructs are missing though.
-
-The file \file{olddoc/syntax.txt} also describes the syntax. See \secref{ltsyntax}
+The file \file{olddoc/syntax.txt} also describes the syntax.
+See \secref{ltsyntax}.
 
 \section{Details}
 
-\subsection{Times}
+\subsection{Times: Handled Time, Setup Time, Start Time, End Time}
 
 \begin{description}
-\item[setuptime]
-\item[handledtime]
-\item[starttime, \exam{TStart}]
+\item[setuptime, \exam{TSetup}]In practice identical to \exam{TStartup}, but
+there are options for defining \exam{TSetup} to have a value before
+\exam{TStart} so that leadsto rules could fire for antecedent values before
+\exam{TStart} and use \exam{cwa(Atom)} derived values to make them fire.
+The current value of \exam{TSetup} is stored in
+\exam{dyn_setup_time(TSetup)}.~\footnote{
+We had command line options \const{setup_maxg} and \const{setup_maxfg} for that
+purpose that would introduce \exam{TSetup} based on the maximum leadsto rule values for \jargon{f} and \jargon{g}.
+But the sourcecode says this is not supported. 
+So, in practice
+\exam{TStart == TSetup}
+}
+\item[handledtime]Handled time is initialized by setup_unknown_or_cwa/2 to TStart.
+There is an additional implied condition on handled time:
+"You should never ask for values before TSetup" and
+"All atoms that have no explicit trace entry before THandled have
+value false if cwa, unknown otherwise".
+\item[starttime, \exam{TStart}] Start time. The algorithm uses \exam{TSetup},
+but \exam{TStart} still plays a role, when storing traces, only values
+at/after \exam{TStart} are saved.~\footnote{TODO:check this!}
+\exam{TStart} is stored as
+\exam{dyn_start_time(TStart)}, but only called through start_time/1.
+
 \item[endtime] If not specified there currently is a default of 200 (see end_time/1)
 \end{description}
 
-Looking at \exam{do_setup_time(TStart, TSetup)} it looks like \exam{TSetup}
-is identical to \exam{TStart}, although
-it may have been foreseen that options \prologflag{setup_maxg} and
-\prologflag{setup_maxfg} could lead to the algorithm
-starting before \exam{TStart}. \exam{starttime} is only used when referring to
-traces, in the algorithm
-only \exam{TSetup} is used.
+\exam{TSetup} and \exam{TSetup} are set up in
+\exam{do_setup_time(TStart, TSetup)}. They may contain specification
+constants.~\footnote{In do_setup_times/2 the values are
+passed through
+\exam{tr_basic_element(Term, [], TermOut)}
+that will substitute \exam{spec:constant(Name, Val)}
+occurrences. See \secref{constants}.}
 
 \exam{HandledTime} is incremented in handled_time_step/1 and
 runspec_rest/0 ensures that
@@ -145,21 +154,21 @@ ranges
 where \exam{cwa(Atom)} holds are not part of the trace.
 
 In saved traces all values are represented. Saved traces will only contain
-atom values in the range \exam{start_time} to \exam{end_time}. The leadsto algorithm may
-derive values outside of that range.
-
-\footnote{TODO: We should discuss alternatives:
-\begin{enumerate}
-\item
-Why not save only necessary values in saved traces?
-\item
-If saving everything, why not compact the timerange?
-\exam{[range(T1, T2, TFU1), range(T2, T3, TFU3), ...]}
-into \exam{[T1-TFU1, T2-TFU2, .. TE-[]]}
-\end{enumerate}
+atom values in the range \exam{start_time} to \exam{end_time}. The leadsto
+algorithm may
+derive values outside of that range.~\footnote{
+       TODO: We should discuss alternatives:
+       \begin{enumerate}
+       \item
+       Why not save only necessary values in saved traces?
+       \item
+       If saving everything, why not compact the timerange?
+       \exam{[range(T1, T2, TFU1), range(T2, T3, TFU3), ...]}
+       into \exam{[T1-TFU1, T2-TFU2, .. TE-[]]}
+       \end{enumerate}
 }
 
-\subsubsection{Variables}
+\subsubsection{Algorithm Variables}
 
 \begin{description}
 \predicate{dyn_sim_status}{2}{File, Status}
@@ -170,6 +179,8 @@ algo algorithm is. \arg{Status} is \const{loaded}, \const{running} or \const{don
 says what \arg{File} is loaded and what \arg{Kind}, where \arg{Kind} is \const{trace} or
 \const{sim}.
 \end{description}
+
+
 \subsubsection{Loading and Trace Generation}
 
 
@@ -181,7 +192,7 @@ discontinous/1 directives are generated for all leadsto specification terms,
 the terms are read from \arg{File} and asserted one by one into the \const{spec}
 module.
 
-Command line constants are added to module spec (see \secref{cmdlineconstants}).
+Command line constants are added to module spec (see \secref{constants}).
 
 Then, the leadsto specification is read one more time, and each \exam{Term} is
 passed on to handle_term/1.
@@ -228,43 +239,34 @@ load_simulation/1 sets \exam{dyn_sim_status(File, loaded)}.
 \predicate{reset_sim_info}{0}{}
 clears the content of spec together with other run time information.
 \predicate{runshowspec}{1}{+Frame}
-Two parts, runspec/1 and show_results/2.
-runspec/2 should probably be responsible for first setting
-\exam{dyn_sim_status(File, running)}
-and at the end to \exam{dyn_sim_status(File, done)}.
+Two parts, runspecdo/1 and show_results/2.
 
-\predicate{runspec}{1}{+Frame}
+\predicate{runspecdo}{1}{+Frame}
+(Functionality in runspec/1).
 If we are dealing with a model, we initialize the output trace common to all
-model traces, then for each model instantiation we call runmodel/4 that does runspec1/0
+model traces, then for each model instantiation we call runmodel/4 that does
+runspec1/0
 and cleans up after itself for the next runmodel/4.
 
 If there is no model/1, we call runspec1/0 followed by savetrace/1.
 
 \predicate{runspec1}{0}{}
-TODO: The code introduces \const{TSetup}, dyn_setup_time/1 that seem to have value identical to start_time. Probably at one time we planned to have some setup time that starts
-before start_time, based on the maximum leadsto rule values for \jargon{f} and \jargon{g}.
+This procedure calls do_setup_time/2 that sets up \exam{TSetup} and
+\exam{TStart}.
 
-We had options \const{setup_maxg} and \const{setup_maxfg} for that purpose. But the code says this is not supported.
 
-Apparently start_time and end_time may contain constants. The values are
-passed through
-\exam{tr_basic_element(Term, [], TermOut)}
-that will substitute \exam{spec:constant(Name, Val)}
-occurrences.
-QUESTION: Is this constant substitution (and variable instantiation) done on an ad hoc basis?
-If so, can we improve on that?
 In runspec/1 we perform:
-setup_rt_intervals/0, setup_unknown_or_cwa/2, setup_leadsto/6 for each leadsto rule
+setup_rt_intervals/0, setup_unknown_or_cwa/2, setup_leadsto/6 for each
+leadsto rule
 dyn_leadsto/5, get_model_checking_p_rules/0 (??), setup_atom_state_boundaries/0 and finally
 do the real reasoning in runspec_rest/0.
+
 \predicate{setup_rt_intervals}{0}{}
-For every dyn_interval/1 term we perform init_interval_callbacks/10 where all but the first three arguments are callback variables or callback predicates.
+For every dyn_interval/1 term we perform init_interval_callbacks/10 where all but
+the first three arguments are callback variables or callback predicates.
 
-TODO: The setting of the interval rules does some detailed steps such as variable instantiation. Finally this leads to changes to dyn_atom_trace/3.
-TODO: It is unclear where what variables become instantiated for the interval rules.
-
-Probably we instantiate the encoded variables separately and later do the substitution
-of variables by name. see
+The setting of the interval rules does some detailed steps such as variable
+instantiation. Finally this leads to changes to dyn_atom_trace/3. See
 \begin{code}
 initialise_interval_p(Interval, P, Vars, Form1) :-
 	(	instantiate_vars(Vars, VarsInst),
@@ -272,20 +274,15 @@ initialise_interval_p(Interval, P, Vars, Form1) :-
 		tr_basic_element(P, VarsInst, P1),
 		...
 \end{code}
-TODO: \jargon{modelchecking}? Where that comes in is unclear for now. See \secref{modelchecking}.
 
-But, the result seems to be relatively straightfoward, some initial atom_trace/3 values.
+
 \predicate{setup_leadsto}{6}
 Also uses init_interval_callbacks/10. It sets
 \exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)} 
-\predicate{init_interval_callbacks}{10}{TimeInfo, Vars, Forms, TimeInfo1, Vars1,
-Forms2, InvalidVars, InvalidTimeInfo, ActPreInstantiated}
-is used for setting up interval rules and leadsto rules. Probably instantiates
-variables,
-also takes care of forall/2 terms.
-
-TODO FIRST: Lets first get into the details of this important predicate. After that,
-inspect what setup_leadsto/6 does.
+\predicate{init_interval_callbacks}{10}{TmInf, Vars, Forms, TmInf1, Vars1,
+Forms2, InvldVars, InvldTimeInfo, ActPreInsttiated}
+is used for setting up interval rules and leadsto rules. It instantiates
+variables, also takes care of forall/2 terms( instantiates them).
 
 \end{description}
 
@@ -293,9 +290,13 @@ inspect what setup_leadsto/6 does.
 
 Traces are generated by the main algorithm in module algo.
 They are internally stored
-as \exam{dyn_atom_trace(AtomKey, Atom, AtomTrace)} facts. For performance reasoning
+as \exam{dyn_atom_trace(AtomKey, Atom, AtomTrace)} facts.
+For performance reasoning
 traces that can no longer play a role in the algorithm are backed up into
-dyn_atom_trace_backup/3 facts.
+dyn_atom_trace_backup/3 facts.~\footnote{TODO:I seem to remember that at places
+in the algorithm we depend on there either being dyn_atom_trace/3 or
+dyn_atom_trace_backup/3.}
+
 
 
 
@@ -311,20 +312,31 @@ Saves constants and sets up trace storage stream.
 \predicate{savemodelspec_cleanup}{2}{-TellStream,
 +ModelInstanceTraceName}
 If the \jargon{leadsto specification} contains a model, the separate
-model instances saved._
+model instances saved.
 \end{description}
 
 \section{Details}
 
-\subsection{Command line constants}	\label{sec:cmdlineconstants}
+\subsection{Constants}	\label{sec:constants}
+
+One can define \jargon{specification constants} constants that will be substituted
+into leadsto specification elements. Within a leadsto specification we use:
+\begin{code}
+constant(Name, Value).
+\end{code}
+
 
 From the command line one can specify \const{-constant Name=Value}. This adds a
 constant to the specification. Value must be a valid ground Prolog term.
 
-util:set_option_constant/1 handles this by asserting dyn_add_cmd_constant/2.
+\exam{set_option_constant/1} handles this by asserting \exam{dyn_add_cmd_constant/2}.
 
 util:load_cmd_constants/0 loads those constants into module \const{spec} as
 \const{constant(Name, Value)} facts.
+
+Constants are substituted by the procedure
+\exam{tr_basic_element(Term, [], TermOut)}. Constants are stored as
+\exam{spec:constant(Name, Val)} values.
 
 \subsection{Model Checking} \label{sec:modelchecking}
 
@@ -342,15 +354,15 @@ The only visible result seems to be some debugging info on the screen.
 A first look at the code in \jargon{modelchecking.pl} does not make anything
 clear yet.
 
-There is a document modelchecking.doc that should provide some background.
-I fear that the code that is still present in algo.pl never really did
+There is a document \file{olddocs/modelchecking.doc} that may provide background.
+I fear that the code that is still present in \file{algo.pl} never really did
 anything.
 
 \subsection{recwait}
 
 Within algo the two choices for representing algorithm state are mixed too much with
 the rest of the code. recwait/0 is the switch between storage as recorded and storage as
-a dynamic clause. Sometimes code seems to be copy/pasted almost. But, it seems
+a dynamic clause. Sometimes code seems to be copy/pasted. But, it seems
 that backtracking in the recorded database and backtracking in the asserted
 database works differently, see update_activity_times1/1.
 
@@ -360,115 +372,111 @@ What is the reason for schedule_fire/3, why postpone?
 
 \subsection{Following the progress of leadsto rules}
 
-We start with setup_leadsto(TStart, Vars, LitDisConj, AndLiterals, Delay,RId)
+We start with \exam{setup_leadsto(TStart, Vars, LitDisConj, AndLiterals,
+Delay,RId)}
 where the arguments are almost identical to the values in the Leadsto
 specification.
 
 Then init_interval_callbacks/9 transforms some constructs such as forall.
-Need to check what happens with variables.
 
-After a number of steps involving normalizing conjunctions and disjunctions and
+After a number of steps involving normalizing conjunctions and
+disjunctions~\footnote{TODO:Verify whether disjunction is allowed} and
 partial evaluation pruning out true and false results,
-setup_lt(Ante, Conse, Vars, Delay, Id, RId) is called.
+\exam{setup_lt(Ante, Conse, Vars, Delay, Id, RId)} is called.
 
 The encoding of the antecedent is responsible for generating code. If a
 Term is a comparison operator, code is generated for that, if a term is
 an arithmetic expression, code is also generated.
 
 We pass on some (incomplete) data structures. code_form/4 uses
-ds_d(AnteResult, VarsIn, PVIn) and ds_d(AnteTail, VarsOut, PVOut).
-AnteResult is a difference list. Therefor often AnteTail is set to [].
+\exam{ds_d(AnteResult, VarsIn, PVIn)} and \exam{ds_d(AnteTail, VarsOut, PVOut)}.
+\exam{AnteResult} is a difference list. Therefor often \exam{AnteTail} is set to \exam{[]}.
 
-code_form/4 is used for Antecedent and Consequent.
+code_form/4 is used for \exam{Ante} and \exam{Conse}.
 
-Each AnteConseTerm is translated as a list element in AnteResult.
-L = ds_litd(Atom, PosNeg, PreOps, PostOps, PostConds) where
-Atom can be true or any other value. It seems that its translated value
+Each \exam{AnteConseTerm} is translated as a list element in \exam{AnteResult}.
+\exam{L = ds_litd(Atom, PosNeg, PreOps, PostOps, PostConds)} where
+\exam{Atom} can be true or any other value. It seems that its translated value
 is not tested in any way.
 
-Within code_form/4, tr_arg_prolog1(Term, PVIn, Term1, Inst, DSTAIn, DSTAOut)
+Within code_form/4, \exam{tr_arg_prolog1(Term, PVIn, Term1, Inst, DSTAIn, DSTAOut)}
 is used where
 \begin{code}
 DSTAIn = ds_ta(VIn, PVIn, [], [], []),
 ...
 DSTAOut = ds_ta(VOut, PVOut, PreOpsOut, PostOpsOut, PostCondsOut),
 \end{code}
-Inst should result in Inst == inst.
+Inst should result in \exam{Inst == inst}.
 
 tr_arg_prolog1/6 translates leadsto variables into Prolog variables,
-their relation is stored and retrieved in PVIn/PVOut, by
+their relationship is stored and retrieved in \exam{PVIn/PVOut}, by
 var_pl_to_var_list/6 and var_pl_from_var_list/5.
 
-The first encounter of a leadsto variable in a code_form/4 has Inst= next,
-a later one gets Inst = inst. Inst values can be inst, next, var, mixed.
+The first encounter of a leadsto variable in a code_form/4 has
+\exam{Inst= next},
+a later one gets \exam{Inst = inst}. Inst values can be \exam{inst},
+\exam{next}, \exam{var}, \exam{mixed}.
 
 
-tr_arg_prolog1/6 is also responsible for substituting \jargon{spec_constant}s.
+tr_arg_prolog1/6 is also responsible for substituting \jargon{spec_constant}s.~\footnote{TODO: Check whether Atoms could end up as Prolog variables, look at
+code_atom/4 where \exam{Inst} is ignored in the code. Can \exam{Inst} be
+\exam{var} or \exam{mixed} there?}
 
-TODO: Check whether Atoms could end up as Prolog variables, look at
-code_atom/4 where Inst is ignored in the code. Can Inst be var or mixed there?
+\exam{code_conse(Conse, VOut, PVOut, Id, ConseRId, PVOutC)} translates
+\exam{Conse} through code_form/4, but true \exam{ConseLits} are removed.~\footnote{(TODO: why not from Ante?).}
 
-code_conse(Conse, VOut, PVOut, Id, ConseRId, PVOutC) translates
-Conse through code_form/4, but true ConseLits are removed.
-(TODO: why not from Ante?).
+The consequent is encoded as \exam{ds_cr(ConseLits, ds_ri(Id))}, but pxor
+consequents are treated differently.~\footnote{TODO}.
 
-The consequent is encoded as ds_cr(ConseLits, ds_ri(Id)), but pxor
-consequents are treated differently, TODO.
-
-The result is stored as dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)
-but more important, setup_lt_normed(AnteLits, AnteHolds, TMin, THolds,
-ConseRId, PV, Delay, Removed), it leads to setup_lt_wait_var/12.
+The result is stored as \exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)}
+but more important, \exam{setup_lt_normed(AnteLits, AnteHolds, TMin, THolds,
+ConseRId, PV, Delay, Removed)}, it leads to setup_lt_wait_var/12.
 
 A number of facts:
 \begin{itemize}
 \item
-If AnteLits becomes \const{[]}, setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed) is called. If $THolds >= TMin + G$, we calculate $ T3 is  TMin + G + Delay$ and
-$T4 is THolds + Delay + H$ and then do schedule_fire(ConseRId, T3, T4) which sets
-dyn_schedule_fire(ConseRId, T3, T4).\footnote{I left out details dealing with pxor aspects.}
+If \exam{AnteLits} becomes \exam{[]}, \\
+\exam{setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)} is called. If \exam{THolds >= TMin + G}, we calculate
+\exam{T3 is  TMin + G + Delay} and
+\exam{T4 is THolds + Delay + H} and then call
+\exam{schedule_fire(ConseRId, T3, T4)} which sets
+\exam{dyn_schedule_fire(ConseRId, T3, T4)}.~\footnote{I left out details dealing
+with pxor aspects.}
 They are fired by the \exam{repeat, set_state, handle_fired} sequence in runspec_rest/0.~\footnote{Why not fire immediately?}
-After schedule_fire/3 we do setup_lt_wait_fired/6. If $THolds < TMin + G$ we do
-setup_lt_wait_true/5.
+After schedule_fire/3 we do setup_lt_wait_fired/6. If \exam{THolds < TMin + G}
+we call setup_lt_wait_true/5.
 
-setup_lt_wait_fired stores a wait_fired/5 fact.~\footnote(It is confusing that two implementations of this waiting are present in the code, depending on the recwait/0 switch.
+\exam{setup_lt_wait_fired} stores a wait_fired/5
+fact.~\footnote{It is confusing that two implementations of this waiting are
+present in the code, depending on the recwait/0 switch.}
 \item
-We need to study the FV, FVL aspects in more detail.
+We need to study the \exam{FV}, \exam{FVL} aspects in more detail.
 \end{itemize}
 
 
-TODO: Looking at the code, it seems that we do not reorder the AnteLiterals
+TODO: Looking at the code, it seems that we do not reorder the \exam{AnteLiterals}
 depending on intermediate results.
 
 
-\subsection{Handled Time, Setup Time, Start Time}
-
-Handled time is initialized by setup_unknown_or_cwa/2 to TStart.
-There is an additional implied condition on handled time:
-"You should never ask for values before TSetup" and
-"All atoms that have no explicit trace entry before THandled have
-value false if cwa, unknown otherwise. Depending on our choice for
-TSetup, this defines values at or before TSetup, independent on any 
-leadsto rule firing. We should probably ensure that leadsto rules
-cannot fire results before TSetup.
-
-\subsection{Focus points}
-
-How are leadsto rules handled? Is there one pointer to the next activity w.r.t.
-the rule per instantiation?
-
 \section{Working backwards}
+
 Meaning, trying to reconstruct the algorithm from the start.
 
-\subsection{Aspects}
+\subsection{Leadsto times \exam{e}, \exam{f}, \exam{g}, \exam{h}}
 
-We limited e, f, g, h:\exam{e,f, g, h >= 0} and if \exam{h == 0} then  \exam{g} must be 0. But 
+We limited \exam{e}, \exam{f},
+\exam{g}, \exam{h}:\exam{e,f, g, h >= 0} and if \exam{h == 0} then
+\exam{g} must be 0. But 
 also,
-\exam{e + f + g + h > 0}. Why those requirements? We probably do not want to reason without delay.
+\exam{e + f + g + h > 0}.~\footnote{Why those requirements? We probably do not want to reason without delay.}
 
-e, f, g, h:
-Once an antecedent holds for duration \const{g} + T, a delay is set between e and f, and
-the antecedent will hold during \const{h} + T. So, even if a rule has fired, we need to 
-remember that it has fired and as long as the antecedent may continue to hold, the consequent
-will be propagated for a longer time.
+\exam{e, f, g, h}:
+
+Once an antecedent holds for duration \exam{g + T}, a delay is set between \exam{e} and
+\exam{f}, and
+the antecedent will hold during \exam{h + T}. So, even if a rule has fired, we need to 
+remember that it has fired and as long as the antecedent may continue to hold,
+the consequent will be propagated for a longer time.
 
 
 \subsection{Invariant}
@@ -480,19 +488,23 @@ values.
 
 \subsection{Sketch of the algorithm}
 
-All rules that could still fire are inspected, their antecedent effect is exhaustively tested 
-up to HandledTime at least. 
+All rules that could still fire are inspected, their antecedent effect is exhaustively
+tested 
+up to \exam{HandledTime} at least. 
 
 After everything has fired, we inspect all waiting antecedents, and look at time
-their first result could come in. And the minimum value becomes the next HandledTime, unless
-this minimum value is not after HandledTime (could it be smaller?). It looks like the
-algorithm currently simply gives up if there is a rule that could fire at HandledTime.
+their first result could come in. And the minimum value becomes the next
+\exam{HandledTime}, unless
+this minimum value is not after \exam{HandledTime} (could it be smaller?).
+It looks like the
+algorithm currently simply gives up if there is a rule that could fire at
+\exam{HandledTime}.
 
-It is probably important that together with setting HandledTime, every rule that
-has some continuation has its effect propagated till the new HandledTime. 
+It is probably important that together with setting \exam{HandledTime}, every rule that
+has some continuation has its effect propagated till the new \exam{HandledTime}. 
 
 This would make the invariant more precise: Every rule has its state updated
-in such a way that the antecedents have been checked up to the new HandledTime.
+in such a way that the antecedents have been checked up to the new \exam{HandledTime}.
 
 \subsection{Rule States}
 
@@ -501,7 +513,7 @@ There can be more than one separate states per rule.
 
 It could be that the first N literals of the antecedent with some specific 
 instantiation
-are valid in some time range T1 - T2. 
+are valid in some time range \exam{T1 - T2}. 
 
 We will look strictly left to right.
 
@@ -511,72 +523,88 @@ we wish to extend the range as far as possible.
 \subsection{Garbage collection}
 
 Is complex and not documented. In the source some explanation is given,
-bugdev.txt also contains some explanation.
+\file{olddocs/bugdev.txt} also contains some explanation.
 
 \subsection{Understanding}
 
-setup_lt_notground_fv analyses the current LitData first for all AtomTraces 
-and all cwa matches, handles those separately by check_fire_isolated or setup_lt_normed.
+\jargon{FV}, \jargon{fv} are abreviations of Free Variables (Prolog variables).
 
-Finally setup_wait_var is called with Atom, FV, FVL values implying that FV 
-from FVL has been handled, but we need to check other instantiations.
+\exam{setup_lt_notground_fv} analyses the current \exam{LitData} first for all
+AtomTraces and all cwa matches, handles those separately by \exam{check_fire_isolated}
+or \exam{setup_lt_normed}.
 
-setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
-		      ConseRId,PV,Delay, Id, IdTerm, Removed):
-AnteHolds holds for Time Interval between TStart and THolds. ToDoAnte is the conjunction that needs to hold.
-LitData is the Literal under investigation. FV are the free variables of the Literal and FVL is a list
+Finally \exam{setup_wait_var} is called with \exam{Atom}, \exam{FV}, \exam{FVL}
+values implying that \exam{FV} 
+from \exam{FVL} has been handled, but we need to check other instantiations.
+
+\exam{setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
+		      ConseRId,PV,Delay, Id, IdTerm, Removed)}:\\
+\exam{AnteHolds} holds for Time Interval between \exam{TStart} and
+\exam{THolds}. \exam{ToDoAnte} is the conjunction that needs to hold.
+\exam{LitData} is the Literal under investigation. \exam{FV} are the free variables of
+the Literal and \exam{FVL} is a list
 of instantiations that have been dealt with elsewhere.
 
-Delay is efgh(E,F,G,H), ConseRId is the consequent.
+\exam{Delay} is \exam{efgh(E,F,G,H)}, \exam{ConseRId} is the consequent.
 
-Removed indicates the source of the call. In case ofupdate_activity_time1(wait_var...), the
-wait_var  term is Removed and the Removed is propagated along.
+\exam{Removed} indicates the source of the call. In case of
+\exam{update_activity_time1(wait_var...)}, the
+\exam{wait_var}  term is Removed and the Removed is propagated along.
 
-PV is probably the characterization of the  variables:pv(Arga, Sorta,Kinda,Arg1a).
+\exam{PV} is probably the characterization of the  variables:\exam{pv(Arga, Sorta,Kinda,Arg1a)}.
 
-setup_lt_notground_fv is called by setup_lt_notground, by setup_lt_normed, by setup_lt.
-setup_lt is called from setup_nontrivial_leadsto.
-setup_lt_normed is also called by instantiate_op and fail_filter_handleRR.
+\exam{setup_lt_notground_fv} is called by \exam{setup_lt_notground}, it by \exam{setup_lt_normed}, it by \exam{setup_lt}.
+\exam{setup_lt} is called from \exam{setup_nontrivial_leadsto}.
+\exam{setup_lt_normed} is also called by \exam{instantiate_op} and \exam{fail_filter_handleRR}.
 
 We probably handle the rule in this call up to HandledTime.
 
-Now, if at the call THolds < HandledTime, we start all over, for this partially 
+Now, if at the call \exam{THolds < HandledTime}, we start all over, for this partially 
 instantiated sequence
-of literals by calling get_new_tholds. Apparently the order of literals is reversed here.
-get_new_tholds is called here and by get_new_tholds itself.
-get_new_tholds(AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
-ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed):
-AnteHoldsTODO is an earlier instantiated sequence of literals that needs to be extended 
-in range up to
-THandled (or further?). AHDone is the sequence that has been checked and hold between 
-TStart and THoldsNew1.
-Tholds is the result. TODO: Details of Tholds, is this a return parameter?
+of literals by calling \exam{get_new_tholds}. Apparently the order of literals is
+reversed here.
+\exam{get_new_tholds} is called here and by \exam{get_new_tholds} itself.
 
-Be aware that in get_new_tholds the Atom in [ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO] is ground, 
+\exam{get_new_tholds(AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
+ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed)}:\\
+\exam{AnteHoldsTODO} is an earlier instantiated sequence of literals that needs to be
+extended in range up to
+\exam{THandled} (or further?). \exam{AHDone} is the sequence that has been checked and
+hold between 
+\exam{TStart} and \exam{THoldsNew1}.
+\exam{Tholds} is the result.~\footnote{TODO: Details of Tholds, is this a return
+parameter?}
+
+Be aware that in \exam{get_new_tholds} the \exam{Atom} in
+\exam{[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]} is ground, 
 and has nothing to
-do with FV and FVL.
+do with \exam{FV} and \exam{FVL}.
 
-First, if AnteHoldsTODO == [], we continue with setup_lt_notground_fv with the 
-increased interval.
-Otherwise we follow AnteHoldsTODO Literals.
-NEXT: What does find_min_range_ground(Atom, PN, Tholds, O2) do? Probably: Inspect 
+First, if \exam{AnteHoldsTODO == []}, we continue~\footnote{as \exam{get_new_tholds} is only called by \exam{setup_lt_notground_fv}} with \exam{setup_lt_notground_fv} with
+the increased interval.
+Otherwise we follow \exam{AnteHoldsTODO} Literals.
+
+NEXT: What does \exam{find_min_range_ground(Atom, PN, Tholds, O2)} do? Probably: Inspect 
 Literal starting from Tholds.
 
 
 
 
-setup_lt_wait_var(FV, FVL, LitData, ToDoAnte, AnteHolds,
-			  TMin, THolds, ConseRId, PV, Delay, Id, IdTerm):
+\exam{setup_lt_wait_var(FV, FVL, LitData, ToDoAnte, AnteHolds,
+			  TMin, THolds, ConseRId, PV, Delay, Id, IdTerm)}:\\
 
-Probably: We know AnteHolds is ok between TMin and THolds.
-LitData is the current literal that has been analyzed. FV are the free variables in the 
-Literal, FVL is the list of instantiations of FV that have been dealt with, for which 
+Probably: We know \exam{AnteHolds} is ok between \exam{TMin} and \exam{THolds}.
+\exam{LitData} is the current literal that has been analyzed. FV are the free
+variables in the 
+Literal, \exam{FVL} is the list of instantiations of FV that have been dealt with,
+for which 
 this setup is not responsible at all. Called by setup_lt_notground1default/12 ( same 
 arguments) which is only called as last call in 
 setup_lt_notground_fv/13.
 
-TODO: Really nail down the meaning of wait_var, also at what stage are what values for TMin and THolds set.
-TODO: Will wait_vars become invalidated? Inspect get_new_tholds.
+TODO: Really nail down the meaning of \exam{wait_var}, also at what stage are what
+values for \exam{TMin} and \exam{THolds} set.
+TODO: Will \exam{wait_vars} become invalidated? Inspect \exam{get_new_tholds}.
 
 \section{So far}
 
@@ -588,10 +616,8 @@ At what stage the HandledTime invariant is. Understanding the get_new_tholds,
 the reverse is on purpose as that is part of the invariant, having a partial
 instantiation left to right.
 
-After that, try understanding the cleanup efforts of wait_var.
+After that, try understanding the cleanup efforts of \exam{wait_var}.
 
-BUT: start describing in detail. Look at what I did so far, can I reuse documentation.
-Step1: Can leadsto.doc be printed out?
 
 \section{"Syntax" of Leadsto Specifications}~\label{sec:ltsyntax}
 
