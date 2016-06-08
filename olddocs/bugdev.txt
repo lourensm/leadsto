@@ -1,0 +1,989 @@
+De -newroundoff is te complex: 
+oldroundoff: rondt alleen af bij het setten van atoms. Bij het opvragen
+niet: dus dan moet alles precies kloppen.
+Dat lijkt ook beter, laat ons atom_key_id eruit slopen.
+Verder ook noroundoff de atom_trace exact opslaan.
+
+ulimit = 5 s
+yes1 no1:
+./ltbare zonder opties
+    54 yes1
+     40 no1
+     94 total
+/usr/local/ai/lt/bin/ltbare v0.85
+     54 yes085
+     40 no085
+     94 total
+Same set
+/usr/local/ai/lt/bin/ltbare
+only the no's, ulimit 15
+./design3.lt
+./machado3.lt
+./machado3b.lt
+./machado8-fic30.lt
+./machado9-los.lt
+wc -l yes15 no15
+     59 yes15
+     35 no15
+     94 total
+Ik doe:
+ulimit -> 30
+make testtraces;cp yes yes30
+Ging wel iets mis, maar ik denk dat
+wel aantal erbij zijn.
+
+yes0: 65 files
+Ik gebruik die voor eerste vergelijking:
+Eerst ./ltbare => tb1 (Dat is oldatomid en unchangehandled
+real    8m6.264s
+user    4m23.670s
+sys     0m1.340s
+ls -l st/tb1/*.tr | wc -l
+     65
+
+yes0 met /usr/local/ai/lt/bin/ltbare (version 0.85) => tb085
+real    7m45.226s
+user    4m12.490s
+sys     0m1.530s
+ls -l st/tb085/*.tr | wc -l
+     65
+
+make difftr1:
+FILE:machado11c.lt.tr
+FILE:machado3b.lt.tr
+FILE:machado3.lt.tr
+FILE:machado4.lt.tr
+FILE:machado8-fic30.lt.tr
+FILE:machado8-no-p.lt.tr
+FILE:machado9-los.lt.tr
+FILE:machado.lt.tr
+FILE:pic1.lt.tr
+FILE:pic2.lt.tr
+FILE:pic3.lt.tr
+Lijken vnl afrondingen te zijn.
+=> Tool maken voor smalldiff
+
+
+Eerst -checkhandled -newroundoff
+make savetraces.tbchnr
+real    4m5.054s
+user    2m12.760s
+sys     0m1.320s
+VERDACHT
+ls -l st/tbchnr/*.tr | wc -l
+     49
+IMPL ERROR:
+coopmas_chars.lt
+coopmas.lt
+design2.lt
+design3.lt
+design4.lt
+design7.lt
+heart.lt andere IMPL ERROR
+machado11c.lt
+machado8-fic30.lt
+machado9-los.lt
+pic1.lt
+pic2.lt
+pic3.lt
+test.lt
+week5.lt
+Later debuggen.
+
+Dan -checkhandled
+make savetraces.tbch
+real    8m20.710s
+user    4m31.870s
+sys     0m1.370s
+ls st/tbch/*.tr | wc -l
+     65
+OK
+make difftr1
+diffing traces st/tb1 st/tbch
+IDENTIEK
+
+Dan -checkhandled -noroundoff
+make savetraces.tbnoround
+real    8m17.594s
+user    4m30.140s
+sys     0m1.380s
+ls st/tbnoround/*.tr | wc -l
+     65
+Verschil:
+FILE:crash.lt.tr verschil veel meer 3.0
+Ik moet daar bij saven van trace toch %g veranderen!
+machado11c.lt.tr
+machado11.lt.tr
+etc: verder lijkt noroundoff het wel te doen!
+Irritant: de constant editor doet ook elementen verdwijnen
+wait_var: kijk of het mogelijk is dat wait_vvar entrie
+voorbij handled_time worden verplaatst.
+Zo ja, dan is er daar ook een dyn_handled nodig;
+MISSCHIEN SOWIESO! Verwijderen wait_var->handled !
+
+Ik heb log1 op de fluit
+Dus: oldatomid wel checkhandled, ulimit 5:
+    58 yes
+     36 no
+     94 total
+===============================
+Met /usr/local/ai/lt/bin/ltbare 
+    54 yes
+     40 no
+     94 total
+================================
+AU het is dus erger:
+4 specificaties leiden waarschijnlijk niet genoeg af
+igv checkhandled.
+r(X) leidt alleen tussen 1 en 2 r(0) af, niet verder b.v. 
+r(0):1-9 
+en helemaal niet fic_r(30,X)
+of fic_x5(30,X)
+
+leadsto([v0:'REAL',v1:'REAL',v2:'REAL',v3:'REAL',v4:'REAL',v5:'REAL',z0:'REAL',z1:'REAL',z2:'REAL',z3:'REAL',z4:'REAL',z5:'REAL'],
+and(w0(v0),w1(v1),w2(v2),w3(v3),w4(v4),w5(v5),x0(z0),x1(z1),x2(z2),x3(z3),x4(z4),x5(z5)),
+r(v0*z0+v1*z1+v2*z2+v3*z3+v4*z4+v5*z5),efgh(0,0,1,1)).
+
+Oftewel, daar gaat iets mis meteen: 
+wi 0  (0-8) 
+w0 0  (0-9)
+alle xi hebben een waarde vanaf 0.
+
+leadsto([x:'REAL',y:'REAL'],and(instage(e),x0(x),w0(y)), w0(y*(1-alpha*x*step)), efgh(0,0,1,1)).
+Nu heeft x0(X) waarde overal
+w0(x) waarde w0(0) (0-3)
+Isoleren?
+Walgelijk complex blijft het:
+w0(0) afgeleid 0,3
+mist w0(0.0) 3,8
+interval([], 0, 1, w0(0.0)).
+
+
+Bij local_trace(16):
+de x0(1.0) fail(3) -> tot 3 niks. 
+Dan back naar vorige of start antecedent, kijken vanaf 3: 
+instage(e): blank: 
+Ik vermoed dat hier algo besluit om hele wait_var vanaf 
+instage(e) te garbage collecten: 
+We gaan de hele wait_var voor instage(e) verwijderen.
+Maar dat gaat toch niet op? Dat gaat alleen op omdat we ons beperkt hebben
+tot x0(1.0) die faalt tussen 2 en 3. 
+Maar er kunnen nog alternatieven zijn!
+Niet voor x0(1.0) maar wel voor x0(x)
+
+Ho, maar misschien is dit al wel correct?
+setup_lt_wait_g(TFail, Atom, PN, Id, IdTerm,LitsToHold,
+					THoldsPrev, HoldLits, ConseRId, Delay,
+					THoldsNew,Removed)
+We hebben een wait_fired gehad en geconstateerd dat de eerste kans
+om te kunnen vuren zou kunnen zijn na TFail, waar lit(Atom, PN) blank is.
+
+We willen dus "gewoon" de wait_var entry lit(Atom, PN) verwijderen
+met alles wat daar aan hangt.
+Maar ho even!
+We hebben het over een wait_fired, die heeft mogelijk conditions na de
+TFail lit(Atom, PN) en de wait_var zou best een andere instance
+kunnen hebben met een andere waarde dan een van de latere antecedenten.
+
+We horen dus eigenlijk te backtracken:
+Kijk naar w0(0.0),pos: als die niet geldt:
+zoek of deze verderop, maar voor handled_time weer true wordt.
+Zo ja, kijk ook naar de eerdere, x0(1.0) zo nee, dan kunnen we de
+entry van x0(1.0) verwijderen uit wait_var, met meteen alles wat erop volgt.
+Dat houdt ook in het terecht verwijderen van een af te handelen
+wait_var(  x0(1.0) )
+
+Als w0(0.0) niet geldt tot 2.5 of 3
+maar daarna mogelijk weer wel,
+kijk of eerdere antecedenten daar ook gelden.
+Zo ja, plak weer de entry eraan vast.
+Zo nee, dan mag alleen de w0(0.0) entry verwijderd worden!
+
+Wat ik doe bij update_lits_fired is zoeken
+naar de range waarbinnen alle antecedenten true zijn.
+als dan blijkt dat vanaf laatste fire-time tot 
+fail(3, blank) een antecedent blank is, dan moet niet hele entry ge-gc'd 
+worden, maar alleen de laatste entry? Hoewel:
+we weten dat vanaf een literal, hier x0(1.0) de rest van de antecedenten
+niet meer gelden tot fail(3, blank), dus vanaf die entry moeten we
+gaan opruimen.
+
+We hebben geconstateerd dat x0(1.0) faalt tot 3
+daarna dat 3 niet lager is dan dat alle eerdere antecedenten gelden:
+instage(e) geldt tot 3: dus gaan we op zoek of
+we een nieuwe range kunnen vinden vanaf TFail
+
+En dat lijkt onverstandig om te proberen voorbij THandled.
+In elk geval kunnen we dan bij update_new_range alleen
+wait_vars weggooien:
+Uh we moeten in elk geval weggooien vanaf x0(1.0) en lits voorbij
+mits ze niet gelden tot handled time.
+Dan moet er een dyn_handled aangemaakt worden voor x0(1.0)
+Stel dat x0(1.0) wel begint te gelden verderop:
+Nooit mag dan iets VOOR x0(1.0) weggegooid worden, de entry voor
+x0(1.0) moet of verwijderd worden uit wait_var met dan een aantekening
+dyn_handled, of x0(1.0) moet deel uit maken van een nieuwe wait_fired
+of wait_true.
+
+update_new_range(TFail, Atom, PN, Id, IdTerm, LitsToHold, HoldLits, ConseRId,
+		 Delay, Removed) :-
+moet op zoek gaan naar een nieuw geldend interval, als dat begint met een
+blank, dan moet de wait_var entry Atom, PN, Id, IdTerm verwijderd worden.
+BLIJF MET JE FIKKEN VAN HoldLits af: er kunnen andere instances
+wel gelden voor HandledTime.
+
+PAS AAN.
+
+En de andere alternatieven die nu nog update_new_true_range aanroepen?
+
+Ik denk trouwens dat ik de wait_fired liever niet voorbij 
+HandledTime laat vallen.
+Omdat: de wait_var zou kunnenworden verwijderd. Maar dat is niet erg omdat
+dan de wait_fired meteen mee wordt verwijderd!
+DUS TODO:update_new_range aanpassen.
+
+Verder:
+Hele update_lits_fired volgen:
+First branch AnteHoldsTODO == []
+-> stores setup_lt_wait_fired dat is altijd ok:
+mag zelfs samen met wait_var entry verwijderd worden. wait_var wordt later
+opnieuw gecreeerd, uh, uh, nee, dat mag niet! We moeten goed bijhouden
+wat er gevuurd heeft. We moeten zorgen dat een wait_fired niet 
+voorbij z'n wait_var's bereik komt.
+Maar laat voorlopig zo.
+
+In update_lits_fired II:
+O2 = true(Tlo, Thi, _Cont)
+cmp_ge(THoldsNew1, HT) tak ok.
+andere tak doet update_retrace1 daar dus zelfde correctie als fail(TEnd, _by)
+
+in update_retrace1
+
+We zouden nog speciale geval:
+cmp_ge(TFail, TH) kunnen doen en dan setup_lt_wait_g
+
+eerst cmp_lt(TFail, THoldsNew)
+->	find_min_range_ground(Atom, PN,TFail, O2),
+O2 = blank is ok.
+O2 = true(Tlo, THi, _Cont)
+Case: Tlo nog onder THoldsNew -> probeer aan te sluiten
+bij stukje Tlo, min(Thi,THoldsNew)
+AANPASSEN: update_new_true_range:
+we weten nu dat Atom,PN geldt, maar we mogen weer niet rm_gc_vars doen
+voorbij Atom,PN
+
+Niet cmp_lt(Tlo, THoldsNew) =>
+begin opnieuw, wetend van Tlo,Thi
+in update_mid_true_range gebeurt iets raars: de literals worden verder
+door elkaar gehusseld lijktt en dat gaat stuiten op een 
+chknotandyes lijkt me: TODO: genereer een voorbeeld die
+uitkomt op update_mid_true_range en de geldende literal zit in het midden!
+In elk geval:
+update_mid_true_range ook aanpassen: alleen Atom, PN ref mag verwijderd
+worden. Ter vereenvoudiging zouden we gewoon een aanpassing
+van update_new_range kunnen doen ipv update_mid_true_range en
+vergeten dat we al weten dat een tussen literal geldt.
+
+Het wordt erg gecompilceerd met update_new_true_range:
+op dit moment wordt daar weer update_retrace1 aangeroepen.
+
+Igv update_new_true_range weten we dat er een gat zit ergens in
+een literal voor de CurrentLiteral.
+
+Ik vrees dat ik update_retrace nog complexer moet maken door
+de CurrentData mee te slepen.
+Maar het is wel raar:
+Ik weet dat een Literal voor de CurrentLiteral de mist in zal
+gaan uh, maar niet noodzakelijk over het hele traject.
+Bla bla
+Nog eens later bekijken.
+
+wait_var???
+Dus eigenlijk als de wait_var entry verdwijnt wil ik toch
+liefst een dyn_handled entry aanmaken.
+Later: eerst op zoek naar update_mid_true_range
+=============================================
+update_mid_true_range op zoek naar bug:
+doet nieuwe ordening
+
+HELP: het gaat helemaal mis lijkt wel:
+De Atom,PN i.e. CurrentLit slaat niet perse op laatste Literal:
+We gaan blijkbaar van voor naar achter kijken wat er nog geldt.
+
+Ik denk dat we alles maar moeten handhaven:
+Alleen opletten: We mogen niet zomaar bij
+setup_lt_wait_g alle wait_vars vanaf Atom,PN verwijderen?
+Hoewel, misschien wel nog bij update_lits_fired: we hebben de garantie dat
+alle HoldLits aansluitend gelden tot THoldsNew
+
+Als 1 Literal on the way fail(TEnd, _By) wordt, 
+mogen we zodra we gekeken hebben of we iets vinden voor deze hele
+instance, vanaf Atom,PN verwijderen. Niet ervoor!
+
+Alle andere subcalls update_retrace1 -> update_new_true_range,
+update_mid_true_range, update_new_range moeten alert zijn dat 
+hoogstens entries vanaf Atom, PN worden verwijderd. Anders kappen
+we alternatieve instances voor Atom, PN af.
+
+
+Zorg dat we bij update_retrace1 uitkomen en wel met Atom,PN een
+middelste Literal.
+
+Alleereerst we moeten in wait_fired zijn dus alle 3 de antecedenten moeten 
+true zijn. De eerste moet verder true zijn tot T1.
+De tweede moet fail hebben, voor  THandled.
+De twwede moet daarna weer true worden, voorbij T1
+
+              Old TH    New TH
+              ^         ^
+a:      UUTTTT TTTTUUUU
+b:      UUTTTT UUUUUTTT
+c:      UUTTTT ????????
+
+Begint erop te lijken dat midrange niet kan.
+Ik moet zorgen dat Lit-middle zn start time voorbij
+de HoldsNewTime van eerdere literals geldt, maar zodra een eerdere literal
+niet meer succeed't tot HandledTime, gaan we via update_retrace1
+verder. Ik zou dus wel kunnen zorgen dat 
+
+Drie Literals:
+Rule moet wait_fired zijn, dus gedurende G alle true.
+Dus t0: einde van t0 - G , G
+De eerste lit L1 moet true zijn voorbij t0, zeg tot t1
+De tweede literal,L2 moet falen, fail(TFail, _) maar dat falen moet eerder
+zijn dan t1: TFail < t1.
+Dan moet L2 true zijn van Tlo tot Thi (maar Tlo == TFail?)
+Als Tlo < THoldsNew dan niet, dus
+Tlo moet >= THoldsNew
+Maar: Tlo == TFail en TFail < t1 en THoldsNew = t1
+
+  t0 - g         t0           t1
+ L1  |++++++++++++|+++++++++++|-----
+ L2  |++++++++++++|----
+          
+We hebben een stel antecedenten gevonden: verlengen de THolds.
+Maar nu doet er een lit Lf fail(TEnd)
+Maar die wordt van fail iets anders voor THoldsNew: TEnd < THoldsNew
+Daarna wordt Lf weer true, als dat voorbij THoldsNew is komen we op
+update_mid_true_range
+
+Maar: na fail(TEnd) kan alleen maar true(TEnd,..) volgen.
+Dus strijdige eisen.
+Zeker voor geval update_lits_fired -> update_retrace1
+FORGET THAT.
+--------------
+Repareren update_lits_fired -> update_retrace1
+update_lits_fired:
+Dit betreft een keten van instantiated antecedenten. Ik vermoed dat ze
+allemaal ground moeten zijn.
+
+Zolang alle antecedenten tot of voorbij nieuwe HT true zijn,
+bekijk de volgende literal. Als dat door hele antecedent geldt->
+nieuwe wait_fired entry.
+
+Stel, een Literal, Lf faalt echter voor nieuwe HT. Of meteen voorbij eerdere
+THoldsPrev of wat later: dat leidt tot:
+update_retrace1(TEnd, Atom, PN, Id, IdTerm, AnteHolds,
+				THoldsPrev,HoldLits, ConseRId, Delay,
+				THoldsNew, Removed)
+we weten nu dat Atom, PN faalt vanaf TEnd.
+De huidige rule met instances AnteHolds en instance Atom, PN
+moet nader geanalyseerd. Pas op: Er kunnen alternatieve instances zijn voor
+Atom, PN die wel zouden kunnen firen.
+in update_retrace1: ga uit van call alleen vanuit update_lits_fired
+dan : als O2 == blank dan inderdaad zoiets als
+setup_lt_wait_g: haal entry Atom,PN weg uit Id, IdTerm en ga alle
+verder geinstantieerde LitsToHold met wait_var en al verwijderen.
+
+Geval:
+TFail >= THoldsNew: dat betekent ook voorbij THandledNew, beter
+denk ik dan ook daar  setup_lt_wait_g
+
+Hee, ik denk dat het wel goed gaat met update_new_true_range omdat
+ik niet backtrack over eerdere antecedenten.
+
+update_mid_true_range lijkt wel fout te zijn, met 
+update_new_range
+
+TRACE at handled_time_step_start(3)
+ATOM             TRACE  
+instage(e)  1 - 3 : true  
+instage(p)  0 - 1 : true  
+s1(0.0)     1 - 20 : true  
+s1(1.0)     0 - 1 : true  
+s2(0.0)     0 - 6 : true  7 - 20 : true  
+s2(1.0)     6 - 7 : true  
+w0(0.0)     0 - 3 : true  
+x0(0.0)     0 - 1 : true  
+x0(0.5)     2 - 3 : true  
+x0(1.0)     1 - 2 : true  
+14:SET instage(e) (3,4) = true (by ds_ri(2))
+15:SET x0(0.25) (3,4) = true (by ds_ri(0))
+RESULTTIME:4
+HANDLED TIME -> 4
+UAT:3:wait_fired -> 
+
+
+UATID:30
+
+  UAT:3:wait_var(r(3), r(3), 3, 2, [], [], ds_litd(instage(e), pos, [], [], []), [ds_litd(x0(_G2030), pos, [], [], [check_sort_value(REAL, real, _G2030)]), ds_litd(w0(_G2048), pos, [], [], [check_sort_value(REAL, real, _G2048)])], [], maxinf, ds_cr([ds_litd(w0(_G2069), pos, [_G2069 is _G2048*_G2078, _G2078 is 1-_G2087, _G2087 is _G2030*0.1], [], [])], ds_ri(3)), [pv(y, REAL, real, _G2048), pv(x, REAL, real, _G2030)], efgh(0, 0, 1, 1))  i:30
+Dit???
+Ik snap niet waarom bij handled_time -> 4 de entry voor
+x0(X) range(2,3) niet beschikbaar meer is. Want die is nodig om
+
+DBB:4     r(0)
+[1.0]:x0(1.0)
+
+Merkwaardig:
+DBB:3     r(3)
+[]:instage(e)
+
+
+DUS:
+UATID:16
+
+  UAT:2:wait_fired(2, 3, [ds_lh(lit(w0(0), pos), k(k(r(3), instage(e)), x0(1.0)), k(k(r(3), instage(e)), x0(1))), ds_lh(lit(x0(1), pos), k(r(3), instage(e)), k(r(3), instage(e))), ds_lh(lit(instage(e), pos), r(3), r(3))], ds_cr([ds_litd(w0(_G1996), pos, [_G1996 is 0*_G2005, _G2005 is 1-_G2018, _G2018 is 1*0.1], [], [])], ds_ri(3)), efgh(0, 0, 1, 1))  i:16
+doet een 
+DBB:3     r(3)
+[]:instage(e)
+terwijl ik zou verwachten dat er ipv r(3) een
+k(k(r(3), instage(e)), x0(1))
+
+
+Wat gaat er mis?
+   Call: (25) algo:rm_gc_wait_vars(instage(e), pos, 'r(3)', r(3), [ds_lh(lit(x0(1.0), pos), 'k(r(3), instage(e))', k(r(3), instage(e))), ds_lh(lit(w0(0.0), pos), 'k(k(r(3), instage(e)), x0(1.0))', k(k(r(3), instage(e)), x0(1.0)))], [], [], wait_fired(2, 3, [ds_lh(lit(w0(0.0), pos), 'k(k(r(3), instage(e)), x0(1.0))', k(k(r(3), instage(e)), x0(1.0))), ds_lh(lit(x0(1.0), pos), 'k(r(3), instage(e))', k(r(3), instage(e))), ds_lh(lit(instage(e), pos), 'r(3)', r(3))], ds_cr([ds_litd(w0(_G1996), pos, [_G1996 is 0.0*_G2005, _G2005 is... -..., ...is...], [], [])], ds_ri(3)), efgh(0, 0, 1, 1))) ?
+doet
+Call: (28) assertz(dyn_handled_wait_var_instance('r(3)', r(3), []))
+
+terwijl we in update_lits_fired([ds_lh(lit(x0(1.0), pos), 'k(r(3), instage(e))', k(r(3), instage(e))), ds_lh(lit(w0(0.0), pos), 'k(k(r(3), instage(e)), x0(1.0))', k(k(r(3), instage(e)), x0(1.0)))], 2, 3, [ds_lh(lit(instage(e), pos), 'r(3)', r(3))], ds_cr([ds_litd(w0(_G1996), pos, [_G1996 is 0.0*_G2005, _G2005 is 1-_G2018, _G2018 is... *...], [], [])], ds_ri(3)), efgh(0, 0, 1, 1), 3, wait_fired(2, 3, [ds_lh(lit(w0(0.0), pos), 'k(k(r(3), instage(e)), x0(1.0))', k(k(r(3), instage(e)), x0(1.0))), ds_lh(lit(x0(1.0), pos), 'k(r(3), instage(e))', k(r(3), instage(e))), ds_lh(lit(instage(e), pos), 'r(3)', r(3))], ds_cr([ds_litd(w0(_G1996), pos, [_G1996 is 0.0*_G2005, _G2005 is... -..., ...is...], [], [])], ds_ri(3)), efgh(0, 0, 1, 1)))
+zitten.
+
+Ik zou hier verwachten dat 
+omdat in_stage(e) nog geldt, maar x0(1.0) niet, dat er misschien niets 
+verwijderd zou worden, of zeker dat de lokale wait_var entry
+
+
+leadsto([x:'REAL',y:'REAL'],and(instage(e),x0(x),w0(y)), w0(y*(1-alpha*x*step)), efgh(0,0,1,1)).
+
+Ik ga gewoon checkhandled terugschroeven.
+
+
+[lourens@swpc305 pl]$ diff yes yesold 
+48d47
+< ./machado11.lt
+50,52d48
+< ./machado8-fic30.lt
+< ./machado8-no-p.lt
+< ./machado9-los.lt
+
+
+optie -noroundoff
+     58 yes
+     36 no
+     94 total
+===============================
+optie newroundoff
+Aanpak: nog ca 4 uur besteden aan fixen newroundoff, als dat mis
+gaat: nieuwe checkhandled als default installeren.
+
+Mis: met newroundoff:
+design-comp-revision.lt
+design-costs.lt
+design-req-revision.lt
+design-trace1.lt
+design10.lt
+design??.lt
+trace?.lt
+coopmas*.lt
+week5.lt
+sugarscape1.lt
+test.lt
+machado*.lt
+pic*.lt
+
+Terug naar waar de wait_fired wordt aangemaakt:
+UATID:62
+
+85:set_wait1b(70, wait_fired
+Daar helemaal wait_var volgen.
+Ik vermoed dat wait_fired -> update_retrace1 -> setup_lt_wait_g
+dat de Atom waarop setup_lt_wait_g niet de laatste hoeft te zijn.
+
+Alle tussenliggende entries moeten kloppen.
+
+Ik moet dus iets doen met setup_lt_wait_fired, setup_lt_wait_true
+die alleen voorkomen in setup_lt_conse, ook in update_lits_fired
+
+setup_lt_conse <- {
+	       update_new_true_range,
+	       setup_lt_normed
+	       }
+update_new_true_range <- {
+		      update_activity_time1(wait_true(
+		      update_retrace1
+		      update_new_range
+		      update_mid_true_range
+		      update_new_true_range
+		      }
+setup_lt_normed <- {
+		setup_lt
+		fail_filter_handleRR
+		instantiate_op
+		}
+Ik denk dat dat de route is:
+fail_filter_handleRR, instantiate_op leveren FV waarden, die moeten ook
+de correcte waarde opslaan.
+Maar wat gebeurt er? Dus voor we filter_defaults_handle_others ingaan?
+LitData = ds_litd(Atom, PN, PreOps, PostOps, PostConds),
+assert_debug(ground(PreOps)),
+bagof1(ds_at(Atom, FV, AtomTrace),
+	       find_atom_trace_op(Atom, AtomTrace, PostOps, PostConds,FV, FVL),
+	       Traces),
+Dat is raar: de eerste keer zonder firen moet er een trace gevonden
+worden, maar de tweede keer weer.
+
+Waar wordt de dyn_handled_wait_var_instance geset?
+rm_wait_var(T, HT1,TMin,FV,FVL,LitData,ToDoAnte,AnteHolds1,
+				      THolds,ConseRId,PV,Delay,Id1,IdTerm1)
+assert_debug(AnteHoldsDone == AnteHolds1,aap1),
+		assert_debug(\+ \+append(_X, ToDoAnteL, ToDoAnte)),
+		LitData = ds_litd(Atom1, _PN, _PreOps, _PostOps, _PostConds),
+		copy_term((Atom1, FV), (Atom2,FV2)),
+		assert_debug(ground(FVL)),
+		(	Atom = Atom2,
+			select(FV2, FVL, FVL1)
+RAAR: De FV1 zat in wait_var, dat was ok.
+Eerst: wait_var: vind instances van huidige literal (is laatste ook):
+vindt er 1. Die wordt uitgesloten uit wait_var dmv instance variables.
+Er wordt een wait_fired aangemaakt. Ik vind het wel heel raar dat 
+de wait_fired een atom als argument heeft.
+
+rm_gc_wait_vars1
+
+Voor we drastisch gaan doen:
+Wat is er precies mis?
+Zodra ik assertz(dyn_handled_wait_var_instance) doe kan ik checken op
+aanwezige trace
+
+ttlchecker:
+1)als ik lege string als varname opgeef wordt de naam niet geupdate maar
+verandert de interne waarde wel in de default.
+
+
+cwa verwerkt in dyn_handled_wait ...
+Wat is er nog steeds mis?
+**TEST /./crash.lt
+% test/tbosse/./crash.lt compiled into spec 0.00 sec, 3,340 bytes
+IMPLEMENTATION ERROR:Unaccounted handled_wait_var_instance atom_trace_backup(eat_norm(3.0), 'k(r(4), metabolism_level(3))', k(r(4), metabolism_level(3)), [3.0], 0)
+% test/tbosse/./machado11c.lt compiled into spec 0.00 sec, 12,556 bytes
+IMPLEMENTATION ERROR:Unaccounted handled_wait_var_instance atom_trace_backup(x(1, 0.5), 'r(7)', r(7), [1, 0.5], 0)
+
+
+**TEST /./pic2.lt
+% test/tbosse/./pic2.lt compiled into spec 0.01 sec, 12,168 bytes
+IMPLEMENTATION ERROR:Unaccounted handled_wait_var_instance atom_trace_backup(x(1, 0.5), 'r(1)', r(1), [1, 0.5], 0)
+**TEST /./pic3.lt
+% test/tbosse/./pic3.lt compiled into spec 0.00 sec, 12,620 bytes
+IMPLEMENTATION ERROR:Unaccounted handled_wait_var_instance atom_trace_backup(x(1, 0.5), 'r(7)', r(7), [1, 0.5], 0)
+
+Eerst maar naar crash.lt kijken. Dat zou gedoe met reals kunnen zijn.
+scp crash.lt fluit:
+
+[1]  ?- algo:dyn_handled_wait_var_instance(P, Q, R), R = [S], number(S), T is S - 3.0.
+
+P = 'k(r(4), metabolism_level(3))'
+Q = k(r(4), metabolism_level(3))
+R = [3.0]
+S = 3.0
+T = -3.54825e-06 
+[1]  ?- algo:find_atom_trace(eat_norm(P), Q), R is P - 3.0.
+
+P = 3.0
+Q = [range(60, 80, true)]
+R = -3.54828e-07 
+
+Dus vraag is:
+De assertz(dyn_handled_wait_var_instance(...))
+wordt klaarblijkelijk opgeslagen los van find_atom_trace?
+
+I.g.v. wait_fired afhandelen wordt berekening heruitgevoerd?
+  UAT:70:wait_fired(70, 80, [ds_lh(lit(eat_norm(3), pos), k(r(4), metabolism_level(3)), k(r(4), metabolism_level(3))), ds_lh(lit(metabolism_level(3), pos), r(4), r(4))], ds_cr([ds_litd(eat_norm(_G2424), pos, [_G2424 is _G2432+0, _G2432 is 3+_G2446, _G2446 is _G2458*_G2459, _G2459 is 1-_G2468, _G2468 is 3/_G2477, _G2477 is 1*3, _G2458 is 0.9*3], [], [])], ds_ri(4)), efgh(0, 0, 10, 10))
+
+De oorsprong is:
+ SCHEDULE FIRE: 70 - 80  : [ds_litd(eat_norm(_G2376), pos, [_G2376 is _G2384+0, _G2384 is 3+_G2398, _G2398 is _G2406*_G2407, _G2407 is 1-_G2416, _G2416 is 3/_G2425, _G2425 is 1*3, _G2406 is 0.9*3], [], [])]  (ds_ri(4))
+
+Ik moet dus volgen: 
+12:SET eat_norm(3) (70,80) = true (by ds_ri(4))
+hoe komen we aan 3 hier
+
+AANPAK:
+wait_var => kijkt naar instances die bij laatste vars horen.
+Die moeten identiek zijn aan de wait_fired vars.
+Ik zou iets kunnen doen met controleren of er
+voor elke wait_fired entry een bijbehorende atom_trace is.
+
+
+cmp_lt(TFail, THoldsNew)
+so this current literal succeeded shorter than THoldsNew
+then look past TFail. If blank:
+setup_lt_wait_g(TFail, Atom, PN, Id, IdTerm,LitsToHold,
+					THoldsPrev, HoldLits, ConseRId, Delay,
+					THoldsNew,Removed)
+
+rm_gc_wait_vars(Atom,PN,Id, IdTerm,LitsToHold, HoldLits, [], Removed)
+
+Part I do not understand: rm_gc_wait_vars removing dependencies:
+
+There are ToDoAnte literals that may have constructed 
+wait_var entries
+
+So gc constructs Key for wait_var entry:
+IdTerm2 = k(IdTerm1,Atom),
+my_term_to_atom(IdTerm2,Id2),
+I think that part of the gc algorithm gives no problems.
+What about wait_true, wait_fired entries there?
+Seems ok: they are all removed.
+So we are left with
+rm_gc_wait_vars doing
+it :-
+     rm_wait_var(T, HT1,TMin,FV,FVL,LitData,ToDoAnte,AnteHolds1,
+				      THolds,ConseRId,PV,Delay,Id1,IdTerm1)
+     select(FV2, FVL, FVL1),
+     set_wait_var(T, HT1, TMin,FV, FVL1, LitData,ToDoAnte,
+				     AnteHolds1,THolds, ConseRId,PV,Delay,Id1,
+				     IdTerm1)
+and here we should add:
+assertz(dyn_handled_wait_var_instance(Id1,IdTerm1,FV2))
+we should probably check whether T < HandledTime, and then do
+nothing.
+as soon as wait_var has turn, we gather all dyn_handled_wait_var_instance
+and not follow those through.
+
+So, we follow setup_lt_notground_fv and deal with
+dyn_handled_wait_var_instance there.
+
+        ensure_handled_time(HT),
+	cmp_gt(HT, THolds),
+-> get_new_tholds
+   check_isolated_fire_rest
+
+So, get_new_tholds either ends in rm_gc_wait_vars(Atom,PN,Id1,IdTerm1,AnteHolds,
+						AHDoneOut,ToDoAnte,
+						Removed)
+where I do not understand when dyn_handled_wait_var_instance
+would become relevant.
+What seems to happen there with wait_var: The Literal instance becomes
+invalid. We should remove the whole wait_var entry.
+But that is doen already.
+
+Wat ik niet begrijp is dat Removed als dat een wait_var is.
+
+
+wait_fired, wait_true en wait_var entries verwijzen naar
+wait_var op hoger niveau.
+
+wait_fired, wait_true verwijzen naar de ID, de Key van de omliggende
+wait_var.
+
+rm_gc_wait_vars slaat op het verwijderen van de
+verwijzing naar een ground(?) Literal: Atom, PN
+die juist is uitgesloten uit een wait_var met Id1, IdTerm1
+
+append(AnteDone1, [ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHolds],
+		       OLits)
+Maar waar slaat wait_var dan op?
+LitData is de huidige Literal, maar waar verwijst een wait_var naar z'n
+predecessor
+Dat is via: IdTerm2 = k(IdTerm1,Atom),
+
+Verder kijken naar wait_fired en wait_true
+Dat moet uitlopen in een rm_gc_wait_vars van de Removed zelf
+of weer een set_wait_fired of set_wait_true
+
+Ik vermoed dat de call van rm_gc_wait_vars DIRECT alleen van Removed = wait_var
+komt
+Dus get_new_tholds zorgt voor rm_gc_wait_vars
+
+alle andere rm_gc_wait_vars via setup_lt_wait_g
+
+get_new_tholds <- setup_lt_notground_fv
+setup_lt_notground_fv <- update_activity_time1(wait_var
+<- setup_lt_notground <- setup_lt_normed
+<- setup_lt, Removed = initial, fail_filter_handleRR, instantiate_op-> 
+add_default_cwa
+
+Ik vermoed dat wait_var: AnteHolds is een lijst ground LitData 
+die golden, was inverse. Nu gaan we na hoe het nu zit, 
+Gecheckte literal voor gechecte literal
+zodra een literal tot THandledNew niet meer geldt, doen we
+rm_gc_wait_vars(Atom,PN,Id1, IdTerm1, AnteHolds,
+					AHDoneOut,ToDoAnte, Removed)
+van die Literal.
+
+Dus in principe denk ik:
+rm_gc_wait_vars(Atom,PN,Id1, IdTerm1..) zegt dat
+de entry Atom,PN van Id1,IdTerm1 wait_var entry afgehandeld zijn.
+
+Wat doet update van wait_var?
+
+Ik ga doen:
+In rm_gc_wait_vars(Atom,PN,Id1, IdTerm1..) gaan we op zoek naar de wait_var
+entry.
+Als die T >= HandledTime heeft, doen we niks extra's.
+Anders asserten we een entry dyn_handled_wait_var_instance(Id1,IdTerm1,FV2))
+
+Dan in setup_lt_notground_fv: daar doen we
+setof(FV2, retract(dyn_handled_wait_var_instance(Id1,IdTerm1,FV2)),FVsDone)
+en het gaat er nu om dat er een entry teruggeplaatst is, dus niet voorkomt in
+FVL, maar wel afgehandeld is. Ik zou dan dus: 
+die entries niet laten toevoegen aan FVL, maar pas op met
+add_default_cwa ik denk dat dat ok is.
+
+
+
+update_activity_time1(wait_fired(THolds, THandled, AnteHolds,
+				ConseRId, Delay), THolds) :-
+	reverse(AnteHolds, AnteHolds1),
+	chk_not_inv(AnteHolds1),
+	Removed = wait_fired(THolds, THandled, AnteHolds,
+				ConseRId, Delay),
+	update_lits_fired(AnteHolds1, THolds, THandled, [], ConseRId,
+			  Delay, maxinf, Removed).
+
+update_lits_fired([], THoldsPrev, THandled, HoldLits, ConseRId, Delay,
+		  THoldsNew, _Removed) :-
+        T3 = THandled,
+	T4 is T3 + THoldsNew - THoldsPrev,
+	schedule_fire(ConseRId, T3, T4),
+	chk_inv(HoldLits),
+	ensure_handled_time(HT),
+	assert_debug(cmp_ge(THoldsNew, HT)),
+	setup_lt_wait_fired(THoldsNew,T4,HoldLits,ConseRId,Delay).
+
+Update lits fired always has Removed = wait_fired(..)
+update_retrace1 called from update_new_true_range, update_lits_fired
+update_new_true_range called from update_mid_true_range,update_new_true_range,
+update_activity_time1(wait_true(TMin, THolds, AnteHolds, ConseRId, Delay),
+		      THolds),update_retrace1,update_new_range
+So this whole set of calls:
+update_retrace1,
+update_new_true_range,
+update_mid_true_range,
+update_new_range
+all have as source wait_fired or wait_true
+
+Als in:
+rm_gc_wait_vars(Atom,PN,Id, IdTerm,LitsToHold, HoldLits, [], Removed)
+er een 1-1 verband zou zijn tussen Removed en andere argumenten,
+dan zou ik bij de tweede sweep een rm_gc_wait_vars1 operatie
+een dyn_rm_gc_wait_vars/8 entry kunnen laten aanpassen.
+
+rm_gc_wait_vars <- get_new_tholds
+rm_gc_wait_vars <- setup_lt_wait_g
+
+setup_lt_wait_g <- update_lits_fired
+setup_lt_wait_g <- update_retrace1
+setup_lt_wait_g <- update_new_true_range
+
+Lijkt allemaal wat ingewikkeld.
+
+Ik kan:
+Alle wait_fired en wait_true en wait_var entries die
+zichzelf verwijderen en een instantiation in hun parent
+wait_var entry teruggeven:
+Markeer de teruggegeven instances:
+Bij het analyseren van de wait_var moeten deze entries niet
+meegenomen worden.
+Dat zou een aparte lijst kunnen zijn.
+
+Doe dus niet postponen, maar wel apart markeren.
+ 
+
+Ik denk:
+1)wait entry verwijderd:een wait_fired moet verwijderd uit de wait_var
+2)wait entry verwijderd:De wait_var zelf moet verwijderd omdat een
+  eerdere antecedent al ongeldig is.
+
+Wat goed zou zijn is om toch meteen de update te doen, maar dan de
+hertoegevoegde fired_entries voorzien van een flag: handled for now.
+Zou meteen ook kunnen om alle entries een handled_for now waarde mee te geven?
+
+
+Wat we kunnen doen is:
+De Removed's meenemen:
+dyn_rm_gc_wait_vars(....., Removed) :
+Ik heb een wait_fired entry 
+
+Kijk naar heart.lt
+IMPLEMENTATION ERROR:Missing wait_var ID:k(r(12), (stimulus|occurs))
+
+Iets zorgt voor 
+rm_wait_var 0  r(12) 
+([[]])
+
+UATID:1291
+
+  UAT:80:wait_var(r(11), r(11), 80, 79, [_G1049], [], ds_litd((_G1049|cycle|drain|receives|fluid), pos, [], [], [check_sort_value(group, unspecified, _G1049)]), [], [], maxinf, ds_cr([ds_litd((_G1049|cycle|drain|received|fluid), pos, [], [], [])], ds_ri(11)), [pv(g, group, unspecified, _G1049)], efgh(0, 0, 1, 1))  i:1291
+FDHO:14
+
+set_wait_var 14  r(11) ([])
+
+  16:set_wait1a(81, w(r(11), r(11), 81, 80, [_G1049], [], ds_litd((_G1049|cycle|drain|receives|fluid), pos, [], [], [check_sort_value(group, unspecified, _G1049)]), [], [], maxinf, ds_cr([ds_litd((_G1049|cycle|drain|received|fluid), pos, [], [], [])], ds_ri(11)), [pv(g, group, unspecified, _G1049)], efgh(0, 0, 1, 1), 81))
+0:rm_gc_wait_vars
+
+rm_wait_var 0  r(12) 
+([[]])
+
+set_wait_var 15  r(12) ([])
+
+rm_wait_var(_T, _HT1,_TMin,FV,FVL,LitData1,ToDoAnte1,
+		     AnteHolds,
+		     _THolds,_ConseRId,_PV,_Delay,Id2,IdTerm2)
+impl_error('Missing wait_var ID:~w',[Id2])
+
+
+
+Bug multiple fire:
+Wat gebeurt er:
+1)Aan begin:
+wait_var van empty instantiations
+wait_fired van gevuurde instantiatie.
+Vervolgens wordt handled_time opgeschoven en
+doen we update_handled_time.
+Eerst komt wait_fired aan de beurt: die
+ruimt zichzelf op uit wait_fired en plaatst zich weer in de
+wait_var.
+
+Daarna komt deze wait_var aan de beurt, maar OH PROBLEM:
+hij ziet dat er gevuurd kan worden.
+
+Ik vermoed dat dit alleen speelt in bereik tussen vorige handled_time
+en de nieuwe handled_time.
+
+Wat ik zou kunnen doen is de wait_fired niet meteen bij wait_var terug plaatsen
+maar:
+1)In een andere entry: wait_var_extra_new??
+2)Wel in de wait_var maar met een extra flag verwijzend naar tot waar 
+  hij handled is.
+
+Eigenlijk mag de wait_fired nog niet aan wait_var toegevoegd,
+pas na wait_var zelf aan de beurt is gekomen.
+Waarschijnlijk is dat zo met het hele recursieve gebeuren.
+
+We zitten in:
+update_activity_times(ResultTime) :-
+	alog(update_act_times, '   UPDATE_activity_times:~w~n',[ResultTime]),
+	repeat,
+	(	get_wait1(T, Activity,Ref),
+		cmp_lt(T, ResultTime)
+	->	retract_wait1(Ref),
+		update_activity_time(Activity, T),
+		fail
+	;	!
+	).
+
+handled_time_step(ResultTime) :-
+	ensure_handled_time(HT),
+	handle_fired,
+	first_possible_activity_result(ResultTime),
+	cleanup_traces(HT, ResultTime),
+	set_handled_time(ResultTime),
+	end_time(TEnd),
+	(cmp_ge(ResultTime, TEnd)
+	->	true
+	;	update_activity_times(ResultTime)
+	).
+
+Een wat_fired:
+activity_min_result_time
+Removed = wait_fired(THolds, THandled, AnteHolds,
+				ConseRId, Delay),
+	update_lits_fired(AnteHolds1, THolds, THandled, [], ConseRId,
+			  Delay, maxinf, Removed).
+/*
+  update_lits_fired called by wait_fired activity
+  THoldsPrev: antecedent known to hold upto THolds
+  THandled:time upto which consequent has fired
+
+  Running arg:
+  HoldLits: those Lits hold (extra) between  THoldsPrev and THoldsNew
+  */
+In update_lits_fired we found out that wait_fired rules "current"
+antecedent doesn't match up to time starting at TEnd
+Now we find that after TEnd, find_min_range_ground(Atom, PN,TFail, O2)
+has O2 = blank: after the failing range we get to unexplored territory
+=> setup_lt_wait_g(TFail, Atom, PN, Id, IdTerm,LitsToHold,
+					THoldsPrev, HoldLits, ConseRId, Delay,
+					THoldsNew,Removed)
+We probably should know that TFail >= THandled
+
+setup_lt_wait_g ignores TFail incorrectly.
+
+What we should probably do is:
+1)Require TFail >= THandled, and possibly TFail == THandled
+2)Prestore the 
+rm_gc_wait_vars(Atom,PN,Id, IdTerm,LitsToHold, HoldLits, [], Removed)
+action, postpone it till after update_activity_times (or at end of it).
+
+But we need to scheck:
+Is TFail always >= THandled here?
+We should check first_possible_activity_result(ResultTime)
+per wait_fired and other setup_lt_wait_g elements.
+
+update_lits_fired     -> update_retrace1 ->  setup_lt_wait_g
+update_new_true_range -> setup_lt_wait_g
+
+update_new_true_range -> update_new_true_range
+update_activity_time1(wait_true(TMin, THolds, AnteHolds, ConseRId, Delay),
+		      THolds)-> update_new_true_range
+update_retrace1 -> update_new_true_range
+update_new_range -> update_new_true_range
+update_mid_true_range -> update_new_true_range
+update_retrace1 -> update_mid_true_range
+update_retrace1 -> update_new_range
+So, only deal with wait_true and wait_fired
+We may check/assert this by testing Removed.
+activity_min_result_time(wait_true(TMin, THolds, _AnteHolds, _ConseRId,
+				    Delay), RT) :-
+	!,efgh0(Delay, E, _F, G, _H),
+	RT is TMin + G + E.
+/*
+  Rule just fired up to THandled
+  */
+activity_min_result_time(wait_fired(_THolds, THandled, _AnteHolds, _Conse,
+				    _Delay), RT) :-
+	!,
+	RT = THandled.
+
+So in case of wait_fired, we propagate until we reach THandled,
+I think.
+
+Two cases: We find out firing range can be extended.
+firing ends.
+
+Ik doe nu:
+setup_lt_wait_g(TFail, Atom, PN, Id, IdTerm, LitsToHold, _THoldsPrev, 
+		HoldLits, _ConseRId, _Delay, _THoldsNew, Removed) :-
+	chknotandyes(LitsToHold, Atom, PN, Id, IdTerm,HoldLits,
+		     setup_lt_wait_g1),
+	(is_local
+	->	ensure_handled_time(HT),
+		assert_debug(cmp_ge(TFail, HT))
+	;	true
+	),
+	rm_gc_wait_vars(Atom,PN,Id, IdTerm,LitsToHold, HoldLits, [], Removed).
+
+Toch wat testen:
+allerlei setup_lt_wait_g situaties oproepen.
+
+Daarna: rm_gc_wait_vars uitstellen tot later.
+
+Wat doen andere opties?
+setup_lt_conse -> setup_lt_wait_fired, setup_lt_wait_true
+
+wait_var -> rm_gc_wait_vars
+
+Wat ik bijna zou kunnen durven is:
+rm_gc_wait_vars(Atom,PN,Id, IdTerm,LitsToHold, HoldLits, [], Removed)
+vervangen door iets nieuws dat pas aan end update_activity_times
+in actie komt.
