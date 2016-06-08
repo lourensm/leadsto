@@ -1,0 +1,1284 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+
+<html>
+<head>
+<title>LeadsTo Software</title>
+<style type="text/css">
+
+/* Style sheet for SWI-Prolog latex2html
+*/
+
+dd.defbody
+{ margin-bottom: 1em;
+}
+
+dt.pubdef, dt.multidef
+{ color: #fff;
+padding: 2px 10px 0px 10px;
+margin-bottom: 5px;
+font-size: 18px;
+vertical-align: middle;
+overflow: hidden;
+}
+
+dt.pubdef { background-color: #0c3d6e; }
+dt.multidef { background-color: #ef9439; }
+
+.bib dd
+{ margin-bottom: 1em;
+}
+
+.bib dt
+{ float: left;
+margin-right: 1.3ex;
+}
+
+pre.code
+{ margin-left: 1.5em;
+margin-right: 1.5em;
+border: 1px dotted;
+padding-top: 5px;
+padding-left: 5px;
+padding-bottom: 5px;
+background-color: #f8f8f8;
+}
+
+div.navigate
+{ text-align: center;
+background-color: #f0f0f0;
+border: 1px dotted;
+padding: 5px;
+}
+
+div.title
+{ text-align: center;
+padding-bottom: 1em;
+font-size: 200%;
+font-weight: bold;
+}
+
+div.author
+{ text-align: center;
+font-style: italic;
+}
+
+div.abstract
+{ margin-top: 2em;
+background-color: #f0f0f0;
+border: 1px dotted;
+padding: 5px;
+margin-left: 10%; margin-right:10%;
+}
+
+div.abstract-title
+{ text-align: center;
+padding: 5px;
+font-size: 120%;
+font-weight: bold;
+}
+
+div.toc-h1
+{ font-size: 200%;
+font-weight: bold;
+}
+
+div.toc-h2
+{ font-size: 120%;
+font-weight: bold;
+margin-left: 2em;
+}
+
+div.toc-h3
+{ font-size: 100%;
+font-weight: bold;
+margin-left: 4em;
+}
+
+div.toc-h4
+{ font-size: 100%;
+margin-left: 6em;
+}
+
+span.sec-nr
+{
+}
+
+span.sec-title
+{
+}
+
+span.pred-ext
+{ font-weight: bold;
+}
+
+span.pred-tag
+{ float: right;
+padding-top: 0.2em;
+font-size: 80%;
+font-style: italic;
+color: #fff;
+}
+
+div.caption
+{ width: 80%;
+margin: auto;
+text-align:center;
+}
+
+/* Footnotes */
+.fn {
+color: red;
+font-size: 70%;
+}
+
+.fn-text, .fnp {
+position: absolute;
+top: auto;
+left: 10%;
+border: 1px solid #000;
+box-shadow: 5px 5px 5px #888;
+display: none;
+background: #fff;
+color: #000;
+margin-top: 25px;
+padding: 8px 12px;
+font-size: larger;
+}
+
+sup:hover span.fn-text
+{ display: block;
+}
+
+/* Lists */
+
+dl.latex
+{ margin-top: 1ex;
+margin-bottom: 0.5ex;
+}
+
+dl.latex dl.latex dd.defbody
+{ margin-bottom: 0.5ex;
+}
+
+/* PlDoc Tags */
+
+dl.tags
+{ font-size: 90%;
+margin-left: 5ex;
+margin-top: 1ex;
+margin-bottom: 0.5ex;
+}
+
+dl.tags dt
+{ margin-left: 0pt;
+font-weight: bold;
+}
+
+dl.tags dd
+{ margin-left: 3ex;
+}
+
+td.param
+{ font-style: italic;
+font-weight: bold;
+}
+
+/* Index */
+
+dt.index-sep
+{ font-weight: bold;
+font-size: +1;
+margin-top: 1ex;
+}
+
+/* Tables */
+
+table.center
+{ margin: auto;
+}
+
+table.latex
+{ border-collapse:collapse;
+}
+
+table.latex tr
+{ vertical-align: text-top;
+}
+
+table.latex td,th
+{ padding: 2px 1em;
+}
+
+table.latex tr.hline td,th
+{ border-top: 1px solid black;
+}
+
+table.frame-box
+{ border: 2px solid black;
+}
+
+</style>
+</head>
+<body style="background:white"> 
+<div class="title">LeadsTo Software</div>
+<div class="author">Lourens van der Meij <br>
+E-mail: <a class="url" href="mailto:lourenstcc@gmail.com">lourenstcc@gmail.com</a></div>
+<div class="abstract">
+<div class="abstract-title">Abstract</div> This document describes the 
+LeadsTo software in detail. It starts out as an investigation into 
+details of the algorithm.
+
+<p></div>
+
+<h1><a id="document-contents">Table of Contents</a></h1>
+
+<div class="toc">
+<div class="toc-h2"><a class="sec" href="#sec:1"><span class="sec-nr">1</span> <span class="sec-title">LeadsTo 
+core design and implementation</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:1.1"><span class="sec-nr">1.1</span> <span class="sec-title">Introduction</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:1.2"><span class="sec-nr">1.2</span> <span class="sec-title">run_simulation/2</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:1.3"><span class="sec-nr">1.3</span> <span class="sec-title">LeadsTo 
+specifications</span></a></div>
+<div class="toc-h4"><a class="sec" href="#sec:1.3.1"><span class="sec-nr">1.3.1</span> <span class="sec-title">Sources 
+for information</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:2"><span class="sec-nr">2</span> <span class="sec-title">Details</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:2.1"><span class="sec-nr">2.1</span> <span class="sec-title">Times: 
+Handled Time, Setup Time, Start Time, End Time</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:2.2"><span class="sec-nr">2.2</span> <span class="sec-title">Traces</span></a></div>
+<div class="toc-h4"><a class="sec" href="#sec:2.2.1"><span class="sec-nr">2.2.1</span> <span class="sec-title">Datastructures</span></a></div>
+<div class="toc-h4"><a class="sec" href="#sec:2.2.2"><span class="sec-nr">2.2.2</span> <span class="sec-title">Algorithm 
+Variables</span></a></div>
+<div class="toc-h4"><a class="sec" href="#sec:2.2.3"><span class="sec-nr">2.2.3</span> <span class="sec-title">Loading 
+and Trace Generation</span></a></div>
+<div class="toc-h4"><a class="sec" href="#sec:2.2.4"><span class="sec-nr">2.2.4</span> <span class="sec-title">Saving 
+traces</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:3"><span class="sec-nr">3</span> <span class="sec-title">Details</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:3.1"><span class="sec-nr">3.1</span> <span class="sec-title">Constants</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:3.2"><span class="sec-nr">3.2</span> <span class="sec-title">Model 
+Checking</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:3.3"><span class="sec-nr">3.3</span> <span class="sec-title">recwait</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:3.4"><span class="sec-nr">3.4</span> <span class="sec-title">schedule_fire/3</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:3.5"><span class="sec-nr">3.5</span> <span class="sec-title">Following 
+the progress of leadsto rules</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:4"><span class="sec-nr">4</span> <span class="sec-title">Working 
+backwards</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.1"><span class="sec-nr">4.1</span> <span class="sec-title">Leadsto 
+times <code>e</code>, <code>f</code>, <code>g</code>, <code>h</code></span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.2"><span class="sec-nr">4.2</span> <span class="sec-title">Invariant</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.3"><span class="sec-nr">4.3</span> <span class="sec-title">Sketch 
+of the algorithm</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.4"><span class="sec-nr">4.4</span> <span class="sec-title">Rule 
+States</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.5"><span class="sec-nr">4.5</span> <span class="sec-title">Garbage 
+collection</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.6"><span class="sec-nr">4.6</span> <span class="sec-title">Understanding</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:5"><span class="sec-nr">5</span> <span class="sec-title">So 
+far</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:6"><span class="sec-nr">6</span> <span class="sec-title">"Syntax" 
+of Leadsto Specifications</span></a></div>
+</div>
+
+<p>
+
+<h2><a id="sec:1"><span class="sec-nr">1</span> <span class="sec-title">LeadsTo 
+core design and implementation</span></a></h2>
+
+<p>
+
+<h3><a id="sec:1.1"><span class="sec-nr">1.1</span> <span class="sec-title">Introduction</span></a></h3>
+
+<p>A leadsto specification is encoded as a pl file containing 
+predicates.
+
+<p>
+
+<h3><a id="sec:1.2"><span class="sec-nr">1.2</span> <span class="sec-title">run_simulation/2</span></a></h3>
+
+<p>Here we describe the main leadsto procedure <a id="idx:runsimulation2:1"></a><span class="pred-ext">run_simulation/2</span>,
+<code>run_simulation(File, Frame)</code> This leadsto specification <var>File</var> 
+is loaded into the leadsto runtime:
+
+<p>
+<ol class="latex">
+<li>The predicates are loaded into module <code>spec</code>.
+
+<p>
+<li>After that, all terms in the input file are preprocessed, often 
+leading to asserted dynamic predicates in the current(algo) module.
+
+<p>There seems to be almost no compilation at this stage and it looks 
+like terms in thee spec module often are asserted as facts into algo 
+without any transformation.
+
+<p>Some translation of sortdefs is performed. If a sort contains less 
+than 100 ground terms, it is instantiated, otherwise the sort definition 
+is left as is. This leads to spec:sortdef(Sort, Terms). The source 
+contains a beginning of a new way of encoding sort definitions.
+
+<p>
+<li>If the specification contained a model specification, we run each 
+model instance after setting up model parameters. Otherwise we perform a 
+single run.
+
+<p>
+<li>Running the specification
+
+<p>
+<ol class="latex">
+<li>setup of the runtime (first part of <a id="idx:runspec10:2"></a><a class="pred" href="#runspec1/0">runspec1/0</a>)
+<li>performing the firing of rules (<a id="idx:runspecrest0:3"></a><span class="pred-ext">runspec_rest/0</span>)
+</ol>
+
+<p>
+<li>Saving the generated trace
+</ol>
+
+<p>
+
+<h3><a id="sec:1.3"><span class="sec-nr">1.3</span> <span class="sec-title">LeadsTo 
+specifications</span></a></h3>
+
+<p>
+
+<h4><a id="sec:1.3.1"><span class="sec-nr">1.3.1</span> <span class="sec-title">Sources 
+for information</span></a></h4>
+
+<p>The file <code>userman.html</code> contains the documentation for 
+most allowed constructs in LeadsTo specifications.
+
+<p>The file <code>olddoc/syntax.txt</code> also describes the syntax. 
+See <a class="sec" href="#sec:6">section 6</a>.
+
+<p>
+
+<h2><a id="sec:2"><span class="sec-nr">2</span> <span class="sec-title">Details</span></a></h2>
+
+<p>
+
+<h3><a id="sec:2.1"><span class="sec-nr">2.1</span> <span class="sec-title">Times: 
+Handled Time, Setup Time, Start Time, End Time</span></a></h3>
+
+<dl class="latex">
+<dt><b>setuptime, <code>TSetup</code></b></dt>
+<dd>
+In practice identical to <code>TStartup</code>, but there are options 
+for defining <code>TSetup</code> to have a value before
+<code>TStart</code> so that leadsto rules could fire for antecedent 
+values before
+<code>TStart</code> and use <code>cwa(Atom)</code> derived values to 
+make them fire. The current value of <code>TSetup</code> is stored in
+<code>dyn_setup_time(TSetup)</code>.&nbsp;<sup class="fn">1<span class="fn-text"> 
+We had command line options <code>setup_maxg</code> and <code>setup_maxfg</code> 
+for that purpose that would introduce <code>TSetup</code> based on the 
+maximum leadsto rule values for <em>f</em> and <em>g</em>. But the 
+sourcecode says this is not supported. So, in practice <code>TStart == 
+TSetup</code></span></sup>
+</dd>
+<dt><b>handledtime</b></dt>
+<dd>
+Handled time is initialized by <a id="idx:setupunknownorcwa2:4"></a><span class="pred-ext">setup_unknown_or_cwa/2</span> 
+to TStart. There is an additional implied condition on handled time: 
+"You should never ask for values before TSetup" and "All atoms that have 
+no explicit trace entry before THandled have value false if cwa, unknown 
+otherwise".
+</dd>
+<dt><b>starttime, <code>TStart</code></b></dt>
+<dd>
+Start time. The algorithm uses <code>TSetup</code>, but <code>TStart</code> 
+still plays a role, when storing traces, only values at/after <code>TStart</code> 
+are saved.&nbsp;<sup class="fn">2<span class="fn-text">TODO:check this!</span></sup>
+<code>TStart</code> is stored as
+<code>dyn_start_time(TStart)</code>, but only called through <a id="idx:starttime1:5"></a><span class="pred-ext">start_time/1</span>.</dd>
+<dt><b>endtime</b></dt>
+<dd>
+If not specified there currently is a default of 200 (see <a id="idx:endtime1:6"></a><span class="pred-ext">end_time/1</span>)
+</dd>
+</dl>
+
+<p><code>TSetup</code> and <code>TSetup</code> are set up in
+<code>do_setup_time(TStart, TSetup)</code>. They may contain 
+specification constants.&nbsp;<sup class="fn">3<span class="fn-text">In <a id="idx:dosetuptimes2:7"></a><span class="pred-ext">do_setup_times/2</span> 
+the values are passed through <code>tr_basic_element(Term, [], TermOut)</code> 
+that will substitute <code>spec:constant(Name, Val)</code> occurrences. 
+See <a class="sec" href="#sec:3.1">section 3.1</a>.</span></sup>
+
+<p><code>HandledTime</code> is incremented in <a id="idx:handledtimestep1:8"></a><span class="pred-ext">handled_time_step/1</span> 
+and
+<a id="idx:runspecrest0:9"></a><span class="pred-ext">runspec_rest/0</span> 
+ensures that at the end of the leadsto algorithm <code>HandledTime &gt;= 
+Endtime</code>.
+
+<p>
+
+<h3><a id="sec:2.2"><span class="sec-nr">2.2</span> <span class="sec-title">Traces</span></a></h3>
+
+<p>
+
+<h4><a id="sec:2.2.1"><span class="sec-nr">2.2.1</span> <span class="sec-title">Datastructures</span></a></h4>
+
+<p>Traces are stored as Prolog facts, each fact represents values of a 
+single ground atom.
+
+<p>Values of an atom over time are represented as a list:
+
+<pre class="code">
+[range(23.0, 24.0, true), range(17, 18, true)]
+</pre>
+
+<p>The ranges are ordered, the latest time range first. During the 
+execution of our leadsto algorithm, only necessary values are stored, 
+unknown ranges or false ranges where <code>cwa(Atom)</code> holds are 
+not part of the trace.
+
+<p>In saved traces all values are represented. Saved traces will only 
+contain atom values in the range <code>start_time</code> to <code>end_time</code>. 
+The leadsto algorithm may derive values outside of that range.&nbsp;<sup class="fn">4<span class="fn-text"> 
+TODO: We should discuss alternatives: 
+<ol class="latex">
+<li>Why not save only necessary values in saved traces? 
+<li>If saving everything, why not compact the timerange? <code>[range(T1, 
+T2, TFU1), range(T2, T3, TFU3), ...]</code> into <code>[T1-TFU1, 
+T2-TFU2, .. TE-[]]</code> 
+</ol>
+</span></sup>
+
+<p>
+
+<h4><a id="sec:2.2.2"><span class="sec-nr">2.2.2</span> <span class="sec-title">Algorithm 
+Variables</span></a></h4>
+
+<dl class="latex">
+<dt class="pubdef"><a id="dyn_sim_status/2"><strong>dyn_sim_status</strong>(<var>File, 
+Status</var>)</a></dt>
+<dd class="defbody">
+says in what stage of loading and running the algo algorithm is. <var>Status</var> 
+is <code>loaded</code>, <code>running</code> or <code>done</code>.</dd>
+<dt class="pubdef"><a id="dyn_currently_loaded/2"><strong>dyn_currently_loaded</strong>(<var>Kind, 
+File</var>)</a></dt>
+<dd class="defbody">
+says what <var>File</var> is loaded and what <var>Kind</var>, where <var>Kind</var> 
+is <code>trace</code> or
+<code>sim</code>.
+</dd>
+</dl>
+
+<p>
+
+<h4><a id="sec:2.2.3"><span class="sec-nr">2.2.3</span> <span class="sec-title">Loading 
+and Trace Generation</span></a></h4>
+
+<dl class="latex">
+<dt class="pubdef"><a id="load_simulation/1"><strong>load_simulation</strong>(<var>+File</var>)</a></dt>
+<dd class="defbody">
+The specification <var>File</var> is loaded into module <code>spec</code>. 
+The source code seems somewhat complex: The module <code>spec</code> is 
+set up,
+<a id="idx:discontinous1:10"></a><span class="pred-ext">discontinous/1</span> 
+directives are generated for all leadsto specification terms, the terms 
+are read from <var>File</var> and asserted one by one into the <code>spec</code> 
+module.
+
+<p>Command line constants are added to module spec (see <a class="sec" href="#sec:3.1">section 
+3.1</a>).
+
+<p>Then, the leadsto specification is read one more time, and each <code>Term</code> 
+is passed on to <a id="idx:handleterm1:11"></a><span class="pred-ext">handle_term/1</span>. 
+Most terms are handled by asserting dynamic facts into module <code>algo</code>. 
+Some of those are 1-1 translations, others don't.
+
+<p><code>model(Model)</code> is translated into <code>dyn_model(Model)</code>, 
+after checking that there is only one such term.
+
+<p><code>cwa(F/A)</code> is translated into <code>dyn_cwa(FunctorTerm)</code>.
+
+<p>The most interesting things happen with interval like leadsto 
+specification terms.
+<a id="idx:initialiseinterval3:12"></a><span class="pred-ext">initialise_interval/3</span> 
+and <a id="idx:initialiseintervalperiodic4:13"></a><span class="pred-ext">initialise_interval_periodic/4</span> 
+deal with them. These predicates normalise all interval specification 
+terms into:
+<code>dyn_interval(i(Interval, Vars, Form))</code> and
+<code>dyn_interval(i(Interval, P, Vars, Form))</code> facts.
+
+<p>Leadsto rule terms are translated into
+<code>dyn_leadsto(I, Vars, LitDisConj, AndLiterals, Delay)</code> facts.
+
+<p>Finally <a id="idx:updatesorts0:14"></a><span class="pred-ext">update_sorts/0</span> 
+performs some pre compilation of sort definitions.
+<sup class="fn">5<span class="fn-text"> TODO: It is unclear what happens 
+to sortdefs at this stage. Questions are: 
+<ul class="latex">
+<li>What terms are used? Are they spec:sortdef/2 and spec:sortdef/4? 
+<li>What is the role of <a id="idx:dynsortdef5:15"></a><span class="pred-ext">dyn_sortdef/5</span>? 
+<li>Are constants somehow substituted into sortdef elements? 
+</ul>
+Question surrounding <a id="idx:loadsimulation1:16"></a><a class="pred" href="#load_simulation/1">load_simulation/1</a>: 
+<ul class="latex">
+<li>Why is the leadsto specification scanned twice. The terms will be 
+probably be walked through even one more time to set up the algorithm. 
+</ul>
+</span></sup>
+
+<p><a id="idx:loadsimulation1:17"></a><a class="pred" href="#load_simulation/1">load_simulation/1</a> 
+sets <code>dyn_sim_status(File, loaded)</code>.</dd>
+<dt class="pubdef"><a id="reset_sim_info/0"><strong>reset_sim_info</strong></a></dt>
+<dd class="defbody">
+clears the content of spec together with other run time information.
+</dd>
+<dt class="pubdef"><a id="runshowspec/1"><strong>runshowspec</strong>(<var>+Frame</var>)</a></dt>
+<dd class="defbody">
+Two parts, <a id="idx:runspecdo1:18"></a><a class="pred" href="#runspecdo/1">runspecdo/1</a> 
+and <a id="idx:showresults2:19"></a><span class="pred-ext">show_results/2</span>.</dd>
+<dt class="pubdef"><a id="runspecdo/1"><strong>runspecdo</strong>(<var>+Frame</var>)</a></dt>
+<dd class="defbody">
+(Functionality in <a id="idx:runspec1:20"></a><span class="pred-ext">runspec/1</span>). 
+If we are dealing with a model, we initialize the output trace common to 
+all model traces, then for each model instantiation we call <a id="idx:runmodel4:21"></a><span class="pred-ext">runmodel/4</span> 
+that does
+<a id="idx:runspec10:22"></a><a class="pred" href="#runspec1/0">runspec1/0</a> 
+and cleans up after itself for the next <a id="idx:runmodel4:23"></a><span class="pred-ext">runmodel/4</span>.
+
+<p>If there is no <a id="idx:model1:24"></a><span class="pred-ext">model/1</span>, 
+we call <a id="idx:runspec10:25"></a><a class="pred" href="#runspec1/0">runspec1/0</a> 
+followed by <a id="idx:savetrace1:26"></a><span class="pred-ext">savetrace/1</span>.</dd>
+<dt class="pubdef"><a id="runspec1/0"><strong>runspec1</strong></a></dt>
+<dd class="defbody">
+This procedure calls <a id="idx:dosetuptime2:27"></a><span class="pred-ext">do_setup_time/2</span> 
+that sets up <code>TSetup</code> and
+<code>TStart</code>.
+
+<p>In <a id="idx:runspec1:28"></a><span class="pred-ext">runspec/1</span> 
+we perform:
+<a id="idx:setuprtintervals0:29"></a><a class="pred" href="#setup_rt_intervals/0">setup_rt_intervals/0</a>, <a id="idx:setupunknownorcwa2:30"></a><span class="pred-ext">setup_unknown_or_cwa/2</span>, <a id="idx:setupleadsto6:31"></a><a class="pred" href="#setup_leadsto/6">setup_leadsto/6</a> 
+for each leadsto rule
+<a id="idx:dynleadsto5:32"></a><span class="pred-ext">dyn_leadsto/5</span>, <a id="idx:getmodelcheckingprules0:33"></a><span class="pred-ext">get_model_checking_p_rules/0</span> 
+(??), <a id="idx:setupatomstateboundaries0:34"></a><span class="pred-ext">setup_atom_state_boundaries/0</span> 
+and finally do the real reasoning in <a id="idx:runspecrest0:35"></a><span class="pred-ext">runspec_rest/0</span>.</dd>
+<dt class="pubdef"><a id="setup_rt_intervals/0"><strong>setup_rt_intervals</strong></a></dt>
+<dd class="defbody">
+For every <a id="idx:dyninterval1:36"></a><span class="pred-ext">dyn_interval/1</span> 
+term we perform <a id="idx:initintervalcallbacks10:37"></a><a class="pred" href="#init_interval_callbacks/10">init_interval_callbacks/10</a> 
+where all but the first three arguments are callback variables or 
+callback predicates.
+
+<p>The setting of the interval rules does some detailed steps such as 
+variable instantiation. Finally this leads to changes to <a id="idx:dynatomtrace3:38"></a><span class="pred-ext">dyn_atom_trace/3</span>. 
+See
+
+<pre class="code">
+initialise_interval_p(Interval, P, Vars, Form1) :-
+        (       instantiate_vars(Vars, VarsInst),
+                tr_range(Interval, VarsInst, T1, T2),
+                tr_basic_element(P, VarsInst, P1),
+                ...
+</pre>
+
+</dd>
+<dt class="pubdef"><a id="setup_leadsto/6"><strong>setup_leadsto</strong>(<var>6</var>)</a></dt>
+<dd class="defbody">
+lso uses <a id="idx:initintervalcallbacks10:39"></a><a class="pred" href="#init_interval_callbacks/10">init_interval_callbacks/10</a>. 
+It sets
+<code>dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)</code>
+</dd>
+<dt class="pubdef"><a id="init_interval_callbacks/10"><strong>init_interval_callbacks</strong>(<var>TmInf, 
+Vars, Forms, TmInf1, Vars1, Forms2, InvldVars, InvldTimeInfo, 
+ActPreInsttiated</var>)</a></dt>
+<dd class="defbody">
+is used for setting up interval rules and leadsto rules. It instantiates 
+variables, also takes care of <a id="idx:forall2:40"></a><span class="pred-ext">forall/2</span> 
+terms( instantiates them).
+
+<p></dd>
+</dl>
+
+<p>Traces are generated by the main algorithm in module algo. They are 
+internally stored as <code>dyn_atom_trace(AtomKey, Atom, AtomTrace)</code> 
+facts. For performance reasoning traces that can no longer play a role 
+in the algorithm are backed up into
+<a id="idx:dynatomtracebackup3:41"></a><span class="pred-ext">dyn_atom_trace_backup/3</span> 
+facts.&nbsp;<sup class="fn">6<span class="fn-text">TODO:I seem to 
+remember that at places in the algorithm we depend on there either being <a id="idx:dynatomtrace3:42"></a><span class="pred-ext">dyn_atom_trace/3</span> 
+or <a id="idx:dynatomtracebackup3:43"></a><span class="pred-ext">dyn_atom_trace_backup/3</span>.</span></sup>
+
+<p>
+
+<h4><a id="sec:2.2.4"><span class="sec-nr">2.2.4</span> <span class="sec-title">Saving 
+traces</span></a></h4>
+
+<p>Traces are saved in two stages by
+
+<dl class="latex">
+<dt class="pubdef"><a id="savetracesetup/3"><strong>savetracesetup</strong>(<var>+File, 
++Frame, -Telling</var>)</a></dt>
+<dd class="defbody">
+Saves constants and sets up trace storage stream.
+</dd>
+<dt class="pubdef"><a id="savetrace1/1"><strong>savetrace1</strong>(<var>+TraceName</var>)</a></dt>
+<dd class="defbody">
+Saves the trace itself. (If <var>TraceName</var> is <code>[]</code>, 
+trace will not have trace id.)
+</dd>
+<dt class="pubdef"><a id="savemodelspec_cleanup/2"><strong>savemodelspec_cleanup</strong>(<var>-TellStream, 
++ModelInstanceTraceName</var>)</a></dt>
+<dd class="defbody">
+If the <em>leadsto specification</em> contains a model, the separate 
+model instances saved.
+</dd>
+</dl>
+
+<p>
+
+<h2><a id="sec:3"><span class="sec-nr">3</span> <span class="sec-title">Details</span></a></h2>
+
+<p><h3 id="sec:constants"><a id="sec:3.1"><span class="sec-nr">3.1</span> <span class="sec-title">Constants</span></a></h3>
+
+<a id="sec:constants"></a>
+
+<p>One can define <em>specification constants</em> constants that will 
+be substituted into leadsto specification elements. Within a leadsto 
+specification we use:
+
+<pre class="code">
+constant(Name, Value).
+</pre>
+
+<p>From the command line one can specify <code>-constant Name=Value</code>. 
+This adds a constant to the specification. Value must be a valid ground 
+Prolog term.
+
+<p><code>set_option_constant/1</code> handles this by asserting <code>dyn_add_cmd_constant/2</code>.
+
+<p>util:load_cmd_constants/0 loads those constants into module <code>spec</code> 
+as
+<code>constant(Name, Value)</code> facts.
+
+<p>Constants are substituted by the procedure
+<code>tr_basic_element(Term, [], TermOut)</code>. Constants are stored 
+as
+<code>spec:constant(Name, Val)</code> values.
+
+<p><h3 id="sec:modelchecking"><a id="sec:3.2"><span class="sec-nr">3.2</span> <span class="sec-title">Model 
+Checking</span></a></h3>
+
+<a id="sec:modelchecking"></a>
+
+<p>The source contains code labelled <em>model checking</em>. I do not 
+remember whether this code ever worked. I seem to remember I tried 
+converting the leadsto model into some state based form.
+
+<p><code>Makefile</code> contains an example call of using 
+modelchecking:
+
+<pre class="code">
+./leadsto -local -modelchecking spec/heartn.lt
+</pre>
+
+<p>The only visible result seems to be some debugging info on the 
+screen.
+
+<p>A first look at the code in <em>modelchecking.pl</em> does not make 
+anything clear yet.
+
+<p>There is a document <code>olddocs/modelchecking.doc</code> that may 
+provide background. I fear that the code that is still present in <code>algo.pl</code> 
+never really did anything.
+
+<p>
+
+<h3><a id="sec:3.3"><span class="sec-nr">3.3</span> <span class="sec-title">recwait</span></a></h3>
+
+<p>Within algo the two choices for representing algorithm state are 
+mixed too much with the rest of the code. <a id="idx:recwait0:44"></a><span class="pred-ext">recwait/0</span> 
+is the switch between storage as recorded and storage as a dynamic 
+clause. Sometimes code seems to be copy/pasted. But, it seems that 
+backtracking in the recorded database and backtracking in the asserted 
+database works differently, see <a id="idx:updateactivitytimes11:45"></a><span class="pred-ext">update_activity_times1/1</span>.
+
+<p>
+
+<h3><a id="sec:3.4"><span class="sec-nr">3.4</span> <span class="sec-title">schedule_fire/3</span></a></h3>
+
+<p>What is the reason for <a id="idx:schedulefire3:46"></a><span class="pred-ext">schedule_fire/3</span>, 
+why postpone?
+
+<p>
+
+<h3><a id="sec:3.5"><span class="sec-nr">3.5</span> <span class="sec-title">Following 
+the progress of leadsto rules</span></a></h3>
+
+<p>We start with <a id="idx:setupleadsto6:47"></a><a class="pred" href="#setup_leadsto/6">setup_leadsto/6</a> 
+where the arguments are almost identical to the values in the Leadsto 
+specification.
+
+<dl class="latex">
+<dt class="pubdef"><a id="setup_leadsto/6"><strong>setup_leadsto</strong>(<var>TStart, 
+Vars, LitDisConj, AndLiterals, Delay,RId</var>)</a></dt>
+<dd class="defbody">
+where the arguments are almost identical to the values in the Leadsto 
+specification. Then <a id="idx:initintervalcallbacks9:48"></a><span class="pred-ext">init_interval_callbacks/9</span> 
+transforms some constructs such as forall.
+
+<p>After a number of steps involving normalizing conjunctions and 
+disjunctions&nbsp;<sup class="fn">7<span class="fn-text">TODO:Verify 
+whether disjunction is allowed</span></sup> and partial evaluation 
+pruning out true and false results, <a id="idx:setuplt6:49"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a> 
+is called.</dd>
+<dt class="pubdef"><a id="setup_lt/6"><strong>setup_lt</strong>(<var>Ante, 
+Conse, Vars, Delay, Id, RId</var>)</a></dt>
+<dd class="defbody">
+
+<p>The encoding of the antecedent is responsible for generating code. If 
+a Term is a comparison operator, code is generated for that, if a term 
+is an arithmetic expression, code is also generated.
+
+<p>We pass on some (incomplete) data structures within <a id="idx:setuplt6:50"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a>. <a id="idx:codeform4:51"></a><a class="pred" href="#code_form/4">code_form/4</a> 
+uses
+<code>ds_d(AnteResult, VarsIn, PVIn)</code> and <code>ds_d(AnteTail, 
+VarsOut, PVOut)</code>.
+<code>AnteResult</code> is a difference list. Therefore often <code>AnteTail</code> 
+is set to <code>[]</code>.</dd>
+<dt class="pubdef"><a id="code_form/4"><strong>code_form</strong>(<var>+AnteConse, 
++PosNeg:[pos, neg], DIn, DOut</var>)</a></dt>
+<dd class="defbody">
+
+<p><a id="idx:codeform4:52"></a><a class="pred" href="#code_form/4">code_form/4</a> 
+is used for <code>Ante</code> and <code>Conse</code>.
+
+<p>Each <code>AnteConseTerm</code> is translated as a list element in <code>AnteResult</code>.
+<code>L = ds_litd(Atom, PosNeg, PreOps, PostOps, PostConds)</code> where
+<code>Atom</code> can be true or any other value. It seems that its 
+translated value is not tested in any way.
+
+<p>Within <a id="idx:codeform4:53"></a><a class="pred" href="#code_form/4">code_form/4</a>, <code>tr_arg_prolog1(Term, 
+PVIn, Term1, Inst, DSTAIn, DSTAOut)</code> is used where
+
+<pre class="code">
+DSTAIn = ds_ta(VIn, PVIn, [], [], []),
+...
+DSTAOut = ds_ta(VOut, PVOut, PreOpsOut, PostOpsOut, PostCondsOut),
+</pre>
+
+<p>Inst should result in <code>Inst == inst</code>.</dd>
+<dt class="pubdef"><a id="tr_arg_prolog1/6"><strong>tr_arg_prolog1</strong>(<var>Term, 
+PVIn, Term1, Inst, DSTAIn, DSTAOut</var>)</a></dt>
+<dd class="defbody">
+
+<p><a id="idx:trargprolog16:54"></a><a class="pred" href="#tr_arg_prolog1/6">tr_arg_prolog1/6</a> 
+translates leadsto variables into Prolog variables, their relationship 
+is stored and retrieved in <code>PVIn/PVOut</code>, by
+<a id="idx:varpltovarlist6:55"></a><span class="pred-ext">var_pl_to_var_list/6</span> 
+and <a id="idx:varplfromvarlist5:56"></a><span class="pred-ext">var_pl_from_var_list/5</span>.
+
+<p>The first encounter of a leadsto variable in a <a id="idx:codeform4:57"></a><a class="pred" href="#code_form/4">code_form/4</a> 
+has
+<code>Inst= next</code>, a later one gets <code>Inst = inst</code>. Inst 
+values can be <code>inst</code>,
+<code>next</code>, <code>var</code>, <code>mixed</code>.
+
+<p><a id="idx:trargprolog16:58"></a><a class="pred" href="#tr_arg_prolog1/6">tr_arg_prolog1/6</a> 
+is also responsible for substituting <em>spec_constant</em>s.&nbsp;<sup class="fn">8<span class="fn-text">TODO: 
+Check whether Atoms could end up as Prolog variables, look at <a id="idx:codeatom4:59"></a><span class="pred-ext">code_atom/4</span> 
+where <code>Inst</code> is ignored in the code. Can <code>Inst</code> be <code>var</code> 
+or <code>mixed</code> there?</span></sup></dd>
+<dt class="pubdef"><a id="code_conse/6"><strong>code_conse</strong>(<var>Conse, 
+VOut, PVOut, Id, ConseRId, PVOutC</var>)</a></dt>
+<dd class="defbody">
+translates
+<code>Conse</code> through <a id="idx:codeform4:60"></a><a class="pred" href="#code_form/4">code_form/4</a>, 
+but true <code>ConseLits</code> are removed.&nbsp;<sup class="fn">9<span class="fn-text">(TODO: 
+why not from Ante?).</span></sup>
+
+<p>The consequent is encoded as <code>ds_cr(ConseLits, ds_ri(Id))</code>, 
+but pxor consequents are treated differently.&nbsp;<sup class="fn">10<span class="fn-text">TODO</span></sup>.
+
+<p>The result is stored as <code>dyn_lt_rule(Id, 
+AnteLits,ConseRId,PVOutC,Delay,RId)</code> but more important, <code>setup_lt_normed(AnteLits, 
+AnteHolds, TMin, THolds, ConseRId, PV, Delay, Removed)</code>, it leads 
+to <a id="idx:setupltwaitvar12:61"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a>.
+</dd>
+</dl>
+
+<p>A number of facts:
+<ul class="latex">
+<li>If <code>AnteLits</code> becomes <code>[]</code>, <br>
+<code>setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)</code> 
+is called. If <code>THolds &gt;= TMin + G</code>, we calculate
+<code>T3 is TMin + G + Delay</code> and
+<code>T4 is THolds + Delay + H</code> and then call
+<code>schedule_fire(ConseRId, T3, T4)</code> which sets
+<code>dyn_schedule_fire(ConseRId, T3, T4)</code>.&nbsp;<sup class="fn">11<span class="fn-text">I 
+left out details dealing with pxor aspects.</span></sup> They are fired 
+by the <code>repeat, set_state, handle_fired</code> sequence in <a id="idx:runspecrest0:62"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">12<span class="fn-text">Why 
+not fire immediately?</span></sup> After <a id="idx:schedulefire3:63"></a><span class="pred-ext">schedule_fire/3</span> 
+we do <a id="idx:setupltwaitfired6:64"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
+If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:65"></a><span class="pred-ext">setup_lt_wait_true/5</span>.
+
+<p><code>setup_lt_wait_fired</code> stores a <a id="idx:waitfired5:66"></a><span class="pred-ext">wait_fired/5</span> 
+fact.&nbsp;<sup class="fn">13<span class="fn-text">It is confusing that 
+two implementations of this waiting are present in the code, depending 
+on the <a id="idx:recwait0:67"></a><span class="pred-ext">recwait/0</span> 
+switch.</span></sup>
+<li>We need to study the <code>FV</code>, <code>FVL</code> aspects in 
+more detail.
+</ul>
+
+<p>TODO: Looking at the code, it seems that we do not reorder the <code>AnteLiterals</code> 
+depending on intermediate results.
+
+<p>
+
+<h2><a id="sec:4"><span class="sec-nr">4</span> <span class="sec-title">Working 
+backwards</span></a></h2>
+
+<p>Meaning, trying to reconstruct the algorithm from the start.
+
+<p>
+
+<h3><a id="sec:4.1"><span class="sec-nr">4.1</span> <span class="sec-title">Leadsto 
+times <code>e</code>, <code>f</code>, <code>g</code>, <code>h</code></span></a></h3>
+
+<p>We limited <code>e</code>, <code>f</code>,
+<code>g</code>, <code>h</code>:<code>e,f, g, h &gt;= 0</code> and if <code>h 
+== 0</code> then
+<code>g</code> must be 0. But also,
+<code>e + f + g + h &gt; 0</code>.&nbsp;<sup class="fn">14<span class="fn-text">Why 
+those requirements? We probably do not want to reason without delay.</span></sup>
+
+<p><code>e, f, g, h</code>:
+
+<p>Once an antecedent holds for duration <code>g + T</code>, a delay is 
+set between <code>e</code> and
+<code>f</code>, and the antecedent will hold during <code>h + T</code>. 
+So, even if a rule has fired, we need to remember that it has fired and 
+as long as the antecedent may continue to hold, the consequent will be 
+propagated for a longer time.
+
+<p>
+
+<h3><a id="sec:4.2"><span class="sec-nr">4.2</span> <span class="sec-title">Invariant</span></a></h3>
+
+<p><code>HandledTime</code>: Everything that can be derived, has been 
+derived for
+<code>T &lt;= HandledTime</code>. CWA atom values do not have to be 
+instantiated, probably will not be instantiated to false values.
+
+<p>
+
+<h3><a id="sec:4.3"><span class="sec-nr">4.3</span> <span class="sec-title">Sketch 
+of the algorithm</span></a></h3>
+
+<p>All rules that could still fire are inspected, their antecedent 
+effect is exhaustively tested up to <code>HandledTime</code> at least.
+
+<p>After everything has fired, we inspect all waiting antecedents, and 
+look at time their first result could come in. And the minimum value 
+becomes the next
+<code>HandledTime</code>, unless this minimum value is not after <code>HandledTime</code> 
+(could it be smaller?). It looks like the algorithm currently simply 
+gives up if there is a rule that could fire at
+<code>HandledTime</code>.
+
+<p>It is probably important that together with setting <code>HandledTime</code>, 
+every rule that has some continuation has its effect propagated till the 
+new <code>HandledTime</code>.
+
+<p>This would make the invariant more precise: Every rule has its state 
+updated in such a way that the antecedents have been checked up to the 
+new <code>HandledTime</code>.
+
+<p>
+
+<h3><a id="sec:4.4"><span class="sec-nr">4.4</span> <span class="sec-title">Rule 
+States</span></a></h3>
+
+<p>Rules can contain variables, that is, antecedent literals can have 
+variables. There can be more than one separate states per rule.
+
+<p>It could be that the first N literals of the antecedent with some 
+specific instantiation are valid in some time range <code>T1 - T2</code>.
+
+<p>We will look strictly left to right.
+
+<p>But, the extending of the fired rules is done in reverse, why? 
+Probably because we wish to extend the range as far as possible.
+
+<p>
+
+<h3><a id="sec:4.5"><span class="sec-nr">4.5</span> <span class="sec-title">Garbage 
+collection</span></a></h3>
+
+<p>Is complex and not documented. In the source some explanation is 
+given,
+<code>olddocs/bugdev.txt</code> also contains some explanation.
+
+<p>
+
+<h3><a id="sec:4.6"><span class="sec-nr">4.6</span> <span class="sec-title">Understanding</span></a></h3>
+
+<p><em>FV</em>, <em>fv</em> are abreviations of Free Variables (Prolog 
+variables).
+
+<p><a id="idx:setupltnotgroundfv13:68"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+analyses the current <code>LitData</code> first for all AtomTraces and 
+all cwa matches, handles those separately by <code>check_fire_isolated</code> 
+or <code>setup_lt_normed</code>.
+
+<p>Finally <code>setup_wait_var</code> is called with <code>Atom</code>, <code>FV</code>, <code>FVL</code> 
+values implying that <code>FV</code> from <code>FVL</code> has been 
+handled, but we need to check other instantiations.
+
+<dl class="latex">
+<dt class="pubdef"><a id="setup_lt_notground_fv/13"><strong>setup_lt_notground_fv</strong>(<var>TStart, 
+FV, FVL, LitData, ToDoAnte, AnteHolds,THolds, ConseRId,PV, Delay, Id, 
+IdTerm, Removed</var>)</a></dt>
+<dd class="defbody">
+
+<p><var>AnteHolds</var> holds for Time Interval between <var>TStart</var> 
+and
+<code>THolds</code>. <code>ToDoAnte</code> is the conjunction that needs 
+to hold.
+<code>LitData</code> is the Literal under investigation. <code>FV</code> 
+are the free variables of the Literal and <code>FVL</code> is a list of 
+instantiations that have been dealt with elsewhere.
+
+<p><code>Delay</code> is <code>efgh(E,F,G,H)</code>, <code>ConseRId</code> 
+is the consequent.
+
+<p><code>Removed</code> indicates the source of the call. In case of
+<code>update_activity_time1(wait_var...)</code>, the
+<code>wait_var</code> term is Removed and the Removed is propagated 
+along.
+
+<p><code>PV</code> is probably the characterization of the variables:<code>pv(Arga, 
+Sorta,Kinda,Arg1a)</code>.
+
+<p><code>setup_lt_notground_fv</code> is called by <code>setup_lt_notground</code>, 
+it by <code>setup_lt_normed</code>, it by <code>setup_lt</code>.
+<code>setup_lt</code> is called from <code>setup_nontrivial_leadsto</code>.
+<code>setup_lt_normed</code> is also called by <code>instantiate_op</code> 
+and <code>fail_filter_handleRR</code>.
+
+<p>We probably handle the rule in this call up to HandledTime.
+
+<p>Now, if at the call <code>THolds &lt; HandledTime</code>, we start 
+all over, for this partially instantiated sequence of literals by 
+calling <code>get_new_tholds</code>. Apparently the order of literals is 
+reversed here.
+<code>get_new_tholds</code> is called here and by <code>get_new_tholds</code> 
+itself.</dd>
+<dt class="pubdef"><a id="get_new_tholds/15"><strong>get_new_tholds</strong>(<var>AnteHoldsTODO, 
+AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, ToDoAnte, 
+ConseRId,PV,Delay, Id,IdTerm,Removed</var>)</a></dt>
+<dd class="defbody">
+
+<p><code>AnteHoldsTODO</code> is an earlier instantiated sequence of 
+literals that needs to be extended in range up to
+<code>THandled</code> (or further?). <code>AHDone</code> is the sequence 
+that has been checked and hold between
+<code>TStart</code> and <code>THoldsNew1</code>.
+<code>Tholds</code> is the result.&nbsp;<sup class="fn">15<span class="fn-text">TODO: 
+Details of Tholds, is this a return parameter?</span></sup>
+
+<p>Be aware that in <code>get_new_tholds</code> the <code>Atom</code> in
+<code>[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]</code> is ground, 
+and has nothing to do with <code>FV</code> and <code>FVL</code>.
+
+<p>First, if <code>AnteHoldsTODO ==[]</code>, we continue&nbsp;<sup class="fn">16<span class="fn-text">as <code>get_new_tholds</code> 
+is only called by <code>setup_lt_notground_fv</code></span></sup> with <code>setup_lt_notground_fv</code> 
+with the increased interval. Otherwise we follow <code>AnteHoldsTODO</code> 
+Literals.
+
+<p>NEXT: What does <code>find_min_range_ground(Atom, PN, Tholds, O2)</code> 
+do? Probably: Inspect Literal starting from Tholds.</dd>
+<dt class="pubdef"><a id="setup_lt_wait_var/12"><strong>setup_lt_wait_var</strong>(<var>FV, 
+FVL, LitData, ToDoAnte, AnteHolds, TMin, THolds, ConseRId, PV, Delay, 
+Id, IdTerm</var>)</a></dt>
+<dd class="defbody">
+
+<p>Probably: We know <code>AnteHolds</code> is ok between <code>TMin</code> 
+and <code>THolds</code>.
+<code>LitData</code> is the current literal that has been analyzed. FV 
+are the free variables in the Literal, <code>FVL</code> is the list of 
+instantiations of FV that have been dealt with, for which this setup is 
+not responsible at all. Called by
+<a id="idx:setupltnotground1default12:69"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
+( same arguments) which is only called as last call in
+<a id="idx:setupltnotgroundfv13:70"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
+
+<p>TODO: Really nail down the meaning of <code>wait_var</code>, also at 
+what stage are what values for <code>TMin</code> and <code>THolds</code> 
+set. TODO: Will <code>wait_vars</code> become invalidated? Inspect <code>get_new_tholds</code>.
+
+<p></dd>
+</dl>
+
+<p>
+
+<h2><a id="sec:5"><span class="sec-nr">5</span> <span class="sec-title">So 
+far</span></a></h2>
+
+<p>Try documenting the whole data structure that describes the state of 
+each leadsto rule first. All invariants, the understanding of having 
+every possible outcome of a leadsto rule represented.
+
+<p>At what stage the HandledTime invariant is. Understanding the 
+get_new_tholds, the reverse is on purpose as that is part of the 
+invariant, having a partial instantiation left to right.
+
+<p>After that, try understanding the cleanup efforts of <code>wait_var</code>.
+
+<p><h2 id="sec:ltsyntax"><a id="sec:6"><span class="sec-nr">6</span> <span class="sec-title">"Syntax" 
+of Leadsto Specifications</span></a></h2>
+
+&nbsp;<a id="sec:ltsyntax"></a>
+
+<p>Copied from syntax.txt:
+
+<pre class="code">
+The leadsto input syntax is prolog syntax, but with the
+following added/changed operator definitions.
+(For input of leadsto specs in prolog, the : redefinition is 
+ awkward. I do a push/pop operator call for reading)
+
+                        op(150, xfx, :),
+                        op(700, xfy, &lt;),
+                        op(700, xfy, &lt;=),
+                        op(700, xfy, =&lt;),
+                        op(700, xfy, &gt;),
+                        op(700, xfy, &gt;=)
+                        ]).
+
+Currently, only the top level terms are described. I am working
+on syntax (+minimal explanation of semantics) of the top level
+terms, but especially the sub terms.
+
+sub terms:
+
+% VAR:PLPCE:
+    VAR, in principle, a prolog term, although Uppercase atoms 
+    are allowed. Quotes around atoms are allowed.
+     TODO: are unquoted uppercase functors allowed?
+     e.g. P(a) TODO: what are further restrictions and 
+     interpretations of PLPCE terms TODO: junk this stupid 
+     name "PLPCE".
+
+% start_time(PLPCE)
+% end_time(PLPCE)
+% global_lambda(PLPCE)
+
+
+TODO: why those qterms?
+% qterm(cwa(X))        cwa_node 
+% qterm(external(X))   external_node
+% qterm(X) ...         other_node
+
+% display(_,_)
+% display_number_range(_,_,_,_)
+
+% periodic(Vars, Range, Period:PLPCE, Formula) is_list(Vars)
+                 * handle_interval(Vars, Range, Formula, Root, Son, Extra)
+% periodic(ST, ET, Period:PLPCE, Formula)
+                 * handle_interval([], range(ST, ET), Formula, Root,Son,Extra),
+% periodic(Vars, ST, ET, Period:PLPCE, Formula)
+                 * handle_interval(Vars, range(ST, ET),Formula,Root,Son,Extra)
+% interval(Vars, ST, ET, Formula)
+                 * handle_interval(Vars, Range, Formula, Root, _Son, Extra)
+% interval(Vars, ST, ET, Formula)
+                 * handle_interval(Vars, range(ST, ET),Formula,Root,_Son,Extra)
+% interval(ST, ET, Formula)
+                 * handle_interval([], range(ST, ET), Formula,Root,_Son,Extra)
+
+% leadsto(AnteFormula, ConseFormula, Delay)
+        * handle_leadsto1(Root, AnteFormula, ConseFormula, Delay, Extra, _Son)
+% leadsto(Vars, AnteFormula, ConseFormula, Delay)
+        * handle_leadsto1(Root, AnteFormula, ConseFormula, Delay, Extra, Son)
+% specification(_) 
+                   * IGNORED
+% content(C)
+                * TODO? assertz(dyn_content(C))
+% denotes(Header, Formula)
+                  * term_to_formula_node(Formula, FormulaNode, Extra),
+                new(PN, property_def_node(@off)),
+                send(PN, fill_header, Header),
+                send(PN, son, FormulaNode),
+                send(Root, son, PN)
+% (sort_element(SortName:PLPCE, Term):- member(Term2, List) with Term==Term2
+                * test_sort_def(SortName, List, Extra),
+        ensure_sort_son(Root, SortName1, SNode),
+        add_sort_contents(SNode, List).
+% constant(Name, Value)
+  * check_constant(Name, Value),
+        send(Root, son, new(N, constant_def_node)),
+        send(N, fill_header, Name),
+        send(N, fill_value, Value)
+% sortdef(SortName:PLPCE, Objs)
+  * test_sort_def(SortName, Objs, Extra),
+        send(Root, son, new(SN, sort_node)),
+        send(SN, change_gui_prop, sort_name, SortName1),
+        add_sort_contents(SN, Objs).
+% cwa(PLPCE)
+% model(PLPCE)
+% [specification_element] 
+  * generic node
+</pre>
+
+<h1><a id="document-index">Index</a></h1>
+
+<dl>
+<dt class="index-sep">?</dt>
+<dt>code_atom/4</dt>
+<dd>
+<a class="idx" href="#idx:codeatom4:59">3.5</a></dd>
+<dt><a class="idx" href="#code_conse/6">code_conse/6</a></dt>
+<dt><a class="idx" href="#code_form/4">code_form/4</a></dt>
+<dd>
+<a class="idx" href="#idx:codeform4:51">3.5</a> <a class="idx" href="#idx:codeform4:52">3.5</a> <a class="idx" href="#idx:codeform4:53">3.5</a> <a class="idx" href="#idx:codeform4:57">3.5</a> <a class="idx" href="#idx:codeform4:60">3.5</a></dd>
+<dt>discontinous/1</dt>
+<dd>
+<a class="idx" href="#idx:discontinous1:10">2.2.3</a></dd>
+<dt>do_setup_time/2</dt>
+<dd>
+<a class="idx" href="#idx:dosetuptime2:27">2.2.3</a></dd>
+<dt>do_setup_times/2</dt>
+<dd>
+<a class="idx" href="#idx:dosetuptimes2:7">2.1</a></dd>
+<dt>dyn_atom_trace/3</dt>
+<dd>
+<a class="idx" href="#idx:dynatomtrace3:38">2.2.3</a> <a class="idx" href="#idx:dynatomtrace3:42">2.2.3</a></dd>
+<dt>dyn_atom_trace_backup/3</dt>
+<dd>
+<a class="idx" href="#idx:dynatomtracebackup3:41">2.2.3</a> <a class="idx" href="#idx:dynatomtracebackup3:43">2.2.3</a></dd>
+<dt><a class="idx" href="#dyn_currently_loaded/2">dyn_currently_loaded/2</a></dt>
+<dt>dyn_interval/1</dt>
+<dd>
+<a class="idx" href="#idx:dyninterval1:36">2.2.3</a></dd>
+<dt>dyn_leadsto/5</dt>
+<dd>
+<a class="idx" href="#idx:dynleadsto5:32">2.2.3</a></dd>
+<dt><a class="idx" href="#dyn_sim_status/2">dyn_sim_status/2</a></dt>
+<dt>dyn_sortdef/5</dt>
+<dd>
+<a class="idx" href="#idx:dynsortdef5:15">2.2.3</a></dd>
+<dt>end_time/1</dt>
+<dd>
+<a class="idx" href="#idx:endtime1:6">2.1</a></dd>
+<dt>forall/2</dt>
+<dd>
+<a class="idx" href="#idx:forall2:40">2.2.3</a></dd>
+<dt>get_model_checking_p_rules/0</dt>
+<dd>
+<a class="idx" href="#idx:getmodelcheckingprules0:33">2.2.3</a></dd>
+<dt><a class="idx" href="#get_new_tholds/15">get_new_tholds/15</a></dt>
+<dt>handle_term/1</dt>
+<dd>
+<a class="idx" href="#idx:handleterm1:11">2.2.3</a></dd>
+<dt>handled_time_step/1</dt>
+<dd>
+<a class="idx" href="#idx:handledtimestep1:8">2.1</a></dd>
+<dt><a class="idx" href="#init_interval_callbacks/10">init_interval_callbacks/10</a></dt>
+<dd>
+<a class="idx" href="#idx:initintervalcallbacks10:37">2.2.3</a> <a class="idx" href="#idx:initintervalcallbacks10:39">2.2.3</a></dd>
+<dt>init_interval_callbacks/9</dt>
+<dd>
+<a class="idx" href="#idx:initintervalcallbacks9:48">3.5</a></dd>
+<dt>initialise_interval/3</dt>
+<dd>
+<a class="idx" href="#idx:initialiseinterval3:12">2.2.3</a></dd>
+<dt>initialise_interval_periodic/4</dt>
+<dd>
+<a class="idx" href="#idx:initialiseintervalperiodic4:13">2.2.3</a></dd>
+<dt><a class="idx" href="#load_simulation/1">load_simulation/1</a></dt>
+<dd>
+<a class="idx" href="#idx:loadsimulation1:16">2.2.3</a> <a class="idx" href="#idx:loadsimulation1:17">2.2.3</a></dd>
+<dt>model/1</dt>
+<dd>
+<a class="idx" href="#idx:model1:24">2.2.3</a></dd>
+<dt>recwait/0</dt>
+<dd>
+<a class="idx" href="#idx:recwait0:44">3.3</a> <a class="idx" href="#idx:recwait0:67">3.5</a></dd>
+<dt><a class="idx" href="#reset_sim_info/0">reset_sim_info/0</a></dt>
+<dt>run_simulation/2</dt>
+<dd>
+<a class="idx" href="#idx:runsimulation2:1">1.2</a></dd>
+<dt>runmodel/4</dt>
+<dd>
+<a class="idx" href="#idx:runmodel4:21">2.2.3</a> <a class="idx" href="#idx:runmodel4:23">2.2.3</a></dd>
+<dt><a class="idx" href="#runshowspec/1">runshowspec/1</a></dt>
+<dt>runspec/1</dt>
+<dd>
+<a class="idx" href="#idx:runspec1:20">2.2.3</a> <a class="idx" href="#idx:runspec1:28">2.2.3</a></dd>
+<dt><a class="idx" href="#runspec1/0">runspec1/0</a></dt>
+<dd>
+<a class="idx" href="#idx:runspec10:2">1.2</a> <a class="idx" href="#idx:runspec10:22">2.2.3</a> <a class="idx" href="#idx:runspec10:25">2.2.3</a></dd>
+<dt>runspec_rest/0</dt>
+<dd>
+<a class="idx" href="#idx:runspecrest0:3">1.2</a> <a class="idx" href="#idx:runspecrest0:9">2.1</a> <a class="idx" href="#idx:runspecrest0:35">2.2.3</a> <a class="idx" href="#idx:runspecrest0:62">3.5</a></dd>
+<dt><a class="idx" href="#runspecdo/1">runspecdo/1</a></dt>
+<dd>
+<a class="idx" href="#idx:runspecdo1:18">2.2.3</a></dd>
+<dt><a class="idx" href="#savemodelspec_cleanup/2">savemodelspec_cleanup/2</a></dt>
+<dt>savetrace/1</dt>
+<dd>
+<a class="idx" href="#idx:savetrace1:26">2.2.3</a></dd>
+<dt><a class="idx" href="#savetrace1/1">savetrace1/1</a></dt>
+<dt><a class="idx" href="#savetracesetup/3">savetracesetup/3</a></dt>
+<dt>schedule_fire/3</dt>
+<dd>
+<a class="idx" href="#idx:schedulefire3:46">3.4</a> <a class="idx" href="#idx:schedulefire3:63">3.5</a></dd>
+<dt>setup_atom_state_boundaries/0</dt>
+<dd>
+<a class="idx" href="#idx:setupatomstateboundaries0:34">2.2.3</a></dd>
+<dt><a class="idx" href="#setup_leadsto/6">setup_leadsto/6</a></dt>
+<dd>
+<a class="idx" href="#idx:setupleadsto6:31">2.2.3</a> <a class="idx" href="#idx:setupleadsto6:47">3.5</a></dd>
+<dt><a class="idx" href="#setup_lt/6">setup_lt/6</a></dt>
+<dd>
+<a class="idx" href="#idx:setuplt6:49">3.5</a> <a class="idx" href="#idx:setuplt6:50">3.5</a></dd>
+<dt>setup_lt_notground1default/12</dt>
+<dd>
+<a class="idx" href="#idx:setupltnotground1default12:69">4.6</a></dd>
+<dt><a class="idx" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a></dt>
+<dd>
+<a class="idx" href="#idx:setupltnotgroundfv13:68">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:70">4.6</a></dd>
+<dt>setup_lt_wait_fired/6</dt>
+<dd>
+<a class="idx" href="#idx:setupltwaitfired6:64">3.5</a></dd>
+<dt>setup_lt_wait_true/5</dt>
+<dd>
+<a class="idx" href="#idx:setupltwaittrue5:65">3.5</a></dd>
+<dt><a class="idx" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a></dt>
+<dd>
+<a class="idx" href="#idx:setupltwaitvar12:61">3.5</a></dd>
+<dt><a class="idx" href="#setup_rt_intervals/0">setup_rt_intervals/0</a></dt>
+<dd>
+<a class="idx" href="#idx:setuprtintervals0:29">2.2.3</a></dd>
+<dt>setup_unknown_or_cwa/2</dt>
+<dd>
+<a class="idx" href="#idx:setupunknownorcwa2:4">2.1</a> <a class="idx" href="#idx:setupunknownorcwa2:30">2.2.3</a></dd>
+<dt>show_results/2</dt>
+<dd>
+<a class="idx" href="#idx:showresults2:19">2.2.3</a></dd>
+<dt>start_time/1</dt>
+<dd>
+<a class="idx" href="#idx:starttime1:5">2.1</a></dd>
+<dt><a class="idx" href="#tr_arg_prolog1/6">tr_arg_prolog1/6</a></dt>
+<dd>
+<a class="idx" href="#idx:trargprolog16:54">3.5</a> <a class="idx" href="#idx:trargprolog16:58">3.5</a></dd>
+<dt>update_activity_times1/1</dt>
+<dd>
+<a class="idx" href="#idx:updateactivitytimes11:45">3.3</a></dd>
+<dt>update_sorts/0</dt>
+<dd>
+<a class="idx" href="#idx:updatesorts0:14">2.2.3</a></dd>
+<dt>var_pl_from_var_list/5</dt>
+<dd>
+<a class="idx" href="#idx:varplfromvarlist5:56">3.5</a></dd>
+<dt>var_pl_to_var_list/6</dt>
+<dd>
+<a class="idx" href="#idx:varpltovarlist6:55">3.5</a></dd>
+<dt>wait_fired/5</dt>
+<dd>
+<a class="idx" href="#idx:waitfired5:66">3.5</a></dd>
+</dl>
+
+</body></html>

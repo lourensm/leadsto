@@ -1199,6 +1199,7 @@ pdf:
 
 $(HTML):	$(TEX)
 		latex2html $(DOC)
+		mv pldoc.html leadsto.html
 
 $(PDF):		$(TEX)
 		$(PLMANDIR)/runtex --pdf $(DOC)

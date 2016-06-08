@@ -372,25 +372,31 @@ What is the reason for schedule_fire/3, why postpone?
 
 \subsection{Following the progress of leadsto rules}
 
-We start with \exam{setup_leadsto(TStart, Vars, LitDisConj, AndLiterals,
-Delay,RId)}
+We start with setup_leadsto/6 where the arguments are almost identical to the
+values in the Leadsto specification. 
+\begin{description}
+\predicate{setup_leadsto}{6}{TStart, Vars, LitDisConj, AndLiterals,
+Delay,RId}
 where the arguments are almost identical to the values in the Leadsto
-specification.
-
-Then init_interval_callbacks/9 transforms some constructs such as forall.
+specification. Then init_interval_callbacks/9 transforms some constructs
+such as forall.
 
 After a number of steps involving normalizing conjunctions and
 disjunctions~\footnote{TODO:Verify whether disjunction is allowed} and
-partial evaluation pruning out true and false results,
-\exam{setup_lt(Ante, Conse, Vars, Delay, Id, RId)} is called.
+partial evaluation pruning out true and false results, setup_lt/6 is called.
+
+
+\predicate{setup_lt}{6}{Ante, Conse, Vars, Delay, Id, RId}
 
 The encoding of the antecedent is responsible for generating code. If a
 Term is a comparison operator, code is generated for that, if a term is
 an arithmetic expression, code is also generated.
 
-We pass on some (incomplete) data structures. code_form/4 uses
+We pass on some (incomplete) data structures within setup_lt/6. code_form/4 uses
 \exam{ds_d(AnteResult, VarsIn, PVIn)} and \exam{ds_d(AnteTail, VarsOut, PVOut)}.
-\exam{AnteResult} is a difference list. Therefor often \exam{AnteTail} is set to \exam{[]}.
+\exam{AnteResult} is a difference list. Therefore often \exam{AnteTail} is set to \exam{[]}.
+
+\predicate{code_form}{4}{+AnteConse, +PosNeg:[pos, neg], DIn, DOut}
 
 code_form/4 is used for \exam{Ante} and \exam{Conse}.
 
@@ -399,14 +405,17 @@ Each \exam{AnteConseTerm} is translated as a list element in \exam{AnteResult}.
 \exam{Atom} can be true or any other value. It seems that its translated value
 is not tested in any way.
 
-Within code_form/4, \exam{tr_arg_prolog1(Term, PVIn, Term1, Inst, DSTAIn, DSTAOut)}
-is used where
+Within code_form/4, \exam{tr_arg_prolog1(Term, PVIn, Term1, Inst, DSTAIn,
+DSTAOut)} is used where
 \begin{code}
 DSTAIn = ds_ta(VIn, PVIn, [], [], []),
 ...
 DSTAOut = ds_ta(VOut, PVOut, PreOpsOut, PostOpsOut, PostCondsOut),
 \end{code}
 Inst should result in \exam{Inst == inst}.
+
+\predicate{tr_arg_prolog1}{6}{Term, PVIn, Term1, Inst, DSTAIn,
+DSTAOut}
 
 tr_arg_prolog1/6 translates leadsto variables into Prolog variables,
 their relationship is stored and retrieved in \exam{PVIn/PVOut}, by
@@ -422,7 +431,7 @@ tr_arg_prolog1/6 is also responsible for substituting \jargon{spec_constant}s.~\
 code_atom/4 where \exam{Inst} is ignored in the code. Can \exam{Inst} be
 \exam{var} or \exam{mixed} there?}
 
-\exam{code_conse(Conse, VOut, PVOut, Id, ConseRId, PVOutC)} translates
+\predicate{code_conse}{6}{Conse, VOut, PVOut, Id, ConseRId, PVOutC} translates
 \exam{Conse} through code_form/4, but true \exam{ConseLits} are removed.~\footnote{(TODO: why not from Ante?).}
 
 The consequent is encoded as \exam{ds_cr(ConseLits, ds_ri(Id))}, but pxor
@@ -431,6 +440,9 @@ consequents are treated differently.~\footnote{TODO}.
 The result is stored as \exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)}
 but more important, \exam{setup_lt_normed(AnteLits, AnteHolds, TMin, THolds,
 ConseRId, PV, Delay, Removed)}, it leads to setup_lt_wait_var/12.
+\end{description}
+
+
 
 A number of facts:
 \begin{itemize}
@@ -529,7 +541,7 @@ Is complex and not documented. In the source some explanation is given,
 
 \jargon{FV}, \jargon{fv} are abreviations of Free Variables (Prolog variables).
 
-\exam{setup_lt_notground_fv} analyses the current \exam{LitData} first for all
+setup_lt_notground_fv/13 analyses the current \exam{LitData} first for all
 AtomTraces and all cwa matches, handles those separately by \exam{check_fire_isolated}
 or \exam{setup_lt_normed}.
 
@@ -537,9 +549,11 @@ Finally \exam{setup_wait_var} is called with \exam{Atom}, \exam{FV}, \exam{FVL}
 values implying that \exam{FV} 
 from \exam{FVL} has been handled, but we need to check other instantiations.
 
-\exam{setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds,
-		      ConseRId,PV,Delay, Id, IdTerm, Removed)}:\\
-\exam{AnteHolds} holds for Time Interval between \exam{TStart} and
+\begin{description}
+\predicate{setup_lt_notground_fv}{13}{TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds, ConseRId,PV,
+Delay, Id, IdTerm, Removed}
+
+\arg{AnteHolds} holds for Time Interval between \arg{TStart} and
 \exam{THolds}. \exam{ToDoAnte} is the conjunction that needs to hold.
 \exam{LitData} is the Literal under investigation. \exam{FV} are the free variables of
 the Literal and \exam{FVL} is a list
@@ -565,8 +579,9 @@ of literals by calling \exam{get_new_tholds}. Apparently the order of literals i
 reversed here.
 \exam{get_new_tholds} is called here and by \exam{get_new_tholds} itself.
 
-\exam{get_new_tholds(AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
-ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed)}:\\
+\predicate{get_new_tholds}{15}{AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
+ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed}
+
 \exam{AnteHoldsTODO} is an earlier instantiated sequence of literals that needs to be
 extended in range up to
 \exam{THandled} (or further?). \exam{AHDone} is the sequence that has been checked and
@@ -584,27 +599,30 @@ First, if \exam{AnteHoldsTODO == []}, we continue~\footnote{as \exam{get_new_tho
 the increased interval.
 Otherwise we follow \exam{AnteHoldsTODO} Literals.
 
-NEXT: What does \exam{find_min_range_ground(Atom, PN, Tholds, O2)} do? Probably: Inspect 
-Literal starting from Tholds.
+NEXT: What does \exam{find_min_range_ground(Atom, PN, Tholds, O2)} do?
+Probably: Inspect Literal starting from Tholds.
 
 
 
 
-\exam{setup_lt_wait_var(FV, FVL, LitData, ToDoAnte, AnteHolds,
-			  TMin, THolds, ConseRId, PV, Delay, Id, IdTerm)}:\\
+\predicate{setup_lt_wait_var}{12}{FV, FVL, LitData, ToDoAnte, AnteHolds,
+			  TMin, THolds, ConseRId, PV, Delay, Id, IdTerm}
 
 Probably: We know \exam{AnteHolds} is ok between \exam{TMin} and \exam{THolds}.
 \exam{LitData} is the current literal that has been analyzed. FV are the free
-variables in the 
-Literal, \exam{FVL} is the list of instantiations of FV that have been dealt with,
-for which 
-this setup is not responsible at all. Called by setup_lt_notground1default/12 ( same 
+variables in the Literal, \exam{FVL} is the list of instantiations of FV that
+have been dealt with, for which 
+this setup is not responsible at all. Called by
+setup_lt_notground1default/12 ( same 
 arguments) which is only called as last call in 
 setup_lt_notground_fv/13.
 
-TODO: Really nail down the meaning of \exam{wait_var}, also at what stage are what
-values for \exam{TMin} and \exam{THolds} set.
+TODO: Really nail down the meaning of \exam{wait_var}, also at what stage are
+what values for \exam{TMin} and \exam{THolds} set.
 TODO: Will \exam{wait_vars} become invalidated? Inspect \exam{get_new_tholds}.
+
+\end{description}
+
 
 \section{So far}
 
