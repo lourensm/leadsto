@@ -197,23 +197,22 @@ Command line constants are added to module spec (see \secref{constants}).
 Then, the leadsto specification is read one more time, and each \exam{Term} is
 passed on to handle_term/1.
 Most terms are handled by asserting dynamic facts into module \exam{algo}.
-Some of those are 1-1 translations, others don't.
+Some of those are 1-1 translations, others are not.
 
 \exam{model(Model)} is translated into \exam{dyn_model(Model)},
 after checking that there is only one such term.
 
 \exam{cwa(F/A)} is translated into \exam{dyn_cwa(FunctorTerm)}.
 
-The most interesting things happen with interval like leadsto specification
-terms.
-initialise_interval/3 and initialise_interval_periodic/4 deal with them. These
-predicates normalise all interval specification terms into:
-\exam{dyn_interval(i(Interval, Vars, Form))} and 
-\exam{dyn_interval(i(Interval, P, Vars, Form))}
-facts.
+The most interesting things happen with interval leadsto specification
+terms and leadsto rule terms. Interval rules are converted into two
+standard forms and stored by initialise_interval/3 and
+initialise_interval_periodic/4.
 
-Leadsto rule terms are translated into
-\exam{dyn_leadsto(I, Vars, LitDisConj, AndLiterals, Delay)} facts.
+handle_term/1 itself simply assertz leadsto rules into
+\exam{dyn_leadsto(RuleId, Vars, Antecedent, Consequent, Delay)} facts.
+setup_leadsto/6 processes these facts further in runspec1/0 at algorithm
+startup.
 
 Finally update_sorts/0 performs some pre compilation of sort definitions.
 \footnote{
@@ -226,6 +225,7 @@ What is the role of dyn_sortdef/5?
 \item
 Are constants somehow substituted into sortdef elements?
 \end{itemize}
+
 Question surrounding load_simulation/1:
 \begin{itemize}
 \item
@@ -233,6 +233,23 @@ Why is the leadsto specification scanned twice. The terms will be probably be
 walked through even one more time to set up the algorithm.
 \end{itemize}
 }
+
+\predicate{initialise_interval}{3}{+Range, +Vars, +LiteralConjunction}
+Handles initial setup of all non-periodic interval rules. In this phase
+the predicate asserts \exam{dyn_interval(i(Range, Vars, LiteralConjunction)}.
+setup_rt_intervals/0 processes the terms further at algorithm startup.
+\predicate{initialise_interval_periodic}{4}{+Range, +Period, +Vars, +LiteralConjunction}
+the predicate asserts \exam{dyn_interval(i(Range, Period, Vars, LiteralConjunction)}.
+setup_rt_intervals/0 processes the terms further in runspec1/0
+at algorithm startup.
+initialise_interval/3 and initialise_interval_periodic/4 deal with them.
+
+
+Leadsto rule terms are translated into
+\exam{dyn_leadsto(I, Vars, LitDisConj, AndLiterals, Delay)} facts.
+
+
+
 
 load_simulation/1 sets \exam{dyn_sim_status(File, loaded)}.
 
@@ -262,7 +279,8 @@ dyn_leadsto/5, get_model_checking_p_rules/0 (??), setup_atom_state_boundaries/0 
 do the real reasoning in runspec_rest/0.
 
 \predicate{setup_rt_intervals}{0}{}
-For every dyn_interval/1 term we perform init_interval_callbacks/10 where all but
+For every dyn_interval/1 term we perform init_interval_callbacks/10 where all
+but
 the first three arguments are callback variables or callback predicates.
 
 The setting of the interval rules does some detailed steps such as variable
@@ -276,9 +294,18 @@ initialise_interval_p(Interval, P, Vars, Form1) :-
 \end{code}
 
 
-\predicate{setup_leadsto}{6}
-Also uses init_interval_callbacks/10. It sets
-\exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)} 
+\predicate{setup_leadsto}{6}{+TStart, +Vars, +Antecedent, +Consequent, +Delay,
++RId} (Called by runspec1/0).
+It translates and transforms the rule using init_interval_callbacks/10,
+then calls setup_lt_internalL/5 which simply calls setup_lt_internal/6.
+That predicate simplifies Antecedent and Consequent terms using
+simplify_term/4. In some cases the rules simplify to specifying constant
+Antecedents. Other cases are passed on to setup_nontrivial_leadsto/5.
+It stores the compiled leadsto rule as
+\exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)} but
+also does initial firing and instantiation the leadsto rule data structures
+by calling setup_lt/6 which calls setup_lt_normed/8.
+
 \predicate{init_interval_callbacks}{10}{TmInf, Vars, Forms, TmInf1, Vars1,
 Forms2, InvldVars, InvldTimeInfo, ActPreInsttiated}
 is used for setting up interval rules and leadsto rules. It instantiates
@@ -366,14 +393,13 @@ a dynamic clause. Sometimes code seems to be copy/pasted. But, it seems
 that backtracking in the recorded database and backtracking in the asserted
 database works differently, see update_activity_times1/1.
 
-\subsection{schedule_fire/3}
 
-What is the reason for schedule_fire/3, why postpone?
 
 \subsection{Following the progress of leadsto rules}
 
 We start with setup_leadsto/6 where the arguments are almost identical to the
-values in the Leadsto specification. 
+values in the Leadsto specification.
+
 \begin{description}
 \predicate{setup_leadsto}{6}{TStart, Vars, LitDisConj, AndLiterals,
 Delay,RId}
@@ -395,6 +421,12 @@ an arithmetic expression, code is also generated.
 We pass on some (incomplete) data structures within setup_lt/6. code_form/4 uses
 \exam{ds_d(AnteResult, VarsIn, PVIn)} and \exam{ds_d(AnteTail, VarsOut, PVOut)}.
 \exam{AnteResult} is a difference list. Therefore often \exam{AnteTail} is set to \exam{[]}.
+
+setup_lt/6 calls setup_lt_normed/8.
+The result is stored as
+\exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)}
+but more important, setup_lt_normed/8 is called,
+it leads to setup_lt_wait_var/12.
 
 \predicate{code_form}{4}{+AnteConse, +PosNeg:[pos, neg], DIn, DOut}
 
@@ -427,7 +459,8 @@ a later one gets \exam{Inst = inst}. Inst values can be \exam{inst},
 \exam{next}, \exam{var}, \exam{mixed}.
 
 
-tr_arg_prolog1/6 is also responsible for substituting \jargon{spec_constant}s.~\footnote{TODO: Check whether Atoms could end up as Prolog variables, look at
+tr_arg_prolog1/6 is also responsible for substituting
+\jargon{spec_constant}s.~\footnote{TODO: Check whether Atoms could end up as Prolog variables, look at
 code_atom/4 where \exam{Inst} is ignored in the code. Can \exam{Inst} be
 \exam{var} or \exam{mixed} there?}
 
@@ -437,34 +470,33 @@ code_atom/4 where \exam{Inst} is ignored in the code. Can \exam{Inst} be
 The consequent is encoded as \exam{ds_cr(ConseLits, ds_ri(Id))}, but pxor
 consequents are treated differently.~\footnote{TODO}.
 
-The result is stored as \exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)}
-but more important, \exam{setup_lt_normed(AnteLits, AnteHolds, TMin, THolds,
-ConseRId, PV, Delay, Removed)}, it leads to setup_lt_wait_var/12.
-\end{description}
+\predicate{setup_lt_normed}{8}{AnteTODO, AnteHolds, TMin, THolds, ConseRId,PV,
+Delay, Removed}
+We know AnteHolds holds in range \arg{TMin}, \arg{THolds}, we need to
+continue with \arg{AnteTODO}.
+If \arg{AnteTODO} becomes \exam{[]}, \\
+\exam{setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)} is
+called. Otherwise, setup_lt_notground/9 is called which calls
+setup_lt_notground_fv/13 after setting up the free variable arguments.
 
-
-
-A number of facts:
-\begin{itemize}
-\item
-If \exam{AnteLits} becomes \exam{[]}, \\
-\exam{setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)} is called. If \exam{THolds >= TMin + G}, we calculate
+\predicate{setup_lt_conse}{6}{AnteHolds, TMin, THolds, ConseRId, Delay, Removed}
+We know The whole antecedent holds between \arg{TMin} and \arg{THolds}.
+If \exam{THolds >= TMin + G}, we calculate
 \exam{T3 is  TMin + G + Delay} and
 \exam{T4 is THolds + Delay + H} and then call
 \exam{schedule_fire(ConseRId, T3, T4)} which sets
 \exam{dyn_schedule_fire(ConseRId, T3, T4)}.~\footnote{I left out details dealing
-with pxor aspects.}
-They are fired by the \exam{repeat, set_state, handle_fired} sequence in runspec_rest/0.~\footnote{Why not fire immediately?}
+with pxor aspects.
+What is the reason for schedule_fire/3, why postpone?}
+They are fired by the \exam{repeat, set_state, handle_fired} sequence in
+runspec_rest/0.~\footnote{Why not fire immediately?}
 After schedule_fire/3 we do setup_lt_wait_fired/6. If \exam{THolds < TMin + G}
 we call setup_lt_wait_true/5.
 
-\exam{setup_lt_wait_fired} stores a wait_fired/5
+setup_lt_wait_fired/6 stores a wait_fired/5
 fact.~\footnote{It is confusing that two implementations of this waiting are
 present in the code, depending on the recwait/0 switch.}
-\item
-We need to study the \exam{FV}, \exam{FVL} aspects in more detail.
-\end{itemize}
-
+\end{description}
 
 TODO: Looking at the code, it seems that we do not reorder the \exam{AnteLiterals}
 depending on intermediate results.
@@ -539,65 +571,81 @@ Is complex and not documented. In the source some explanation is given,
 
 \subsection{Understanding}
 
-\jargon{FV}, \jargon{fv} are abreviations of Free Variables (Prolog variables).
 
-setup_lt_notground_fv/13 analyses the current \exam{LitData} first for all
-AtomTraces and all cwa matches, handles those separately by \exam{check_fire_isolated}
-or \exam{setup_lt_normed}.
 
 Finally \exam{setup_wait_var} is called with \exam{Atom}, \exam{FV}, \exam{FVL}
 values implying that \exam{FV} 
 from \exam{FVL} has been handled, but we need to check other instantiations.
 
 \begin{description}
-\predicate{setup_lt_notground_fv}{13}{TStart, FV, FVL, LitData, ToDoAnte, AnteHolds,THolds, ConseRId,PV,
-Delay, Id, IdTerm, Removed}
+\predicate{setup_lt_notground_fv}{13}{+TStart, +FV, +FVL, +LitData, +ToDoAnte,
++AnteHolds, +THolds, +ConseRId, +PV,
++Delay, +Id, +IdTerm, +Removed}
 
 \arg{AnteHolds} holds for Time Interval between \arg{TStart} and
-\exam{THolds}. \exam{ToDoAnte} is the conjunction that needs to hold.
-\exam{LitData} is the Literal under investigation. \exam{FV} are the free variables of
-the Literal and \exam{FVL} is a list
+\arg{THolds}. \arg{ToDoAnte} is the conjunction that needs to hold.
+\arg{LitData} is the Literal under investigation. \arg{FV} are the free variables of
+the Literal and \arg{FVL} is a list
 of instantiations that have been dealt with elsewhere.
 
-\exam{Delay} is \exam{efgh(E,F,G,H)}, \exam{ConseRId} is the consequent.
+\arg{Delay} is \exam{efgh(E,F,G,H)}, \arg{ConseRId} is the consequent.
 
 \exam{Removed} indicates the source of the call. In case of
 \exam{update_activity_time1(wait_var...)}, the
 \exam{wait_var}  term is Removed and the Removed is propagated along.
 
-\exam{PV} is probably the characterization of the  variables:\exam{pv(Arga, Sorta,Kinda,Arg1a)}.
+\arg{PV} is probably the characterization of the  variables:\exam{pv(Arga, Sorta,Kinda,Arg1a)}.
 
-\exam{setup_lt_notground_fv} is called by \exam{setup_lt_notground}, it by \exam{setup_lt_normed}, it by \exam{setup_lt}.
-\exam{setup_lt} is called from \exam{setup_nontrivial_leadsto}.
-\exam{setup_lt_normed} is also called by \exam{instantiate_op} and \exam{fail_filter_handleRR}.
+\jargon{FV}, \jargon{fv} are abreviations of Free Variables (Prolog variables).
+
+
+
+setup_lt_notground_fv/13 is called by setup_lt_notground/9, it by setup_lt_normed/8, it by setup_lt/6.
+setup_lt/6 is called from setup_nontrivial_leadsto/5.
+setup_lt_normed/8 is also called by instantiate_op/16 (called in add_default_cwa/17) and fail_filter_handleRR/16, part of filter_defaults_handle_others/14 in
+setup_lt_notground_fv/13.
 
 We probably handle the rule in this call up to HandledTime.
 
-Now, if at the call \exam{THolds < HandledTime}, we start all over, for this partially 
+Now, if at the call \exam{THolds < HandledTime}, we start all over, for
+this partially 
 instantiated sequence
-of literals by calling \exam{get_new_tholds}. Apparently the order of literals is
-reversed here.
+of literals by calling get_new_tholds/15. Apparently the order of
+literals is reversed here.
 \exam{get_new_tholds} is called here and by \exam{get_new_tholds} itself.
+
+If \exam{THolds >= HandledTime}
+setup_lt_notground_fv/13 analyses the current \exam{LitData} first for all
+AtomTraces and all cwa matches, handles those separately by \exam{check_fire_isolated}
+or \exam{setup_lt_normed}.
+All those instantiations of \arg{FV} handled separately are added to \arg{FVL}
+and we finally call setup_lt_notground1default/12 that calls
+setup_lt_wait_var/12.
 
 \predicate{get_new_tholds}{15}{AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
 ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed}
 
-\exam{AnteHoldsTODO} is an earlier instantiated sequence of literals that needs to be
+Called by setup_lt_notground_fv/13 and by get_new_tholds/15 itself.
+
+\arg{AnteHoldsTODO} is an earlier instantiated sequence of literals that
+needs to be
 extended in range up to
-\exam{THandled} (or further?). \exam{AHDone} is the sequence that has been checked and
+\arg{THandled} (or further?). \arg{AHDone} is the sequence that has been
+checked and
 hold between 
-\exam{TStart} and \exam{THoldsNew1}.
-\exam{Tholds} is the result.~\footnote{TODO: Details of Tholds, is this a return
+\arg{TStart} and \arg{THoldsNew1}.
+\arg{Tholds} is the result.~\footnote{TODO: Details of Tholds, is this a return
 parameter?}
 
-Be aware that in \exam{get_new_tholds} the \exam{Atom} in
+Be aware that in get_new_tholds/15 the \exam{Atom} in
 \exam{[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]} is ground, 
 and has nothing to
 do with \exam{FV} and \exam{FVL}.
 
-First, if \exam{AnteHoldsTODO == []}, we continue~\footnote{as \exam{get_new_tholds} is only called by \exam{setup_lt_notground_fv}} with \exam{setup_lt_notground_fv} with
-the increased interval.
-Otherwise we follow \exam{AnteHoldsTODO} Literals.
+First, if \exam{AnteHoldsTODO == []}, we
+continue with setup_lt_notground_fv/13 with
+the increased time interval.
+Otherwise we follow \arg{AnteHoldsTODO} Literals.
 
 NEXT: What does \exam{find_min_range_ground(Atom, PN, Tholds, O2)} do?
 Probably: Inspect Literal starting from Tholds.
@@ -608,8 +656,8 @@ Probably: Inspect Literal starting from Tholds.
 \predicate{setup_lt_wait_var}{12}{FV, FVL, LitData, ToDoAnte, AnteHolds,
 			  TMin, THolds, ConseRId, PV, Delay, Id, IdTerm}
 
-Probably: We know \exam{AnteHolds} is ok between \exam{TMin} and \exam{THolds}.
-\exam{LitData} is the current literal that has been analyzed. FV are the free
+Probably: We know \arg{AnteHolds} is ok between \arg{TMin} and \arg{THolds}.
+\arg{LitData} is the current literal that has been analyzed. FV are the free
 variables in the Literal, \exam{FVL} is the list of instantiations of FV that
 have been dealt with, for which 
 this setup is not responsible at all. Called by
@@ -618,7 +666,7 @@ arguments) which is only called as last call in
 setup_lt_notground_fv/13.
 
 TODO: Really nail down the meaning of \exam{wait_var}, also at what stage are
-what values for \exam{TMin} and \exam{THolds} set.
+what values for \arg{TMin} and \arg{THolds} set.
 TODO: Will \exam{wait_vars} become invalidated? Inspect \exam{get_new_tholds}.
 
 \end{description}
@@ -626,8 +674,8 @@ TODO: Will \exam{wait_vars} become invalidated? Inspect \exam{get_new_tholds}.
 
 \section{So far}
 
-Try documenting the whole data structure that describes the state of each leadsto
-rule first. All invariants, the understanding of having every possible 
+Try documenting the whole data structure that describes the state of each
+leadsto rule first. All invariants, the understanding of having every possible 
 outcome of a leadsto rule represented.
 
 At what stage the HandledTime invariant is. Understanding the get_new_tholds,
