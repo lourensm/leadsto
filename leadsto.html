@@ -270,7 +270,8 @@ of the algorithm</span></a></div>
 States</span></a></div>
 <div class="toc-h3"><a class="sec" href="#sec:4.5"><span class="sec-nr">4.5</span> <span class="sec-title">Garbage 
 collection</span></a></div>
-<div class="toc-h3"><a class="sec" href="#sec:4.6"><span class="sec-nr">4.6</span> <span class="sec-title">Understanding</span></a></div>
+<div class="toc-h3"><a class="sec" href="#sec:4.6"><span class="sec-nr">4.6</span> <span class="sec-title">Runtime 
+Algorithm Predicates</span></a></div>
 <div class="toc-h2"><a class="sec" href="#sec:5"><span class="sec-nr">5</span> <span class="sec-title">So 
 far</span></a></div>
 <div class="toc-h2"><a class="sec" href="#sec:6"><span class="sec-nr">6</span> <span class="sec-title">"Syntax" 
@@ -920,11 +921,8 @@ given,
 
 <p>
 
-<h3><a id="sec:4.6"><span class="sec-nr">4.6</span> <span class="sec-title">Understanding</span></a></h3>
-
-<p>Finally <code>setup_wait_var</code> is called with <code>Atom</code>, <code>FV</code>, <code>FVL</code> 
-values implying that <code>FV</code> from <code>FVL</code> has been 
-handled, but we need to check other instantiations.
+<h3><a id="sec:4.6"><span class="sec-nr">4.6</span> <span class="sec-title">Runtime 
+Algorithm Predicates</span></a></h3>
 
 <dl class="latex">
 <dt class="pubdef"><a id="setup_lt_normed/8"><strong>setup_lt_normed</strong>(<var>AnteTODO, 
@@ -1025,7 +1023,10 @@ or <a id="idx:setupltnormed8:108"></a><a class="pred" href="#setup_lt_normed/8">
 All those instantiations of <var>FV</var> handled separately are added 
 to <var>FVL</var> and we finally call <a id="idx:setupltnotground1default12:109"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
 that calls
-<a id="idx:setupltwaitvar12:110"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a>.</dd>
+<a id="idx:setupltwaitvar12:110"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a> 
+with <code>Atom</code>, <code>FV</code>, <code>FVL</code> values 
+implying that <code>FV</code> from <code>FVL</code> has been handled, 
+but we need to check other instantiations.</dd>
 <dt class="pubdef"><a id="get_new_tholds/15"><strong>get_new_tholds</strong>(<var>AnteHoldsTODO, 
 AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, ToDoAnte, 
 ConseRId,PV,Delay, Id,IdTerm,Removed</var>)</a></dt>

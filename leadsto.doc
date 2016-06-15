@@ -545,13 +545,7 @@ we wish to extend the range as far as possible.
 Is complex and not documented. In the source some explanation is given,
 \file{olddocs/bugdev.txt} also contains some explanation.
 
-\subsection{Understanding}
-
-
-
-Finally \exam{setup_wait_var} is called with \exam{Atom}, \exam{FV}, \exam{FVL}
-values implying that \exam{FV} 
-from \exam{FVL} has been handled, but we need to check other instantiations.
+\subsection{Runtime Algorithm Predicates}
 
 \begin{description}
 
@@ -626,7 +620,9 @@ AtomTraces in filter_defaults_handle_others/4 and all cwa matches in add_default
 check_fire_isolated/5 or setup_lt_normed/8.
 All those instantiations of \arg{FV} handled separately are added to \arg{FVL}
 and we finally call setup_lt_notground1default/12 that calls
-setup_lt_wait_var/12.
+setup_lt_wait_var/12 with \exam{Atom}, \exam{FV}, \exam{FVL}
+values implying that \exam{FV} 
+from \exam{FVL} has been handled, but we need to check other instantiations.
 
 \predicate{get_new_tholds}{15}{AnteHoldsTODO, AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, 
 ToDoAnte, ConseRId,PV,Delay, Id,IdTerm,Removed}
