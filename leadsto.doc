@@ -304,7 +304,8 @@ Antecedents. Other cases are passed on to setup_nontrivial_leadsto/5.
 It stores the compiled leadsto rule as
 \exam{dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)} but
 also does initial firing and instantiation the leadsto rule data structures
-by calling setup_lt/6 which calls setup_lt_normed/8.
+by calling setup_lt/6 which calls setup_lt_normed/8 which is part of the run
+time algorithm.
 
 \predicate{init_interval_callbacks}{10}{TmInf, Vars, Forms, TmInf1, Vars1,
 Forms2, InvldVars, InvldTimeInfo, ActPreInsttiated}
@@ -469,34 +470,9 @@ code_atom/4 where \exam{Inst} is ignored in the code. Can \exam{Inst} be
 
 The consequent is encoded as \exam{ds_cr(ConseLits, ds_ri(Id))}, but pxor
 consequents are treated differently.~\footnote{TODO}.
-
-\predicate{setup_lt_normed}{8}{AnteTODO, AnteHolds, TMin, THolds, ConseRId,PV,
-Delay, Removed}
-We know AnteHolds holds in range \arg{TMin}, \arg{THolds}, we need to
-continue with \arg{AnteTODO}.
-If \arg{AnteTODO} becomes \exam{[]}, \\
-\exam{setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)} is
-called. Otherwise, setup_lt_notground/9 is called which calls
-setup_lt_notground_fv/13 after setting up the free variable arguments.
-
-\predicate{setup_lt_conse}{6}{AnteHolds, TMin, THolds, ConseRId, Delay, Removed}
-We know The whole antecedent holds between \arg{TMin} and \arg{THolds}.
-If \exam{THolds >= TMin + G}, we calculate
-\exam{T3 is  TMin + G + Delay} and
-\exam{T4 is THolds + Delay + H} and then call
-\exam{schedule_fire(ConseRId, T3, T4)} which sets
-\exam{dyn_schedule_fire(ConseRId, T3, T4)}.~\footnote{I left out details dealing
-with pxor aspects.
-What is the reason for schedule_fire/3, why postpone?}
-They are fired by the \exam{repeat, set_state, handle_fired} sequence in
-runspec_rest/0.~\footnote{Why not fire immediately?}
-After schedule_fire/3 we do setup_lt_wait_fired/6. If \exam{THolds < TMin + G}
-we call setup_lt_wait_true/5.
-
-setup_lt_wait_fired/6 stores a wait_fired/5
-fact.~\footnote{It is confusing that two implementations of this waiting are
-present in the code, depending on the recwait/0 switch.}
 \end{description}
+
+
 
 TODO: Looking at the code, it seems that we do not reorder the \exam{AnteLiterals}
 depending on intermediate results.
@@ -553,7 +529,7 @@ in such a way that the antecedents have been checked up to the new \exam{Handled
 \subsection{Rule States}
 
 Rules can contain variables, that is, antecedent literals can have variables.
-There can be more than one separate states per rule.
+There can be more than one separate state per rule.
 
 It could be that the first N literals of the antecedent with some specific 
 instantiation
@@ -578,6 +554,36 @@ values implying that \exam{FV}
 from \exam{FVL} has been handled, but we need to check other instantiations.
 
 \begin{description}
+
+\predicate{setup_lt_normed}{8}{AnteTODO, AnteHolds, TMin, THolds, ConseRId,PV,
+Delay, Removed}
+We know AnteHolds holds in range \arg{TMin}, \arg{THolds}, we need to
+continue with \arg{AnteTODO}. AnteHolds has all Prolog variables instantiated
+and excluded from \exam{FVL} wait_var occurrences.
+
+If \arg{AnteTODO} becomes \exam{[]}, \\
+\exam{setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)} is
+called. Otherwise, setup_lt_notground/9 is called which calls
+setup_lt_notground_fv/13 after setting up the free variable arguments.
+
+\predicate{setup_lt_conse}{6}{AnteHolds, TMin, THolds, ConseRId, Delay, Removed}
+We know The whole antecedent holds between \arg{TMin} and \arg{THolds}.
+If \exam{THolds >= TMin + G}, we calculate
+\exam{T3 is  TMin + G + Delay} and
+\exam{T4 is THolds + Delay + H} and then call
+\exam{schedule_fire(ConseRId, T3, T4)} which sets
+\exam{dyn_schedule_fire(ConseRId, T3, T4)}.~\footnote{I left out details dealing
+with pxor aspects.
+What is the reason for schedule_fire/3, why postpone?}
+They are fired by the \exam{repeat, set_state, handle_fired} sequence in
+runspec_rest/0.~\footnote{Why not fire immediately?}
+After schedule_fire/3 we do setup_lt_wait_fired/6. If \exam{THolds < TMin + G}
+we call setup_lt_wait_true/5.
+
+setup_lt_wait_fired/6 stores a wait_fired/5
+fact.~\footnote{It is confusing that two implementations of this waiting are
+present in the code, depending on the recwait/0 switch.}
+
 \predicate{setup_lt_notground_fv}{13}{+TStart, +FV, +FVL, +LitData, +ToDoAnte,
 +AnteHolds, +THolds, +ConseRId, +PV,
 +Delay, +Id, +IdTerm, +Removed}
@@ -600,24 +606,24 @@ of instantiations that have been dealt with elsewhere.
 
 
 
-setup_lt_notground_fv/13 is called by setup_lt_notground/9, it by setup_lt_normed/8, it by setup_lt/6.
+setup_lt_notground_fv/13 is called by setup_lt_notground/9, it by
+setup_lt_normed/8, it by setup_lt/6.
 setup_lt/6 is called from setup_nontrivial_leadsto/5.
 setup_lt_normed/8 is also called by instantiate_op/16 (called in add_default_cwa/17) and fail_filter_handleRR/16, part of filter_defaults_handle_others/14 in
 setup_lt_notground_fv/13.
 
 We probably handle the rule in this call up to HandledTime.
 
-Now, if at the call \exam{THolds < HandledTime}, we start all over, for
-this partially 
-instantiated sequence
+Now, if at the call \exam{THolds < HandledTime}, we start all over for
+this partially instantiated sequence
 of literals by calling get_new_tholds/15. Apparently the order of
 literals is reversed here.
-\exam{get_new_tholds} is called here and by \exam{get_new_tholds} itself.
+get_new_tholds/15 is called here and by get_new_tholds/15 itself.
 
 If \exam{THolds >= HandledTime}
 setup_lt_notground_fv/13 analyses the current \exam{LitData} first for all
-AtomTraces and all cwa matches, handles those separately by \exam{check_fire_isolated}
-or \exam{setup_lt_normed}.
+AtomTraces in filter_defaults_handle_others/4 and all cwa matches in add_default_cwa/17, handles those separately by
+check_fire_isolated/5 or setup_lt_normed/8.
 All those instantiations of \arg{FV} handled separately are added to \arg{FVL}
 and we finally call setup_lt_notground1default/12 that calls
 setup_lt_wait_var/12.
@@ -637,10 +643,10 @@ hold between
 \arg{Tholds} is the result.~\footnote{TODO: Details of Tholds, is this a return
 parameter?}
 
-Be aware that in get_new_tholds/15 the \exam{Atom} in
+\footnote{When analysing the source:Be aware that in get_new_tholds/15 the \exam{Atom} in
 \exam{[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]} is ground, 
 and has nothing to
-do with \exam{FV} and \exam{FVL}.
+do with \exam{FV} and \exam{FVL}.}
 
 First, if \exam{AnteHoldsTODO == []}, we
 continue with setup_lt_notground_fv/13 with
@@ -665,10 +671,18 @@ setup_lt_notground1default/12 ( same
 arguments) which is only called as last call in 
 setup_lt_notground_fv/13.
 
-TODO: Really nail down the meaning of \exam{wait_var}, also at what stage are
+TODO
+\begin{itemize}
+\item
+Really nail down the meaning of \exam{wait_var}, also at what stage are
 what values for \arg{TMin} and \arg{THolds} set.
-TODO: Will \exam{wait_vars} become invalidated? Inspect \exam{get_new_tholds}.
-
+\item
+Will \exam{wait_vars} become invalidated? Inspect get_new_tholds/15.
+\item
+For a \exam{wait_var} entry, can a result be found that extends \arg{AnteHolds}
+starting at \arg{TMin}? Probably: it could be that some rule has not fired yet,
+giving a new \arg{LitData} instantiation. But please create an example.
+\end{itemize}
 \end{description}
 
 

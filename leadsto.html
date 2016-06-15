@@ -613,7 +613,8 @@ It stores the compiled leadsto rule as
 <code>dyn_lt_rule(Id, AnteLits,ConseRId,PVOutC,Delay,RId)</code> but 
 also does initial firing and instantiation the leadsto rule data 
 structures by calling <a id="idx:setuplt6:53"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a> 
-which calls <a id="idx:setupltnormed8:54"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>.</dd>
+which calls <a id="idx:setupltnormed8:54"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a> 
+which is part of the run time algorithm.</dd>
 <dt class="pubdef"><a id="init_interval_callbacks/10"><strong>init_interval_callbacks</strong>(<var>TmInf, 
 Vars, Forms, TmInf1, Vars1, Forms2, InvldVars, InvldTimeInfo, 
 ActPreInsttiated</var>)</a></dt>
@@ -824,41 +825,7 @@ but true <code>ConseLits</code> are removed.&nbsp;<sup class="fn">9<span class="
 why not from Ante?).</span></sup>
 
 <p>The consequent is encoded as <code>ds_cr(ConseLits, ds_ri(Id))</code>, 
-but pxor consequents are treated differently.&nbsp;<sup class="fn">10<span class="fn-text">TODO</span></sup>.</dd>
-<dt class="pubdef"><a id="setup_lt_normed/8"><strong>setup_lt_normed</strong>(<var>AnteTODO, 
-AnteHolds, TMin, THolds, ConseRId,PV, Delay, Removed</var>)</a></dt>
-<dd class="defbody">
-We know AnteHolds holds in range <var>TMin</var>, <var>THolds</var>, we 
-need to continue with <var>AnteTODO</var>. If <var>AnteTODO</var> 
-becomes <code>[]</code>, <br>
-<code>setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)</code> 
-is called. Otherwise, <a id="idx:setupltnotground9:79"></a><span class="pred-ext">setup_lt_notground/9</span> 
-is called which calls
-<a id="idx:setupltnotgroundfv13:80"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
-after setting up the free variable arguments.</dd>
-<dt class="pubdef"><a id="setup_lt_conse/6"><strong>setup_lt_conse</strong>(<var>AnteHolds, 
-TMin, THolds, ConseRId, Delay, Removed</var>)</a></dt>
-<dd class="defbody">
-We know The whole antecedent holds between <var>TMin</var> and <var>THolds</var>. 
-If <code>THolds &gt;= TMin + G</code>, we calculate
-<code>T3 is TMin + G + Delay</code> and
-<code>T4 is THolds + Delay + H</code> and then call
-<code>schedule_fire(ConseRId, T3, T4)</code> which sets
-<code>dyn_schedule_fire(ConseRId, T3, T4)</code>.&nbsp;<sup class="fn">11<span class="fn-text">I 
-left out details dealing with pxor aspects. What is the reason for <a id="idx:schedulefire3:81"></a><span class="pred-ext">schedule_fire/3</span>, 
-why postpone?</span></sup> They are fired by the <code>repeat, 
-set_state, handle_fired</code> sequence in
-<a id="idx:runspecrest0:82"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">12<span class="fn-text">Why 
-not fire immediately?</span></sup> After <a id="idx:schedulefire3:83"></a><span class="pred-ext">schedule_fire/3</span> 
-we do <a id="idx:setupltwaitfired6:84"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
-If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:85"></a><span class="pred-ext">setup_lt_wait_true/5</span>.
-
-<p><a id="idx:setupltwaitfired6:86"></a><span class="pred-ext">setup_lt_wait_fired/6</span> 
-stores a <a id="idx:waitfired5:87"></a><span class="pred-ext">wait_fired/5</span> 
-fact.&nbsp;<sup class="fn">13<span class="fn-text">It is confusing that 
-two implementations of this waiting are present in the code, depending 
-on the <a id="idx:recwait0:88"></a><span class="pred-ext">recwait/0</span> 
-switch.</span></sup>
+but pxor consequents are treated differently.&nbsp;<sup class="fn">10<span class="fn-text">TODO</span></sup>.
 </dd>
 </dl>
 
@@ -881,7 +848,7 @@ times <code>e</code>, <code>f</code>, <code>g</code>, <code>h</code></span></a><
 <code>g</code>, <code>h</code>:<code>e,f, g, h &gt;= 0</code> and if <code>h 
 == 0</code> then
 <code>g</code> must be 0. But also,
-<code>e + f + g + h &gt; 0</code>.&nbsp;<sup class="fn">14<span class="fn-text">Why 
+<code>e + f + g + h &gt; 0</code>.&nbsp;<sup class="fn">11<span class="fn-text">Why 
 those requirements? We probably do not want to reason without delay.</span></sup>
 
 <p><code>e, f, g, h</code>:
@@ -932,7 +899,7 @@ new <code>HandledTime</code>.
 States</span></a></h3>
 
 <p>Rules can contain variables, that is, antecedent literals can have 
-variables. There can be more than one separate states per rule.
+variables. There can be more than one separate state per rule.
 
 <p>It could be that the first N literals of the antecedent with some 
 specific instantiation are valid in some time range <code>T1 - T2</code>.
@@ -960,6 +927,43 @@ values implying that <code>FV</code> from <code>FVL</code> has been
 handled, but we need to check other instantiations.
 
 <dl class="latex">
+<dt class="pubdef"><a id="setup_lt_normed/8"><strong>setup_lt_normed</strong>(<var>AnteTODO, 
+AnteHolds, TMin, THolds, ConseRId,PV, Delay, Removed</var>)</a></dt>
+<dd class="defbody">
+We know AnteHolds holds in range <var>TMin</var>, <var>THolds</var>, we 
+need to continue with <var>AnteTODO</var>. AnteHolds has all Prolog 
+variables instantiated and excluded from <code>FVL</code> wait_var 
+occurrences.
+
+<p>If <var>AnteTODO</var> becomes <code>[]</code>, <br>
+<code>setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)</code> 
+is called. Otherwise, <a id="idx:setupltnotground9:79"></a><span class="pred-ext">setup_lt_notground/9</span> 
+is called which calls
+<a id="idx:setupltnotgroundfv13:80"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+after setting up the free variable arguments.</dd>
+<dt class="pubdef"><a id="setup_lt_conse/6"><strong>setup_lt_conse</strong>(<var>AnteHolds, 
+TMin, THolds, ConseRId, Delay, Removed</var>)</a></dt>
+<dd class="defbody">
+We know The whole antecedent holds between <var>TMin</var> and <var>THolds</var>. 
+If <code>THolds &gt;= TMin + G</code>, we calculate
+<code>T3 is TMin + G + Delay</code> and
+<code>T4 is THolds + Delay + H</code> and then call
+<code>schedule_fire(ConseRId, T3, T4)</code> which sets
+<code>dyn_schedule_fire(ConseRId, T3, T4)</code>.&nbsp;<sup class="fn">12<span class="fn-text">I 
+left out details dealing with pxor aspects. What is the reason for <a id="idx:schedulefire3:81"></a><span class="pred-ext">schedule_fire/3</span>, 
+why postpone?</span></sup> They are fired by the <code>repeat, 
+set_state, handle_fired</code> sequence in
+<a id="idx:runspecrest0:82"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">13<span class="fn-text">Why 
+not fire immediately?</span></sup> After <a id="idx:schedulefire3:83"></a><span class="pred-ext">schedule_fire/3</span> 
+we do <a id="idx:setupltwaitfired6:84"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
+If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:85"></a><span class="pred-ext">setup_lt_wait_true/5</span>.
+
+<p><a id="idx:setupltwaitfired6:86"></a><span class="pred-ext">setup_lt_wait_fired/6</span> 
+stores a <a id="idx:waitfired5:87"></a><span class="pred-ext">wait_fired/5</span> 
+fact.&nbsp;<sup class="fn">14<span class="fn-text">It is confusing that 
+two implementations of this waiting are present in the code, depending 
+on the <a id="idx:recwait0:88"></a><span class="pred-ext">recwait/0</span> 
+switch.</span></sup></dd>
 <dt class="pubdef"><a id="setup_lt_notground_fv/13"><strong>setup_lt_notground_fv</strong>(<var>+TStart, 
 +FV, +FVL, +LitData, +ToDoAnte, +AnteHolds, +THolds, +ConseRId, +PV, 
 +Delay, +Id, +IdTerm, +Removed</var>)</a></dt>
@@ -989,7 +993,8 @@ variables).
 
 <p><a id="idx:setupltnotgroundfv13:89"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
 is called by <a id="idx:setupltnotground9:90"></a><span class="pred-ext">setup_lt_notground/9</span>, 
-it by <a id="idx:setupltnormed8:91"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>, 
+it by
+<a id="idx:setupltnormed8:91"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>, 
 it by <a id="idx:setuplt6:92"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a>.
 <a id="idx:setuplt6:93"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a> 
 is called from <a id="idx:setupnontrivialleadsto5:94"></a><span class="pred-ext">setup_nontrivial_leadsto/5</span>.
@@ -1004,27 +1009,30 @@ in
 <p>We probably handle the rule in this call up to HandledTime.
 
 <p>Now, if at the call <code>THolds &lt; HandledTime</code>, we start 
-all over, for this partially instantiated sequence of literals by 
-calling <a id="idx:getnewtholds15:101"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>. 
+all over for this partially instantiated sequence of literals by calling <a id="idx:getnewtholds15:101"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>. 
 Apparently the order of literals is reversed here.
-<code>get_new_tholds</code> is called here and by <code>get_new_tholds</code> 
+<a id="idx:getnewtholds15:102"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+is called here and by <a id="idx:getnewtholds15:103"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
 itself.
 
 <p>If <code>THolds &gt;= HandledTime</code>
-<a id="idx:setupltnotgroundfv13:102"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
-analyses the current <code>LitData</code> first for all AtomTraces and 
-all cwa matches, handles those separately by <code>check_fire_isolated</code> 
-or <code>setup_lt_normed</code>. All those instantiations of <var>FV</var> 
-handled separately are added to <var>FVL</var> and we finally call <a id="idx:setupltnotground1default12:103"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
+<a id="idx:setupltnotgroundfv13:104"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+analyses the current <code>LitData</code> first for all AtomTraces in <a id="idx:filterdefaultshandleothers4:105"></a><span class="pred-ext">filter_defaults_handle_others/4</span> 
+and all cwa matches in <a id="idx:adddefaultcwa17:106"></a><span class="pred-ext">add_default_cwa/17</span>, 
+handles those separately by
+<a id="idx:checkfireisolated5:107"></a><span class="pred-ext">check_fire_isolated/5</span> 
+or <a id="idx:setupltnormed8:108"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>. 
+All those instantiations of <var>FV</var> handled separately are added 
+to <var>FVL</var> and we finally call <a id="idx:setupltnotground1default12:109"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
 that calls
-<a id="idx:setupltwaitvar12:104"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a>.</dd>
+<a id="idx:setupltwaitvar12:110"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a>.</dd>
 <dt class="pubdef"><a id="get_new_tholds/15"><strong>get_new_tholds</strong>(<var>AnteHoldsTODO, 
 AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, ToDoAnte, 
 ConseRId,PV,Delay, Id,IdTerm,Removed</var>)</a></dt>
 <dd class="defbody">
 
-<p>Called by <a id="idx:setupltnotgroundfv13:105"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
-and by <a id="idx:getnewtholds15:106"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+<p>Called by <a id="idx:setupltnotgroundfv13:111"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+and by <a id="idx:getnewtholds15:112"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
 itself.
 
 <p><var>AnteHoldsTODO</var> is an earlier instantiated sequence of 
@@ -1035,12 +1043,12 @@ that has been checked and hold between
 <var>Tholds</var> is the result.&nbsp;<sup class="fn">15<span class="fn-text">TODO: 
 Details of Tholds, is this a return parameter?</span></sup>
 
-<p>Be aware that in <a id="idx:getnewtholds15:107"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
-the <code>Atom</code> in
-<code>[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]</code> is ground, 
-and has nothing to do with <code>FV</code> and <code>FVL</code>.
+<p><sup class="fn">16<span class="fn-text">When analysing the source:Be 
+aware that in <a id="idx:getnewtholds15:113"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+the <code>Atom</code> in <code>[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]</code> 
+is ground, and has nothing to do with <code>FV</code> and <code>FVL</code>.</span></sup>
 
-<p>First, if <code>AnteHoldsTODO ==[]</code>, we continue with <a id="idx:setupltnotgroundfv13:108"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+<p>First, if <code>AnteHoldsTODO ==[]</code>, we continue with <a id="idx:setupltnotgroundfv13:114"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
 with the increased time interval. Otherwise we follow <var>AnteHoldsTODO</var> 
 Literals.
 
@@ -1057,15 +1065,21 @@ and <var>THolds</var>.
 the free variables in the Literal, <code>FVL</code> is the list of 
 instantiations of FV that have been dealt with, for which this setup is 
 not responsible at all. Called by
-<a id="idx:setupltnotground1default12:109"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
+<a id="idx:setupltnotground1default12:115"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
 ( same arguments) which is only called as last call in
-<a id="idx:setupltnotgroundfv13:110"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
+<a id="idx:setupltnotgroundfv13:116"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
 
-<p>TODO: Really nail down the meaning of <code>wait_var</code>, also at 
-what stage are what values for <var>TMin</var> and <var>THolds</var> 
-set. TODO: Will <code>wait_vars</code> become invalidated? Inspect <code>get_new_tholds</code>.
-
-<p></dd>
+<p>TODO
+<ul class="latex">
+<li>Really nail down the meaning of <code>wait_var</code>, also at what 
+stage are what values for <var>TMin</var> and <var>THolds</var> set.
+<li>Will <code>wait_vars</code> become invalidated? Inspect <a id="idx:getnewtholds15:117"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>.
+<li>For a <code>wait_var</code> entry, can a result be found that 
+extends <var>AnteHolds</var> starting at <var>TMin</var>? Probably: it 
+could be that some rule has not fired yet, giving a new <var>LitData</var> 
+instantiation. But please create an example.
+</ul>
+</dd>
 </dl>
 
 <p>
@@ -1184,7 +1198,10 @@ TODO: why those qterms?
 <dt class="index-sep">?</dt>
 <dt>add_default_cwa/17</dt>
 <dd>
-<a class="idx" href="#idx:adddefaultcwa17:97">4.6</a></dd>
+<a class="idx" href="#idx:adddefaultcwa17:97">4.6</a> <a class="idx" href="#idx:adddefaultcwa17:106">4.6</a></dd>
+<dt>check_fire_isolated/5</dt>
+<dd>
+<a class="idx" href="#idx:checkfireisolated5:107">4.6</a></dd>
 <dt>code_atom/4</dt>
 <dd>
 <a class="idx" href="#idx:codeatom4:77">3.4</a></dd>
@@ -1224,6 +1241,9 @@ TODO: why those qterms?
 <dt>filter_defaults_handle_others/14</dt>
 <dd>
 <a class="idx" href="#idx:filterdefaultshandleothers14:99">4.6</a></dd>
+<dt>filter_defaults_handle_others/4</dt>
+<dd>
+<a class="idx" href="#idx:filterdefaultshandleothers4:105">4.6</a></dd>
 <dt>forall/2</dt>
 <dd>
 <a class="idx" href="#idx:forall2:55">2.2.3</a></dd>
@@ -1232,7 +1252,7 @@ TODO: why those qterms?
 <a class="idx" href="#idx:getmodelcheckingprules0:41">2.2.3</a></dd>
 <dt><a class="idx" href="#get_new_tholds/15">get_new_tholds/15</a></dt>
 <dd>
-<a class="idx" href="#idx:getnewtholds15:101">4.6</a> <a class="idx" href="#idx:getnewtholds15:106">4.6</a> <a class="idx" href="#idx:getnewtholds15:107">4.6</a></dd>
+<a class="idx" href="#idx:getnewtholds15:101">4.6</a> <a class="idx" href="#idx:getnewtholds15:102">4.6</a> <a class="idx" href="#idx:getnewtholds15:103">4.6</a> <a class="idx" href="#idx:getnewtholds15:112">4.6</a> <a class="idx" href="#idx:getnewtholds15:113">4.6</a> <a class="idx" href="#idx:getnewtholds15:117">4.6</a></dd>
 <dt>handle_term/1</dt>
 <dd>
 <a class="idx" href="#idx:handleterm1:11">2.2.3</a> <a class="idx" href="#idx:handleterm1:14">2.2.3</a></dd>
@@ -1262,7 +1282,7 @@ TODO: why those qterms?
 <a class="idx" href="#idx:model1:32">2.2.3</a></dd>
 <dt>recwait/0</dt>
 <dd>
-<a class="idx" href="#idx:recwait0:59">3.3</a> <a class="idx" href="#idx:recwait0:88">3.4</a></dd>
+<a class="idx" href="#idx:recwait0:59">3.3</a> <a class="idx" href="#idx:recwait0:88">4.6</a></dd>
 <dt><a class="idx" href="#reset_sim_info/0">reset_sim_info/0</a></dt>
 <dt>run_simulation/2</dt>
 <dd>
@@ -1279,7 +1299,7 @@ TODO: why those qterms?
 <a class="idx" href="#idx:runspec10:2">1.2</a> <a class="idx" href="#idx:runspec10:16">2.2.3</a> <a class="idx" href="#idx:runspec10:22">2.2.3</a> <a class="idx" href="#idx:runspec10:30">2.2.3</a> <a class="idx" href="#idx:runspec10:33">2.2.3</a> <a class="idx" href="#idx:runspec10:47">2.2.3</a></dd>
 <dt>runspec_rest/0</dt>
 <dd>
-<a class="idx" href="#idx:runspecrest0:3">1.2</a> <a class="idx" href="#idx:runspecrest0:9">2.1</a> <a class="idx" href="#idx:runspecrest0:43">2.2.3</a> <a class="idx" href="#idx:runspecrest0:82">3.4</a></dd>
+<a class="idx" href="#idx:runspecrest0:3">1.2</a> <a class="idx" href="#idx:runspecrest0:9">2.1</a> <a class="idx" href="#idx:runspecrest0:43">2.2.3</a> <a class="idx" href="#idx:runspecrest0:82">4.6</a></dd>
 <dt><a class="idx" href="#runspecdo/1">runspecdo/1</a></dt>
 <dd>
 <a class="idx" href="#idx:runspecdo1:26">2.2.3</a></dd>
@@ -1291,7 +1311,7 @@ TODO: why those qterms?
 <dt><a class="idx" href="#savetracesetup/3">savetracesetup/3</a></dt>
 <dt>schedule_fire/3</dt>
 <dd>
-<a class="idx" href="#idx:schedulefire3:81">3.4</a> <a class="idx" href="#idx:schedulefire3:83">3.4</a></dd>
+<a class="idx" href="#idx:schedulefire3:81">4.6</a> <a class="idx" href="#idx:schedulefire3:83">4.6</a></dd>
 <dt>setup_atom_state_boundaries/0</dt>
 <dd>
 <a class="idx" href="#idx:setupatomstateboundaries0:42">2.2.3</a></dd>
@@ -1307,25 +1327,25 @@ TODO: why those qterms?
 <a class="idx" href="#idx:setupltinternal6:50">2.2.3</a></dd>
 <dt><a class="idx" href="#setup_lt_normed/8">setup_lt_normed/8</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltnormed8:54">2.2.3</a> <a class="idx" href="#idx:setupltnormed8:67">3.4</a> <a class="idx" href="#idx:setupltnormed8:68">3.4</a> <a class="idx" href="#idx:setupltnormed8:91">4.6</a> <a class="idx" href="#idx:setupltnormed8:95">4.6</a></dd>
+<a class="idx" href="#idx:setupltnormed8:54">2.2.3</a> <a class="idx" href="#idx:setupltnormed8:67">3.4</a> <a class="idx" href="#idx:setupltnormed8:68">3.4</a> <a class="idx" href="#idx:setupltnormed8:91">4.6</a> <a class="idx" href="#idx:setupltnormed8:95">4.6</a> <a class="idx" href="#idx:setupltnormed8:108">4.6</a></dd>
 <dt>setup_lt_notground/9</dt>
 <dd>
-<a class="idx" href="#idx:setupltnotground9:79">3.4</a> <a class="idx" href="#idx:setupltnotground9:90">4.6</a></dd>
+<a class="idx" href="#idx:setupltnotground9:79">4.6</a> <a class="idx" href="#idx:setupltnotground9:90">4.6</a></dd>
 <dt>setup_lt_notground1default/12</dt>
 <dd>
-<a class="idx" href="#idx:setupltnotground1default12:103">4.6</a> <a class="idx" href="#idx:setupltnotground1default12:109">4.6</a></dd>
+<a class="idx" href="#idx:setupltnotground1default12:109">4.6</a> <a class="idx" href="#idx:setupltnotground1default12:115">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltnotgroundfv13:80">3.4</a> <a class="idx" href="#idx:setupltnotgroundfv13:89">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:100">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:102">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:105">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:108">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:110">4.6</a></dd>
+<a class="idx" href="#idx:setupltnotgroundfv13:80">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:89">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:100">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:104">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:111">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:114">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:116">4.6</a></dd>
 <dt>setup_lt_wait_fired/6</dt>
 <dd>
-<a class="idx" href="#idx:setupltwaitfired6:84">3.4</a> <a class="idx" href="#idx:setupltwaitfired6:86">3.4</a></dd>
+<a class="idx" href="#idx:setupltwaitfired6:84">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:86">4.6</a></dd>
 <dt>setup_lt_wait_true/5</dt>
 <dd>
-<a class="idx" href="#idx:setupltwaittrue5:85">3.4</a></dd>
+<a class="idx" href="#idx:setupltwaittrue5:85">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltwaitvar12:69">3.4</a> <a class="idx" href="#idx:setupltwaitvar12:104">4.6</a></dd>
+<a class="idx" href="#idx:setupltwaitvar12:69">3.4</a> <a class="idx" href="#idx:setupltwaitvar12:110">4.6</a></dd>
 <dt>setup_nontrivial_leadsto/5</dt>
 <dd>
 <a class="idx" href="#idx:setupnontrivialleadsto5:52">2.2.3</a> <a class="idx" href="#idx:setupnontrivialleadsto5:94">4.6</a></dd>
@@ -1361,7 +1381,7 @@ TODO: why those qterms?
 <a class="idx" href="#idx:varpltovarlist6:73">3.4</a></dd>
 <dt>wait_fired/5</dt>
 <dd>
-<a class="idx" href="#idx:waitfired5:87">3.4</a></dd>
+<a class="idx" href="#idx:waitfired5:87">4.6</a></dd>
 <dt>setup_lt_internalL/5</dt>
 <dd>
 <a class="idx" href="#idx:setupltinternalL5:49">2.2.3</a></dd>
