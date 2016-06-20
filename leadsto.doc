@@ -591,6 +591,42 @@ entry does not lead to erraneous results. That could be the case if we would
 derive another delay if \exam{e < f}. We need to be able to detect such
 situations!
 
+Lets focus on rm_gc_wait_vars/8. Called by rm_gc_wait_vars_th/10, which
+is called only by get_new_tholds/15 when the currently inspected \arg{AnteHolds}
+\exam{ds_lh} term fails from \arg{Tholds}. Also called by setup_lt_wait_g/12:
+\begin{itemize}
+\item
+called by update_lits_fired/8 but preceded by an implementation error.
+\item
+by update_new_true_range/7 when from \exam{Tlo} the current Literal is blank.
+If there the current Literal has fail value, update_retrace1/12 is called.
+\item
+called by update_retrace1/12.
+\end{itemize}
+
+Probably rm_gc_wait_vars/8 ensures ok result after a wait entry was removed?
+
+\begin{description}
+\predicate{rm_gc_wait_vars}{8}{Atom, PN, Id, IdTerm, AnteHolds, AnteHoldsDone,
+ToDoAnte, Removed}
+updates \exam{wait_var} situation. We wish to remove the \exam{FV} as
+handled entry. It delegates the functionality to rm_gc_wait_vars/8 or
+postpones garbage collection.
+
+First rm_wait_var/14 is called that simply retracts the entry. Then
+the \exam{FV} value we are dealing with now is removed from \exam{FVL} and then
+the set_wait_var/14 is called with the updated content.
+TODO: ok, here we have a problem, the removal of the instantiation is linked
+to the new time, whereas the existing wait entry holds for an earlier time...?
+
+Then mark_handled/7 is called.
+
+Then, after instantiating the wait entry with the current \exam{FV},
+we remove more, using rm_gc_lit_data_deps_new/7.
+
+\end{description}
+
+
 
 
 \subsection{Runtime Algorithm Predicates}

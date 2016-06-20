@@ -989,7 +989,7 @@ we skip <a id="idx:setupltnormed8:92"></a><a class="pred" href="#setup_lt_normed
 if we encountered the matching <a id="idx:dynhandledwaitvarinstance4:93"></a><span class="pred-ext">dyn_handled_wait_var_instance/4</span>.
 
 <p>Another fact: <a id="idx:dynrmgcwaitvars8:94"></a><span class="pred-ext">dyn_rm_gc_wait_vars/8</span>. 
-But that seems clear:assertion takes place only in <a id="idx:rmgcwaitvars8:95"></a><span class="pred-ext">rm_gc_wait_vars/8</span> 
+But that seems clear:assertion takes place only in <a id="idx:rmgcwaitvars8:95"></a><a class="pred" href="#rm_gc_wait_vars/8">rm_gc_wait_vars/8</a> 
 and depends on the <code>postpone_rm_gc</code> option being set. The 
 entries are handled by <a id="idx:postponedrmgc0:96"></a><span class="pred-ext">postponed_rm_gc/0</span> 
 where indeed the postponed entries are handled by <a id="idx:rmgcwaitvars18:97"></a><span class="pred-ext">rm_gc_wait_vars1/8</span>.
@@ -1002,6 +1002,48 @@ This seems to be harmless?
 entry does not lead to erraneous results. That could be the case if we 
 would derive another delay if <code>e &lt; f</code>. We need to be able 
 to detect such situations!
+
+<p>Lets focus on <a id="idx:rmgcwaitvars8:100"></a><a class="pred" href="#rm_gc_wait_vars/8">rm_gc_wait_vars/8</a>. 
+Called by <a id="idx:rmgcwaitvarsth10:101"></a><span class="pred-ext">rm_gc_wait_vars_th/10</span>, 
+which is called only by <a id="idx:getnewtholds15:102"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+when the currently inspected <var>AnteHolds</var>
+<code>ds_lh</code> term fails from <var>Tholds</var>. Also called by <a id="idx:setupltwaitg12:103"></a><span class="pred-ext">setup_lt_wait_g/12</span>:
+<ul class="latex">
+<li>called by <a id="idx:updatelitsfired8:104"></a><span class="pred-ext">update_lits_fired/8</span> 
+but preceded by an implementation error.
+<li>by <a id="idx:updatenewtruerange7:105"></a><span class="pred-ext">update_new_true_range/7</span> 
+when from <code>Tlo</code> the current Literal is blank. If there the 
+current Literal has fail value, <a id="idx:updateretrace112:106"></a><span class="pred-ext">update_retrace1/12</span> 
+is called.
+<li>called by <a id="idx:updateretrace112:107"></a><span class="pred-ext">update_retrace1/12</span>.
+</ul>
+
+<p>Probably <a id="idx:rmgcwaitvars8:108"></a><a class="pred" href="#rm_gc_wait_vars/8">rm_gc_wait_vars/8</a> 
+ensures ok result after a wait entry was removed?
+
+<dl class="latex">
+<dt class="pubdef"><a id="rm_gc_wait_vars/8"><strong>rm_gc_wait_vars</strong>(<var>Atom, 
+PN, Id, IdTerm, AnteHolds, AnteHoldsDone, ToDoAnte, Removed</var>)</a></dt>
+<dd class="defbody">
+updates <code>wait_var</code> situation. We wish to remove the <code>FV</code> 
+as handled entry. It delegates the functionality to <a id="idx:rmgcwaitvars8:109"></a><a class="pred" href="#rm_gc_wait_vars/8">rm_gc_wait_vars/8</a> 
+or postpones garbage collection.
+
+<p>First <a id="idx:rmwaitvar14:110"></a><span class="pred-ext">rm_wait_var/14</span> 
+is called that simply retracts the entry. Then the <code>FV</code> value 
+we are dealing with now is removed from <code>FVL</code> and then the <a id="idx:setwaitvar14:111"></a><span class="pred-ext">set_wait_var/14</span> 
+is called with the updated content. TODO: ok, here we have a problem, 
+the removal of the instantiation is linked to the new time, whereas the 
+existing wait entry holds for an earlier time...?
+
+<p>Then <a id="idx:markhandled7:112"></a><span class="pred-ext">mark_handled/7</span> 
+is called.
+
+<p>Then, after instantiating the wait entry with the current <code>FV</code>, 
+we remove more, using <a id="idx:rmgclitdatadepsnew7:113"></a><span class="pred-ext">rm_gc_lit_data_deps_new/7</span>.
+
+<p></dd>
+</dl>
 
 <p>
 
@@ -1019,9 +1061,9 @@ occurrences.
 
 <p>If <var>AnteTODO</var> becomes <code>[]</code>, <br>
 <code>setup_lt_conse(AnteHolds, TMin, THolds, ConseRId, Delay, Removed)</code> 
-is called. Otherwise, <a id="idx:setupltnotground9:100"></a><span class="pred-ext">setup_lt_notground/9</span> 
+is called. Otherwise, <a id="idx:setupltnotground9:114"></a><span class="pred-ext">setup_lt_notground/9</span> 
 is called which calls
-<a id="idx:setupltnotgroundfv13:101"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+<a id="idx:setupltnotgroundfv13:115"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
 after setting up the free variable arguments.</dd>
 <dt class="pubdef"><a id="setup_lt_conse/6"><strong>setup_lt_conse</strong>(<var>AnteHolds, 
 TMin, THolds, ConseRId, Delay, Removed</var>)</a></dt>
@@ -1032,19 +1074,19 @@ If <code>THolds &gt;= TMin + G</code>, we calculate
 <code>T4 is THolds + Delay + H</code> and then call
 <code>schedule_fire(ConseRId, T3, T4)</code> which sets
 <code>dyn_schedule_fire(ConseRId, T3, T4)</code>.&nbsp;<sup class="fn">12<span class="fn-text">I 
-left out details dealing with pxor aspects. What is the reason for <a id="idx:schedulefire3:102"></a><span class="pred-ext">schedule_fire/3</span>, 
+left out details dealing with pxor aspects. What is the reason for <a id="idx:schedulefire3:116"></a><span class="pred-ext">schedule_fire/3</span>, 
 why postpone?</span></sup> They are fired by the <code>repeat, 
 set_state, handle_fired</code> sequence in
-<a id="idx:runspecrest0:103"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">13<span class="fn-text">Why 
-not fire immediately?</span></sup> After <a id="idx:schedulefire3:104"></a><span class="pred-ext">schedule_fire/3</span> 
-we do <a id="idx:setupltwaitfired6:105"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
-If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:106"></a><span class="pred-ext">setup_lt_wait_true/5</span>.
+<a id="idx:runspecrest0:117"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">13<span class="fn-text">Why 
+not fire immediately?</span></sup> After <a id="idx:schedulefire3:118"></a><span class="pred-ext">schedule_fire/3</span> 
+we do <a id="idx:setupltwaitfired6:119"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
+If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:120"></a><span class="pred-ext">setup_lt_wait_true/5</span>.
 
-<p><a id="idx:setupltwaitfired6:107"></a><span class="pred-ext">setup_lt_wait_fired/6</span> 
-stores a <a id="idx:waitfired5:108"></a><span class="pred-ext">wait_fired/5</span> 
+<p><a id="idx:setupltwaitfired6:121"></a><span class="pred-ext">setup_lt_wait_fired/6</span> 
+stores a <a id="idx:waitfired5:122"></a><span class="pred-ext">wait_fired/5</span> 
 fact.&nbsp;<sup class="fn">14<span class="fn-text">It is confusing that 
 two implementations of this waiting are present in the code, depending 
-on the <a id="idx:recwait0:109"></a><span class="pred-ext">recwait/0</span> 
+on the <a id="idx:recwait0:123"></a><span class="pred-ext">recwait/0</span> 
 switch.</span></sup></dd>
 <dt class="pubdef"><a id="setup_lt_notground_fv/13"><strong>setup_lt_notground_fv</strong>(<var>+TStart, 
 +FV, +FVL, +LitData, +ToDoAnte, +AnteHolds, +THolds, +ConseRId, +PV, 
@@ -1073,41 +1115,41 @@ Sorta,Kinda,Arg1a)</code>.
 <p><em>FV</em>, <em>fv</em> are abreviations of Free Variables (Prolog 
 variables).
 
-<p><a id="idx:setupltnotgroundfv13:110"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
-is called by <a id="idx:setupltnotground9:111"></a><span class="pred-ext">setup_lt_notground/9</span>, 
+<p><a id="idx:setupltnotgroundfv13:124"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+is called by <a id="idx:setupltnotground9:125"></a><span class="pred-ext">setup_lt_notground/9</span>, 
 it by
-<a id="idx:setupltnormed8:112"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>, 
-it by <a id="idx:setuplt6:113"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a>.
-<a id="idx:setuplt6:114"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a> 
-is called from <a id="idx:setupnontrivialleadsto5:115"></a><span class="pred-ext">setup_nontrivial_leadsto/5</span>.
-<a id="idx:setupltnormed8:116"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a> 
-is also called by <a id="idx:instantiateop16:117"></a><span class="pred-ext">instantiate_op/16</span> 
-(called in <a id="idx:adddefaultcwa17:118"></a><span class="pred-ext">add_default_cwa/17</span>) 
-and <a id="idx:failfilterhandleRR16:119"></a><span class="pred-ext">fail_filter_handleRR/16</span>, 
-part of <a id="idx:filterdefaultshandleothers14:120"></a><span class="pred-ext">filter_defaults_handle_others/14</span> 
+<a id="idx:setupltnormed8:126"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>, 
+it by <a id="idx:setuplt6:127"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a>.
+<a id="idx:setuplt6:128"></a><a class="pred" href="#setup_lt/6">setup_lt/6</a> 
+is called from <a id="idx:setupnontrivialleadsto5:129"></a><span class="pred-ext">setup_nontrivial_leadsto/5</span>.
+<a id="idx:setupltnormed8:130"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a> 
+is also called by <a id="idx:instantiateop16:131"></a><span class="pred-ext">instantiate_op/16</span> 
+(called in <a id="idx:adddefaultcwa17:132"></a><span class="pred-ext">add_default_cwa/17</span>) 
+and <a id="idx:failfilterhandleRR16:133"></a><span class="pred-ext">fail_filter_handleRR/16</span>, 
+part of <a id="idx:filterdefaultshandleothers14:134"></a><span class="pred-ext">filter_defaults_handle_others/14</span> 
 in
-<a id="idx:setupltnotgroundfv13:121"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
+<a id="idx:setupltnotgroundfv13:135"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
 
 <p>We probably handle the rule in this call up to HandledTime.
 
 <p>Now, if at the call <code>THolds &lt; HandledTime</code>, we start 
-all over for this partially instantiated sequence of literals by calling <a id="idx:getnewtholds15:122"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>. 
+all over for this partially instantiated sequence of literals by calling <a id="idx:getnewtholds15:136"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>. 
 Apparently the order of literals is reversed here.
-<a id="idx:getnewtholds15:123"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
-is called here and by <a id="idx:getnewtholds15:124"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+<a id="idx:getnewtholds15:137"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+is called here and by <a id="idx:getnewtholds15:138"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
 itself.
 
 <p>If <code>THolds &gt;= HandledTime</code>
-<a id="idx:setupltnotgroundfv13:125"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
-analyses the current <code>LitData</code> first for all AtomTraces in <a id="idx:filterdefaultshandleothers4:126"></a><span class="pred-ext">filter_defaults_handle_others/4</span> 
-and all cwa matches in <a id="idx:adddefaultcwa17:127"></a><span class="pred-ext">add_default_cwa/17</span>, 
+<a id="idx:setupltnotgroundfv13:139"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+analyses the current <code>LitData</code> first for all AtomTraces in <a id="idx:filterdefaultshandleothers4:140"></a><span class="pred-ext">filter_defaults_handle_others/4</span> 
+and all cwa matches in <a id="idx:adddefaultcwa17:141"></a><span class="pred-ext">add_default_cwa/17</span>, 
 handles those separately by
-<a id="idx:checkfireisolated5:128"></a><span class="pred-ext">check_fire_isolated/5</span> 
-or <a id="idx:setupltnormed8:129"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>. 
+<a id="idx:checkfireisolated5:142"></a><span class="pred-ext">check_fire_isolated/5</span> 
+or <a id="idx:setupltnormed8:143"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a>. 
 All those instantiations of <var>FV</var> handled separately are added 
-to <var>FVL</var> and we finally call <a id="idx:setupltnotground1default12:130"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
+to <var>FVL</var> and we finally call <a id="idx:setupltnotground1default12:144"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
 that calls
-<a id="idx:setupltwaitvar12:131"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a> 
+<a id="idx:setupltwaitvar12:145"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a> 
 with <code>Atom</code>, <code>FV</code>, <code>FVL</code> values 
 implying that <code>FV</code> from <code>FVL</code> has been handled, 
 but we need to check other instantiations.</dd>
@@ -1116,8 +1158,8 @@ AHDone, TStart, THoldsNew1, Tholds,FV, FVL, LitData, ToDoAnte,
 ConseRId,PV,Delay, Id,IdTerm,Removed</var>)</a></dt>
 <dd class="defbody">
 
-<p>Called by <a id="idx:setupltnotgroundfv13:132"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
-and by <a id="idx:getnewtholds15:133"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+<p>Called by <a id="idx:setupltnotgroundfv13:146"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+and by <a id="idx:getnewtholds15:147"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
 itself.
 
 <p><var>AnteHoldsTODO</var> is an earlier instantiated sequence of 
@@ -1129,11 +1171,11 @@ that has been checked and hold between
 Details of Tholds, is this a return parameter?</span></sup>
 
 <p><sup class="fn">16<span class="fn-text">When analysing the source:Be 
-aware that in <a id="idx:getnewtholds15:134"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
+aware that in <a id="idx:getnewtholds15:148"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a> 
 the <code>Atom</code> in <code>[ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHoldsTODO]</code> 
 is ground, and has nothing to do with <code>FV</code> and <code>FVL</code>.</span></sup>
 
-<p>First, if <code>AnteHoldsTODO ==[]</code>, we continue with <a id="idx:setupltnotgroundfv13:135"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+<p>First, if <code>AnteHoldsTODO ==[]</code>, we continue with <a id="idx:setupltnotgroundfv13:149"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
 with the increased time interval. Otherwise we follow <var>AnteHoldsTODO</var> 
 Literals.
 
@@ -1150,16 +1192,16 @@ and <var>THolds</var>.
 the free variables in the Literal, <code>FVL</code> is the list of 
 instantiations of FV that have been dealt with, for which this setup is 
 not responsible at all. Called by
-<a id="idx:setupltnotground1default12:136"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
+<a id="idx:setupltnotground1default12:150"></a><span class="pred-ext">setup_lt_notground1default/12</span> 
 ( same arguments) which is only called as last call in
-<a id="idx:setupltnotgroundfv13:137"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
+<a id="idx:setupltnotgroundfv13:151"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
 
 <p>Although we know <var>AnteHolds</var> is true starting from <var>TMin</var>, 
 we also know that no <var>LitData</var> literal not having <var>FVL</var> 
 instantiation is true starting from the current handled time.
 
 <p>We need to check that <var>TMin</var> is not relevant! Indeed it is 
-not: see <a id="idx:updateactivitytime12:138"></a><span class="pred-ext">update_activity_time1/2</span> 
+not: see <a id="idx:updateactivitytime12:152"></a><span class="pred-ext">update_activity_time1/2</span> 
 for the <code>wait_var</code> term.
 <var>TMin</var> is only used to characterize the <var>Removed</var> 
 argument for identifying the current activity. So, ... TODO: later 
@@ -1170,7 +1212,7 @@ remove the unnecessary <var>TMin</var> argument from
 <ul class="latex">
 <li>Really nail down the meaning of <code>wait_var</code>, also at what 
 stage are what values for <var>TMin</var> and <var>THolds</var> set.
-<li>Will <code>wait_vars</code> become invalidated? Inspect <a id="idx:getnewtholds15:139"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>.
+<li>Will <code>wait_vars</code> become invalidated? Inspect <a id="idx:getnewtholds15:153"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>.
 <li>For a <code>wait_var</code> entry, can a result be found that 
 extends <var>AnteHolds</var> starting at <var>TMin</var>? Probably: it 
 could be that some rule has not fired yet, giving a new <var>LitData</var> 
@@ -1218,7 +1260,7 @@ At or before what HandledTime should <code>wait</code> entry be updated.
 </dd>
 <dt><b>TFirstResult</b></dt>
 <dd>
-First time that consequent could become true, see <a id="idx:activityminresulttime2:140"></a><span class="pred-ext">activity_min_result_time/2</span>.
+First time that consequent could become true, see <a id="idx:activityminresulttime2:154"></a><span class="pred-ext">activity_min_result_time/2</span>.
 </dd>
 </dl>
 
@@ -1366,10 +1408,10 @@ TODO: why those qterms?
 <h3><a id="sec:8.1"><span class="sec-nr">8.1</span> <span class="sec-title">waitvar, 
 waitfired</span></a></h3>
 
-<p><a id="idx:getwait13:141"></a><span class="pred-ext">get_wait1/3</span> 
-is often called with all variables leading to calls of <a id="idx:currentkey1:142"></a><span class="pred-ext">current_key/1</span> 
+<p><a id="idx:getwait13:155"></a><span class="pred-ext">get_wait1/3</span> 
+is often called with all variables leading to calls of <a id="idx:currentkey1:156"></a><span class="pred-ext">current_key/1</span> 
 and looping over all wait_var entries for each
-<a id="idx:firstpossibleactivityresult1:143"></a><span class="pred-ext">first_possible_activity_result/1</span> 
+<a id="idx:firstpossibleactivityresult1:157"></a><span class="pred-ext">first_possible_activity_result/1</span> 
 call.
 
 <p>
@@ -1378,7 +1420,7 @@ call.
 verifying waitvar FV,FVL aspects</span></a></h4>
 
 <p>I changed check_isolated_fire_rest. We need to test it for cases 
-where there are variables. Make sure that <a id="idx:checkisolatedfirerest8:144"></a><span class="pred-ext">check_isolated_fire_rest/8</span> 
+where there are variables. Make sure that <a id="idx:checkisolatedfirerest8:158"></a><span class="pred-ext">check_isolated_fire_rest/8</span> 
 is fired in some example, sometimes with excluded FV,FVL, sometimes not.
 
 <p>Follow <code>FV</code>, <code>FVL</code> with <code>FV ==[]</code>
@@ -1399,7 +1441,7 @@ can use to validate the result?
 <h3><a id="sec:8.2"><span class="sec-nr">8.2</span> <span class="sec-title">Solving 
 bugje-nondeterminism</span></a></h3>
 
-<p><a id="idx:checkisolatedfirerest9:145"></a><span class="pred-ext">check_isolated_fire_rest/9</span> 
+<p><a id="idx:checkisolatedfirerest9:159"></a><span class="pred-ext">check_isolated_fire_rest/9</span> 
 added FV, FVL so that we do not fire FV out of FVL.
 
 <p>To trust this more, I would like to understand the gc aspects. Let us 
@@ -1424,7 +1466,7 @@ should remove those entries as they have <code>FV ==[]</code> and <code>FVL
 == [[]]</code> so they should never lead to new results. But the 
 programming was sloppy. A number of aspects: the <code>wait_var</code> 
 should respect the <code>FVL</code> restriction. It seems to do that but 
-not when we replace the entry by an updated one in <a id="idx:getnewtholds15:146"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>. 
+not when we replace the entry by an updated one in <a id="idx:getnewtholds15:160"></a><a class="pred" href="#get_new_tholds/15">get_new_tholds/15</a>. 
 The problem could also be that we do not make the <code>wait_var</code> 
 start from a new place.
 
@@ -1432,10 +1474,10 @@ start from a new place.
 to the start of the <code>c</code> derived interval. We encounter
 <code>wait_var(ds_lh(b),..)</code>. get <code>O2 = fail(1,_)</code>
 
-<p>In <a id="idx:setupltnotgroundfv13:147"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
+<p>In <a id="idx:setupltnotgroundfv13:161"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a> 
 I see: <code>assert_debug(cmp_ge(THolds, HT))</code>. That should be the 
-case for all <code>setup_lt_wait_var</code>, <a id="idx:setwaitvar14:148"></a><span class="pred-ext">set_wait_var/14</span> 
-calls, so check <a id="idx:rmgcwaitvars18:149"></a><span class="pred-ext">rm_gc_wait_vars1/8</span>.
+case for all <code>setup_lt_wait_var</code>, <a id="idx:setwaitvar14:162"></a><span class="pred-ext">set_wait_var/14</span> 
+calls, so check <a id="idx:rmgcwaitvars18:163"></a><span class="pred-ext">rm_gc_wait_vars1/8</span>.
 
 <p>Still, I would prefer formulating the semantics of <code>wait_var</code> 
 over this skimming and avoiding.
@@ -1444,18 +1486,18 @@ over this skimming and avoiding.
 Activity)</code> and
 <code>dyn_wait_var(Id1, IdTerm, HT, TMin, FV, FVL, LitData, ToDoAnte, 
 AnteHolds, THolds, ConseRId,PV, Delay, HTN))</code>.
-<code>wait_var</code> is set by <a id="idx:setwait1var14:150"></a><span class="pred-ext">set_wait1_var/14</span> 
-and removed by <a id="idx:retractwait12:151"></a><span class="pred-ext">retract_wait1/2</span> 
-or <a id="idx:retractwait11:152"></a><span class="pred-ext">retract_wait1/1</span> 
-(<a id="idx:erase1:153"></a><span class="pred-ext">erase/1</span>).
-<a id="idx:setwait1var14:154"></a><span class="pred-ext">set_wait1_var/14</span> 
-only called by <a id="idx:setwaitvar14:155"></a><span class="pred-ext">set_wait_var/14</span>.
-<a id="idx:setwaitvar14:156"></a><span class="pred-ext">set_wait_var/14</span> 
-called by <a id="idx:setupltwaitvar12:157"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a> 
-which adds HandledTime as an argument. <a id="idx:setwaitvar14:158"></a><span class="pred-ext">set_wait_var/14</span> 
-also called by <a id="idx:rmgcwaitvar18:159"></a><span class="pred-ext">rm_gc_wait_var1/8</span>.
+<code>wait_var</code> is set by <a id="idx:setwait1var14:164"></a><span class="pred-ext">set_wait1_var/14</span> 
+and removed by <a id="idx:retractwait12:165"></a><span class="pred-ext">retract_wait1/2</span> 
+or <a id="idx:retractwait11:166"></a><span class="pred-ext">retract_wait1/1</span> 
+(<a id="idx:erase1:167"></a><span class="pred-ext">erase/1</span>).
+<a id="idx:setwait1var14:168"></a><span class="pred-ext">set_wait1_var/14</span> 
+only called by <a id="idx:setwaitvar14:169"></a><span class="pred-ext">set_wait_var/14</span>.
+<a id="idx:setwaitvar14:170"></a><span class="pred-ext">set_wait_var/14</span> 
+called by <a id="idx:setupltwaitvar12:171"></a><a class="pred" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a> 
+which adds HandledTime as an argument. <a id="idx:setwaitvar14:172"></a><span class="pred-ext">set_wait_var/14</span> 
+also called by <a id="idx:rmgcwaitvar18:173"></a><span class="pred-ext">rm_gc_wait_var1/8</span>.
 
-<p>Let us check wait_fired too. It calls <a id="idx:rmgcwaitwaitvars8:160"></a><span class="pred-ext">rm_gc_wait_wait_vars/8</span>. 
+<p>Let us check wait_fired too. It calls <a id="idx:rmgcwaitwaitvars8:174"></a><span class="pred-ext">rm_gc_wait_wait_vars/8</span>. 
 This seems to be ok as the instantiated antecedent has no uninstantiated 
 variables left.
 
@@ -1511,15 +1553,15 @@ It seems that the sooner we decide to fire a rule, the more we know and
 the further we could extend "true" intervals. The firing could well 
 change values before the new HandledTime, or could it? Probably not! It 
 is the definition of the new HandledTime: no <code>wait</code> entry can 
-produce results before the new HandledTime. Why do we gather <a id="idx:dynschedulefire3:161"></a><span class="pred-ext">dyn_schedule_fire/3</span> 
-facts and fire them in one batch using <a id="idx:handlefired0:162"></a><span class="pred-ext">handle_fired/0</span> 
-? In the current implementation <a id="idx:handlefired0:163"></a><span class="pred-ext">handle_fired/0</span> 
-is called at the beginnning of <a id="idx:handledtimestep1:164"></a><span class="pred-ext">handled_time_step/1</span> 
+produce results before the new HandledTime. Why do we gather <a id="idx:dynschedulefire3:175"></a><span class="pred-ext">dyn_schedule_fire/3</span> 
+facts and fire them in one batch using <a id="idx:handlefired0:176"></a><span class="pred-ext">handle_fired/0</span> 
+? In the current implementation <a id="idx:handlefired0:177"></a><span class="pred-ext">handle_fired/0</span> 
+is called at the beginnning of <a id="idx:handledtimestep1:178"></a><span class="pred-ext">handled_time_step/1</span> 
 and once at the end, after the last
-<a id="idx:handledtimestep1:165"></a><span class="pred-ext">handled_time_step/1</span>. 
-If <a id="idx:updateactivitytimes1:166"></a><span class="pred-ext">update_activity_times/1</span> 
-only schedules rules to fire, then before doing the next <a id="idx:updateactivitytimes1:167"></a><span class="pred-ext">update_activity_times/1</span>, 
-all scheduled firings belonging to the previous <a id="idx:uat1:168"></a><span class="pred-ext">uat/1</span> 
+<a id="idx:handledtimestep1:179"></a><span class="pred-ext">handled_time_step/1</span>. 
+If <a id="idx:updateactivitytimes1:180"></a><span class="pred-ext">update_activity_times/1</span> 
+only schedules rules to fire, then before doing the next <a id="idx:updateactivitytimes1:181"></a><span class="pred-ext">update_activity_times/1</span>, 
+all scheduled firings belonging to the previous <a id="idx:uat1:182"></a><span class="pred-ext">uat/1</span> 
 should have fired. But still, why not fire immediately? It could be that 
 we somehow depend on a known state of the future over one <code>wait</code> 
 batch? Let us postpone this.
@@ -1531,23 +1573,23 @@ batch? Let us postpone this.
 <dt class="index-sep">?</dt>
 <dt>activity_min_result_time/2</dt>
 <dd>
-<a class="idx" href="#idx:activityminresulttime2:140">5</a></dd>
+<a class="idx" href="#idx:activityminresulttime2:154">5</a></dd>
 <dt>add_default_cwa/17</dt>
 <dd>
-<a class="idx" href="#idx:adddefaultcwa17:118">4.6</a> <a class="idx" href="#idx:adddefaultcwa17:127">4.6</a></dd>
+<a class="idx" href="#idx:adddefaultcwa17:132">4.6</a> <a class="idx" href="#idx:adddefaultcwa17:141">4.6</a></dd>
 <dt><a class="idx" href="#atom_key/2">atom_key/2</a></dt>
 <dt><a class="idx" href="#atom_trace/3">atom_trace/3</a></dt>
 <dd>
 <a class="idx" href="#idx:atomtrace3:14">2.2.1</a> <a class="idx" href="#idx:atomtrace3:17">2.2.1</a></dd>
 <dt>check_fire_isolated/5</dt>
 <dd>
-<a class="idx" href="#idx:checkfireisolated5:128">4.6</a></dd>
+<a class="idx" href="#idx:checkfireisolated5:142">4.6</a></dd>
 <dt>check_isolated_fire_rest/8</dt>
 <dd>
-<a class="idx" href="#idx:checkisolatedfirerest8:144">8.1.1</a></dd>
+<a class="idx" href="#idx:checkisolatedfirerest8:158">8.1.1</a></dd>
 <dt>check_isolated_fire_rest/9</dt>
 <dd>
-<a class="idx" href="#idx:checkisolatedfirerest9:145">8.2</a></dd>
+<a class="idx" href="#idx:checkisolatedfirerest9:159">8.2</a></dd>
 <dt>code_atom/4</dt>
 <dd>
 <a class="idx" href="#idx:codeatom4:84">3.4</a></dd>
@@ -1557,7 +1599,7 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:codeform4:72">3.4</a> <a class="idx" href="#idx:codeform4:77">3.4</a> <a class="idx" href="#idx:codeform4:78">3.4</a> <a class="idx" href="#idx:codeform4:82">3.4</a> <a class="idx" href="#idx:codeform4:85">3.4</a></dd>
 <dt>current_key/1</dt>
 <dd>
-<a class="idx" href="#idx:currentkey1:142">8.1</a></dd>
+<a class="idx" href="#idx:currentkey1:156">8.1</a></dd>
 <dt>discontinous/1</dt>
 <dd>
 <a class="idx" href="#idx:discontinous1:20">2.2.3</a></dd>
@@ -1588,7 +1630,7 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:dynrmgcwaitvars8:94">4.5</a></dd>
 <dt>dyn_schedule_fire/3</dt>
 <dd>
-<a class="idx" href="#idx:dynschedulefire3:161">8.3</a></dd>
+<a class="idx" href="#idx:dynschedulefire3:175">8.3</a></dd>
 <dt><a class="idx" href="#dyn_sim_status/2">dyn_sim_status/2</a></dt>
 <dt>dyn_sortdef/5</dt>
 <dd>
@@ -1598,7 +1640,7 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:endtime1:6">2.1</a></dd>
 <dt>erase/1</dt>
 <dd>
-<a class="idx" href="#idx:erase1:153">8.3</a></dd>
+<a class="idx" href="#idx:erase1:167">8.3</a></dd>
 <dt>fail_filter_handle/15</dt>
 <dd>
 <a class="idx" href="#idx:failfilterhandle15:90">4.5</a></dd>
@@ -1607,14 +1649,14 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:filledatomtrace3:13">2.2.1</a></dd>
 <dt>filter_defaults_handle_others/14</dt>
 <dd>
-<a class="idx" href="#idx:filterdefaultshandleothers14:120">4.6</a></dd>
+<a class="idx" href="#idx:filterdefaultshandleothers14:134">4.6</a></dd>
 <dt>filter_defaults_handle_others/4</dt>
 <dd>
-<a class="idx" href="#idx:filterdefaultshandleothers4:126">4.6</a></dd>
+<a class="idx" href="#idx:filterdefaultshandleothers4:140">4.6</a></dd>
 <dt><a class="idx" href="#find_atom_trace/2">find_atom_trace/2</a></dt>
 <dt>first_possible_activity_result/1</dt>
 <dd>
-<a class="idx" href="#idx:firstpossibleactivityresult1:143">8.1</a></dd>
+<a class="idx" href="#idx:firstpossibleactivityresult1:157">8.1</a></dd>
 <dt>forall/2</dt>
 <dd>
 <a class="idx" href="#idx:forall2:65">2.2.3</a></dd>
@@ -1623,19 +1665,19 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:getmodelcheckingprules0:51">2.2.3</a></dd>
 <dt><a class="idx" href="#get_new_tholds/15">get_new_tholds/15</a></dt>
 <dd>
-<a class="idx" href="#idx:getnewtholds15:122">4.6</a> <a class="idx" href="#idx:getnewtholds15:123">4.6</a> <a class="idx" href="#idx:getnewtholds15:124">4.6</a> <a class="idx" href="#idx:getnewtholds15:133">4.6</a> <a class="idx" href="#idx:getnewtholds15:134">4.6</a> <a class="idx" href="#idx:getnewtholds15:139">4.6</a> <a class="idx" href="#idx:getnewtholds15:146">8.3</a></dd>
+<a class="idx" href="#idx:getnewtholds15:102">4.5</a> <a class="idx" href="#idx:getnewtholds15:136">4.6</a> <a class="idx" href="#idx:getnewtholds15:137">4.6</a> <a class="idx" href="#idx:getnewtholds15:138">4.6</a> <a class="idx" href="#idx:getnewtholds15:147">4.6</a> <a class="idx" href="#idx:getnewtholds15:148">4.6</a> <a class="idx" href="#idx:getnewtholds15:153">4.6</a> <a class="idx" href="#idx:getnewtholds15:160">8.3</a></dd>
 <dt>get_wait1/3</dt>
 <dd>
-<a class="idx" href="#idx:getwait13:141">8.1</a></dd>
+<a class="idx" href="#idx:getwait13:155">8.1</a></dd>
 <dt>handle_fired/0</dt>
 <dd>
-<a class="idx" href="#idx:handlefired0:162">8.3</a> <a class="idx" href="#idx:handlefired0:163">8.3</a></dd>
+<a class="idx" href="#idx:handlefired0:176">8.3</a> <a class="idx" href="#idx:handlefired0:177">8.3</a></dd>
 <dt>handle_term/1</dt>
 <dd>
 <a class="idx" href="#idx:handleterm1:21">2.2.3</a> <a class="idx" href="#idx:handleterm1:24">2.2.3</a></dd>
 <dt>handled_time_step/1</dt>
 <dd>
-<a class="idx" href="#idx:handledtimestep1:8">2.1</a> <a class="idx" href="#idx:handledtimestep1:164">8.3</a> <a class="idx" href="#idx:handledtimestep1:165">8.3</a></dd>
+<a class="idx" href="#idx:handledtimestep1:8">2.1</a> <a class="idx" href="#idx:handledtimestep1:178">8.3</a> <a class="idx" href="#idx:handledtimestep1:179">8.3</a></dd>
 <dt><a class="idx" href="#init_interval_callbacks/10">init_interval_callbacks/10</a></dt>
 <dd>
 <a class="idx" href="#idx:initintervalcallbacks10:55">2.2.3</a> <a class="idx" href="#idx:initintervalcallbacks10:58">2.2.3</a></dd>
@@ -1650,13 +1692,13 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:initialiseintervalperiodic4:23">2.2.3</a> <a class="idx" href="#idx:initialiseintervalperiodic4:34">2.2.3</a></dd>
 <dt>instantiate_op/16</dt>
 <dd>
-<a class="idx" href="#idx:instantiateop16:91">4.5</a> <a class="idx" href="#idx:instantiateop16:117">4.6</a></dd>
+<a class="idx" href="#idx:instantiateop16:91">4.5</a> <a class="idx" href="#idx:instantiateop16:131">4.6</a></dd>
 <dt><a class="idx" href="#load_simulation/1">load_simulation/1</a></dt>
 <dd>
 <a class="idx" href="#idx:loadsimulation1:29">2.2.3</a> <a class="idx" href="#idx:loadsimulation1:35">2.2.3</a></dd>
 <dt>mark_handled/7</dt>
 <dd>
-<a class="idx" href="#idx:markhandled7:87">4.5</a> <a class="idx" href="#idx:markhandled7:88">4.5</a></dd>
+<a class="idx" href="#idx:markhandled7:87">4.5</a> <a class="idx" href="#idx:markhandled7:88">4.5</a> <a class="idx" href="#idx:markhandled7:112">4.5</a></dd>
 <dt>model/1</dt>
 <dd>
 <a class="idx" href="#idx:model1:42">2.2.3</a></dd>
@@ -1665,26 +1707,35 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:postponedrmgc0:96">4.5</a> <a class="idx" href="#idx:postponedrmgc0:98">4.5</a></dd>
 <dt>recwait/0</dt>
 <dd>
-<a class="idx" href="#idx:recwait0:66">3.3</a> <a class="idx" href="#idx:recwait0:109">4.6</a></dd>
+<a class="idx" href="#idx:recwait0:66">3.3</a> <a class="idx" href="#idx:recwait0:123">4.6</a></dd>
 <dt><a class="idx" href="#reset_sim_info/0">reset_sim_info/0</a></dt>
 <dt>retract_wait1/1</dt>
 <dd>
-<a class="idx" href="#idx:retractwait11:152">8.3</a></dd>
+<a class="idx" href="#idx:retractwait11:166">8.3</a></dd>
 <dt>retract_wait1/2</dt>
 <dd>
-<a class="idx" href="#idx:retractwait12:151">8.3</a></dd>
+<a class="idx" href="#idx:retractwait12:165">8.3</a></dd>
+<dt>rm_gc_lit_data_deps_new/7</dt>
+<dd>
+<a class="idx" href="#idx:rmgclitdatadepsnew7:113">4.5</a></dd>
 <dt>rm_gc_wait_var1/8</dt>
 <dd>
-<a class="idx" href="#idx:rmgcwaitvar18:159">8.3</a></dd>
-<dt>rm_gc_wait_vars/8</dt>
+<a class="idx" href="#idx:rmgcwaitvar18:173">8.3</a></dd>
+<dt><a class="idx" href="#rm_gc_wait_vars/8">rm_gc_wait_vars/8</a></dt>
 <dd>
-<a class="idx" href="#idx:rmgcwaitvars8:95">4.5</a></dd>
+<a class="idx" href="#idx:rmgcwaitvars8:95">4.5</a> <a class="idx" href="#idx:rmgcwaitvars8:100">4.5</a> <a class="idx" href="#idx:rmgcwaitvars8:108">4.5</a> <a class="idx" href="#idx:rmgcwaitvars8:109">4.5</a></dd>
 <dt>rm_gc_wait_vars1/8</dt>
 <dd>
-<a class="idx" href="#idx:rmgcwaitvars18:89">4.5</a> <a class="idx" href="#idx:rmgcwaitvars18:97">4.5</a> <a class="idx" href="#idx:rmgcwaitvars18:149">8.3</a></dd>
+<a class="idx" href="#idx:rmgcwaitvars18:89">4.5</a> <a class="idx" href="#idx:rmgcwaitvars18:97">4.5</a> <a class="idx" href="#idx:rmgcwaitvars18:163">8.3</a></dd>
+<dt>rm_gc_wait_vars_th/10</dt>
+<dd>
+<a class="idx" href="#idx:rmgcwaitvarsth10:101">4.5</a></dd>
 <dt>rm_gc_wait_wait_vars/8</dt>
 <dd>
-<a class="idx" href="#idx:rmgcwaitwaitvars8:160">8.3</a></dd>
+<a class="idx" href="#idx:rmgcwaitwaitvars8:174">8.3</a></dd>
+<dt>rm_wait_var/14</dt>
+<dd>
+<a class="idx" href="#idx:rmwaitvar14:110">4.5</a></dd>
 <dt>run_simulation/2</dt>
 <dd>
 <a class="idx" href="#idx:runsimulation2:1">1.2</a></dd>
@@ -1700,7 +1751,7 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:runspec10:2">1.2</a> <a class="idx" href="#idx:runspec10:26">2.2.3</a> <a class="idx" href="#idx:runspec10:32">2.2.3</a> <a class="idx" href="#idx:runspec10:40">2.2.3</a> <a class="idx" href="#idx:runspec10:43">2.2.3</a> <a class="idx" href="#idx:runspec10:57">2.2.3</a></dd>
 <dt>runspec_rest/0</dt>
 <dd>
-<a class="idx" href="#idx:runspecrest0:3">1.2</a> <a class="idx" href="#idx:runspecrest0:9">2.1</a> <a class="idx" href="#idx:runspecrest0:53">2.2.3</a> <a class="idx" href="#idx:runspecrest0:103">4.6</a></dd>
+<a class="idx" href="#idx:runspecrest0:3">1.2</a> <a class="idx" href="#idx:runspecrest0:9">2.1</a> <a class="idx" href="#idx:runspecrest0:53">2.2.3</a> <a class="idx" href="#idx:runspecrest0:117">4.6</a></dd>
 <dt><a class="idx" href="#runspecdo/1">runspecdo/1</a></dt>
 <dd>
 <a class="idx" href="#idx:runspecdo1:36">2.2.3</a></dd>
@@ -1712,13 +1763,13 @@ batch? Let us postpone this.
 <dt><a class="idx" href="#savetracesetup/3">savetracesetup/3</a></dt>
 <dt>schedule_fire/3</dt>
 <dd>
-<a class="idx" href="#idx:schedulefire3:102">4.6</a> <a class="idx" href="#idx:schedulefire3:104">4.6</a></dd>
+<a class="idx" href="#idx:schedulefire3:116">4.6</a> <a class="idx" href="#idx:schedulefire3:118">4.6</a></dd>
 <dt>set_wait1_var/14</dt>
 <dd>
-<a class="idx" href="#idx:setwait1var14:150">8.3</a> <a class="idx" href="#idx:setwait1var14:154">8.3</a></dd>
+<a class="idx" href="#idx:setwait1var14:164">8.3</a> <a class="idx" href="#idx:setwait1var14:168">8.3</a></dd>
 <dt>set_wait_var/14</dt>
 <dd>
-<a class="idx" href="#idx:setwaitvar14:148">8.3</a> <a class="idx" href="#idx:setwaitvar14:155">8.3</a> <a class="idx" href="#idx:setwaitvar14:156">8.3</a> <a class="idx" href="#idx:setwaitvar14:158">8.3</a></dd>
+<a class="idx" href="#idx:setwaitvar14:111">4.5</a> <a class="idx" href="#idx:setwaitvar14:162">8.3</a> <a class="idx" href="#idx:setwaitvar14:169">8.3</a> <a class="idx" href="#idx:setwaitvar14:170">8.3</a> <a class="idx" href="#idx:setwaitvar14:172">8.3</a></dd>
 <dt>setup_atom_state_boundaries/0</dt>
 <dd>
 <a class="idx" href="#idx:setupatomstateboundaries0:52">2.2.3</a></dd>
@@ -1727,35 +1778,38 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:setupleadsto6:25">2.2.3</a> <a class="idx" href="#idx:setupleadsto6:49">2.2.3</a> <a class="idx" href="#idx:setupleadsto6:68">3.4</a></dd>
 <dt><a class="idx" href="#setup_lt/6">setup_lt/6</a></dt>
 <dd>
-<a class="idx" href="#idx:setuplt6:63">2.2.3</a> <a class="idx" href="#idx:setuplt6:70">3.4</a> <a class="idx" href="#idx:setuplt6:71">3.4</a> <a class="idx" href="#idx:setuplt6:73">3.4</a> <a class="idx" href="#idx:setuplt6:113">4.6</a> <a class="idx" href="#idx:setuplt6:114">4.6</a></dd>
+<a class="idx" href="#idx:setuplt6:63">2.2.3</a> <a class="idx" href="#idx:setuplt6:70">3.4</a> <a class="idx" href="#idx:setuplt6:71">3.4</a> <a class="idx" href="#idx:setuplt6:73">3.4</a> <a class="idx" href="#idx:setuplt6:127">4.6</a> <a class="idx" href="#idx:setuplt6:128">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_conse/6">setup_lt_conse/6</a></dt>
 <dt>setup_lt_internal/6</dt>
 <dd>
 <a class="idx" href="#idx:setupltinternal6:60">2.2.3</a></dd>
 <dt><a class="idx" href="#setup_lt_normed/8">setup_lt_normed/8</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltnormed8:64">2.2.3</a> <a class="idx" href="#idx:setupltnormed8:74">3.4</a> <a class="idx" href="#idx:setupltnormed8:75">3.4</a> <a class="idx" href="#idx:setupltnormed8:92">4.5</a> <a class="idx" href="#idx:setupltnormed8:112">4.6</a> <a class="idx" href="#idx:setupltnormed8:116">4.6</a> <a class="idx" href="#idx:setupltnormed8:129">4.6</a></dd>
+<a class="idx" href="#idx:setupltnormed8:64">2.2.3</a> <a class="idx" href="#idx:setupltnormed8:74">3.4</a> <a class="idx" href="#idx:setupltnormed8:75">3.4</a> <a class="idx" href="#idx:setupltnormed8:92">4.5</a> <a class="idx" href="#idx:setupltnormed8:126">4.6</a> <a class="idx" href="#idx:setupltnormed8:130">4.6</a> <a class="idx" href="#idx:setupltnormed8:143">4.6</a></dd>
 <dt>setup_lt_notground/9</dt>
 <dd>
-<a class="idx" href="#idx:setupltnotground9:100">4.6</a> <a class="idx" href="#idx:setupltnotground9:111">4.6</a></dd>
+<a class="idx" href="#idx:setupltnotground9:114">4.6</a> <a class="idx" href="#idx:setupltnotground9:125">4.6</a></dd>
 <dt>setup_lt_notground1default/12</dt>
 <dd>
-<a class="idx" href="#idx:setupltnotground1default12:130">4.6</a> <a class="idx" href="#idx:setupltnotground1default12:136">4.6</a></dd>
+<a class="idx" href="#idx:setupltnotground1default12:144">4.6</a> <a class="idx" href="#idx:setupltnotground1default12:150">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltnotgroundfv13:101">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:110">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:121">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:125">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:132">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:135">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:137">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:147">8.3</a></dd>
+<a class="idx" href="#idx:setupltnotgroundfv13:115">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:124">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:135">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:139">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:146">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:149">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:151">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:161">8.3</a></dd>
 <dt>setup_lt_wait_fired/6</dt>
 <dd>
-<a class="idx" href="#idx:setupltwaitfired6:105">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:107">4.6</a></dd>
+<a class="idx" href="#idx:setupltwaitfired6:119">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:121">4.6</a></dd>
+<dt>setup_lt_wait_g/12</dt>
+<dd>
+<a class="idx" href="#idx:setupltwaitg12:103">4.5</a></dd>
 <dt>setup_lt_wait_true/5</dt>
 <dd>
-<a class="idx" href="#idx:setupltwaittrue5:106">4.6</a></dd>
+<a class="idx" href="#idx:setupltwaittrue5:120">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltwaitvar12:76">3.4</a> <a class="idx" href="#idx:setupltwaitvar12:131">4.6</a> <a class="idx" href="#idx:setupltwaitvar12:157">8.3</a></dd>
+<a class="idx" href="#idx:setupltwaitvar12:76">3.4</a> <a class="idx" href="#idx:setupltwaitvar12:145">4.6</a> <a class="idx" href="#idx:setupltwaitvar12:171">8.3</a></dd>
 <dt>setup_nontrivial_leadsto/5</dt>
 <dd>
-<a class="idx" href="#idx:setupnontrivialleadsto5:62">2.2.3</a> <a class="idx" href="#idx:setupnontrivialleadsto5:115">4.6</a></dd>
+<a class="idx" href="#idx:setupnontrivialleadsto5:62">2.2.3</a> <a class="idx" href="#idx:setupnontrivialleadsto5:129">4.6</a></dd>
 <dt><a class="idx" href="#setup_rt_intervals/0">setup_rt_intervals/0</a></dt>
 <dd>
 <a class="idx" href="#idx:setuprtintervals0:30">2.2.3</a> <a class="idx" href="#idx:setuprtintervals0:31">2.2.3</a> <a class="idx" href="#idx:setuprtintervals0:47">2.2.3</a></dd>
@@ -1776,16 +1830,25 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:trargprolog16:79">3.4</a> <a class="idx" href="#idx:trargprolog16:83">3.4</a></dd>
 <dt>uat/1</dt>
 <dd>
-<a class="idx" href="#idx:uat1:168">8.3</a></dd>
+<a class="idx" href="#idx:uat1:182">8.3</a></dd>
 <dt>update_activity_time1/2</dt>
 <dd>
-<a class="idx" href="#idx:updateactivitytime12:138">4.6</a></dd>
+<a class="idx" href="#idx:updateactivitytime12:152">4.6</a></dd>
 <dt>update_activity_times/1</dt>
 <dd>
-<a class="idx" href="#idx:updateactivitytimes1:99">4.5</a> <a class="idx" href="#idx:updateactivitytimes1:166">8.3</a> <a class="idx" href="#idx:updateactivitytimes1:167">8.3</a></dd>
+<a class="idx" href="#idx:updateactivitytimes1:99">4.5</a> <a class="idx" href="#idx:updateactivitytimes1:180">8.3</a> <a class="idx" href="#idx:updateactivitytimes1:181">8.3</a></dd>
 <dt>update_activity_times1/1</dt>
 <dd>
 <a class="idx" href="#idx:updateactivitytimes11:67">3.3</a></dd>
+<dt>update_lits_fired/8</dt>
+<dd>
+<a class="idx" href="#idx:updatelitsfired8:104">4.5</a></dd>
+<dt>update_new_true_range/7</dt>
+<dd>
+<a class="idx" href="#idx:updatenewtruerange7:105">4.5</a></dd>
+<dt>update_retrace1/12</dt>
+<dd>
+<a class="idx" href="#idx:updateretrace112:106">4.5</a> <a class="idx" href="#idx:updateretrace112:107">4.5</a></dd>
 <dt>update_sorts/0</dt>
 <dd>
 <a class="idx" href="#idx:updatesorts0:27">2.2.3</a></dd>
@@ -1797,14 +1860,14 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:varpltovarlist6:80">3.4</a></dd>
 <dt>wait_fired/5</dt>
 <dd>
-<a class="idx" href="#idx:waitfired5:108">4.6</a></dd>
+<a class="idx" href="#idx:waitfired5:122">4.6</a></dd>
 <dt>setup_lt_internalL/5</dt>
 <dd>
 <a class="idx" href="#idx:setupltinternalL5:59">2.2.3</a></dd>
 <dt class="index-sep">R</dt>
 <dt>fail_filter_handleRR/16</dt>
 <dd>
-<a class="idx" href="#idx:failfilterhandleRR16:119">4.6</a></dd>
+<a class="idx" href="#idx:failfilterhandleRR16:133">4.6</a></dd>
 </dl>
 
 </body></html>
