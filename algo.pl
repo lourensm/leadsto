@@ -184,6 +184,9 @@ local_option(ltsim, single('-pc', setprof(cumulative)),'Debugging:Profiling(cumu
 local_option(ltsim,single('-pp', setprof(plain)),
 	     'Debugging:Profiling(plain)',
 	     [help_sort(back(10))]).
+local_option(ltsim,single('-debug1', set_option(debug1)),
+	     'Debugging:bugje nondeterminism',
+	     [help_sort(back(10))]).
 local_option(ltshow, arg('-addterm', Arg, set_option(addterm(Arg)), 'SPECTERM'),
 	     'Add LTTERM to lt specification',[]).
 local_option(ltshow, single('-noshow', set_option(noshow)),
@@ -379,7 +382,7 @@ readrunspec(File) :-
 	;	run_simulation(File1)
 	),
 	noprotocol.
-%:- debug(algo).
+:- debug(algo).
 
 :- dynamic dyn_random_start_state/2.
 
@@ -2475,8 +2478,35 @@ runspec_rest :-
 		    cmp_ge(RT, TEnd),
 		    handle_fired,
 		    !
-	    ).
+	    ),
+	(   do_log(ctrace)
+	->  (atom_trace(_C, c, AtomTrace)
+	    ->	true
+	    ;	AtomTrace = []
+	    ),
+	    format('Atom c trace:~w~n', [AtomTrace])
+	;   true
+	),
+	(   get_option(debug1)
+	->
+	    (debug1_bug_in_trace
+	    ->	save_random_state
+	    ;	format('debug1:bug not detected~n')
+	    )
+	;   true
+	).
 
+debug1_bug_in_trace :-
+	(   atom_trace(_C, c, AtomTrace)
+	->  (AtomTrace = [range(T1, T2, true)]
+	    ->	(T2 is T1 + 1.0
+		->  format('debug1:C interval ok~n', []), fail
+		;   format('debug1:Mismatch AtomTrace?:~w~n', [AtomTrace])
+		)
+	    ;  format('debug1:expected single c interval, got:~w~n', [AtomTrace])
+	    )
+	;   format('debug1:expected some c trace~n', [])
+	).
 
 
 handled_time_step(ResultTime) :-
@@ -2827,8 +2857,9 @@ update_activity_times1(ResultTime) :-
 update_activity_time(Activity, T) :-
 	!,
 	%retract_wait1(T, Activity),
+	alog(uat, 'UAT:~w', [update_activity_time(Activity, T)]),
 	(update_activity_time1(Activity, T)
-	->	true
+	->	alog(uat, update_activity_time_done)
 	;	fatal_fail(update_activity_time1(Activity, T))
 	).
 
@@ -4327,18 +4358,20 @@ fail_filter_handleRR(FV,FV1,range(Tlo, Thi, TFUB), AT, TIn, Atom, PN, ToDoAnte,
 
 get_new_tholds([], AHDone, TStart, THoldsNew, _THolds, FV, FVL,
 	       LitData, ToDoAnte, ConseRId,PV,Delay, Id, IdTerm, Removed) :-
-	debug(algo, 'get_new_tholds[]~w', [AHDone, TStart, THoldsNew]),
+	debug(algo, 'get_new_tholds[]~w', [a(AHDone, TStart, THoldsNew)]),
 	setup_lt_notground_fv(TStart, FV, FVL, LitData, ToDoAnte, AHDone,
 			      THoldsNew,ConseRId,PV,Delay, Id, IdTerm,Removed).
 
 get_new_tholds([ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHolds], AHDoneOut, TStart,
 	       THoldsNew, Tholds, FV, FVL, LitData, ToDoAnte, ConseRId,PV,
 	       Delay, Id, IdTerm, Removed) :-
-	debug(algo, get_new_tholdsA, []),
+	assert_debug(uchecklist(var, FV), 'uninst vars'),
+	debug(algo, 'get_new_tholdsA:~w', [h(Atom, TStart, Tholds, THoldsNew, FVL)]),
 	chknotandyes(AnteHolds, Atom, PN,Id1,IdTerm1,AHDoneOut,get_new_tholds),
 	chk_not_inv(AnteHolds, Atom, IdTerm1),
 	find_min_range_ground(Atom, PN, Tholds, O2),
 	ensure_handled_time(HT),
+	debug(algo, 'get_new_tholdsB:~w', [j(O2, AnteHolds, HT)]),
 	(O2 = true(Tlo1, Thi1, _Cont)
 	->	assert_debug(cmp_le(Tlo1, Tholds)),
 		min_new(Thi1, THoldsNew, THoldsNew1),
@@ -4365,14 +4398,15 @@ get_new_tholds([ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHolds], AHDoneOut, TStart,
 		->	find_min_range_ground(Atom, PN, TFail, O22),
 			(O22 == blank
 			->	check_isolated_fire_rest(TStart, Tholds,
-							 LitData, ToDoAnte,
+							 LitData, FV, FVL,
+							 ToDoAnte,
 							 ConseRId,PV,Delay),
 				rm_gc_wait_vars_th(Atom,PN,Id1,IdTerm1,AnteHolds,
 						AHDoneOut,ToDoAnte,
 						Id, IdTerm, Removed)
 			;O22 = true(Tl22,Th22, _)
 			->	check_isolated_fire_rest(TStart, Tholds,
-							 LitData, ToDoAnte,
+							 LitData, FV, FVL, ToDoAnte,
 							 ConseRId,PV,Delay),
 				(	cmp_lt(Tl22, THoldsNew)
 				->	min_new(Th22, THoldsNew, THoldsNew1),
@@ -4402,41 +4436,52 @@ get_new_tholds([ds_lh(lit(Atom,PN),Id1,IdTerm1)|AnteHolds], AHDoneOut, TStart,
 /* We know the last Literal checked of AnteHolds does not hold right after THolds,
    but we need to check whether the interval TStart - Tholds may fire
    We know that rest of AnteHolds also hold */
-check_isolated_fire_rest(Tstart, Tholds, LitData,ToDoAnte,ConseRId,PV,Delay) :-
+check_isolated_fire_rest(Tstart, Tholds, LitData,FV, FVL,ToDoAnte,ConseRId,PV,Delay) :-
 	efgh0(Delay, _E, _F, G, _H),
 	(cmp_ge(Tholds - Tstart, G)
-	->	check_isolated_fire_rest1(Tstart, Tholds, LitData, ToDoAnte,
+	->	check_isolated_fire_rest1(Tstart, Tholds, LitData, FV, FVL, ToDoAnte,
 					  ConseRId,PV,Delay)
 	;	true
 	).
+
 check_isolated_fire_rest1(Tstart, Tholds, LitData, ToDoAnte, ConseRId,PV,
+			  Delay) :-
+	LitData = ds_litd(Atom, _PN, _PreOps, _PostOps, _PostConds),
+	free_variables(Atom, FV),
+	check_isolated_fire_rest1(Tstart, Tholds, LitData, FV, [], ToDoAnte, ConseRId,PV,
+			  Delay).
+check_isolated_fire_rest1(Tstart, Tholds, LitData, FV, FVL, ToDoAnte, ConseRId,PV,
 			  Delay) :-
 	LitData = ds_litd(Atom, PN, PreOps, PostOps, PostConds),
 	run_ops(PreOps),
-	free_variables(Atom, FV),
-	(	find_atom_trace_op(Atom, AtomTrace, PostOps, PostConds,FV, []),
+	(	find_atom_trace_op(Atom, AtomTrace, PostOps, PostConds,FV, FVL),
 		reverse(AtomTrace, AT),
 		handle_isolated(AT, mininf, Tstart, Tholds, Atom, PN, ToDoAnte, ConseRId,PV,
 				Delay),
 		fail
-	;	do_default_cwa_isolated_no_trace(Atom,PN,Tstart,PostOps,PostConds,
+	;	do_default_cwa_isolated_no_trace(Atom,PN,FV,FVL,Tstart,PostOps,PostConds,
 			ToDoAnte, Tholds,ConseRId,PV,Delay)
 	).
-do_default_cwa_isolated_no_trace(Atom,PN,Tstart,PostOps,PostConds,
+do_default_cwa_isolated_no_trace(Atom,PN,FV,FVL,Tstart,PostOps,PostConds,
 			ToDoAnte, Tholds,ConseRId,PV,Delay) :-
 
 	(	PN = neg,
 		cwa(Atom),
 		(	ground(Atom)
-		->	run_ops(PostOps),run_ops(PostConds),
-			efgh0(Delay, _E1, _F1, G, _H1),
-			ensure_handled_time(HT),
-			min_new(HT, Tholds, Thi),
-			ensure_setup_time(Tsetup),
-			max_new(Tsetup, Tstart, Tlo),
-			cmp_ge(Thi - Tlo, G),
-			check_isolated_fire_restl(ToDoAnte, Tlo, Thi, ConseRId,
+		->	assert_debug(FV == [],dd1),
+			assert_debug(FVL == [[[]]],dd2),
+		        (true
+			->  warning('Behavior changed, no spurious cwa derivation')
+			;   run_ops(PostOps),run_ops(PostConds),
+			    efgh0(Delay, _E1, _F1, G, _H1),
+			    ensure_handled_time(HT),
+			    min_new(HT, Tholds, Thi),
+			 ensure_setup_time(Tsetup),
+			 max_new(Tsetup, Tstart, Tlo),
+			 cmp_ge(Thi - Tlo, G),
+			 check_isolated_fire_restl(ToDoAnte, Tlo, Thi, ConseRId,
 						  PV,Delay)
+			)
 		;	efgh0(Delay, _E, _F, G, _H),
 			ensure_handled_time(HT),
 			min_new(HT, Tholds, Thi),
@@ -4444,7 +4489,11 @@ do_default_cwa_isolated_no_trace(Atom,PN,Tstart,PostOps,PostConds,
 			max_new(Tsetup, Tstart, Tlo),
 			cmp_ge(Thi - Tlo, G),
 			run_ops(PostOps),run_ops(PostConds),
-			\+ find_atom_trace(Atom, _AtomTrace),
+			\+ memberchk(FV, FVL),
+			(   find_atom_trace(Atom, _AtomTrace)
+			->  local_impl_error('We possibly miss some cwa result because of some derived positive values for atom ~w', [Atom])
+			;   true
+			),
 			check_isolated_fire_restl(ToDoAnte, Tlo, Thi, ConseRId,
 						  PV,Delay),
 			fail

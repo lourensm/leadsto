@@ -223,19 +223,24 @@ cmptraces(TraceFile, LoadedFile, Result) :-
 	flag(ltonlyatoms, _, 0),
 	(   algo:filled_atom_trace(AtomKey, Atom, AtomTrace),
 	    flag(algoatoms, AA, AA + 1),
-	    (	LoadModule:atom_trace(AtomKey, Atom, AtomTrace)
+	    (	predicate_property(LoadModule:atom_trace(_,_,_), interpreted)
+	    ->	(	LoadModule:atom_trace(AtomKey, Atom, AtomTrace)
+		->  true
+		;   LoadModule:atom_trace(AtomKey, Atom, AtomTrace1)
+		->  format('Atom Trace varying results:~w~n', [Atom]),
+		    format('algo:~w~nltrace:~w~n', [AtomTrace, AtomTrace1]),
+			flag(mismatchatoms, MA, MA + 1)
+		;   fail
+		)
 	    ->	true
-	    ;	LoadModule:atom_trace(AtomKey, Atom, AtomTrace1)
-	    ->	format('Atom Trace varying results:~w~n', [Atom]),
-		format('algo:~w~nltrace:~w~n', [AtomTrace, AtomTrace1]),
-		flag(mismatchatoms, MA, MA + 1)
 	    ;	format('Atom Trace only new:~w~n', [Atom]),
 		flag(algoonlyatoms, AOA, AOA + 1)
 	    ),
 	    fail
 	;   true
 	),
-	(   LoadModule:atom_trace(AtomKey, Atom, AtomTrace),
+	(   predicate_property(LoadModule:atom_trace(_,_,_), interpreted),
+	    LoadModule:atom_trace(AtomKey, Atom, AtomTrace),
 	    flag(ltatoms, LA, LA + 1),
 	    (algo:filled_atom_trace(AtomKey, Atom, AtomTrace1)
 	    ->	(AtomTrace == AtomTrace1

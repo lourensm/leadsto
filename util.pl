@@ -209,6 +209,7 @@
 	   update_sort/1,
 	   find_set/2
 	  ]).
+
 %:- use_module(library(pce)).
 :- use_module(pce_stuff).
 :- use_module(formats).

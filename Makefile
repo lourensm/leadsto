@@ -1239,3 +1239,21 @@ ltall:
 		done
 
 
+debug1:
+	$(MAKE) leadsto
+	./leadsto -debug1 -log all spec1/bugje-nondeterminism.lt
+
+stopbug:
+	$(MAKE) leadsto
+	rm -f randomstate.txt
+	counter=0
+	while true; do \
+		if [ -e randomstate.txt ] ;\
+		then \
+			echo "FOUND rs";\
+			exit 1;\
+		fi;\
+		let counter=counter+1;\
+		./leadsto -debug1 -noshow -log all spec1/bugje-nondeterminism.lt;\
+		echo "COUNTER:" $$counter;\
+	done
