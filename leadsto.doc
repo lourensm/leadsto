@@ -569,6 +569,30 @@ we wish to extend the range as far as possible.
 Is complex and not documented. In the source some explanation is given,
 \file{olddocs/bugdev.txt} also contains some explanation.
 
+dyn_handled_wait_var_instance/4 is complex, asserted in mark_handled/7.
+mark_handled/7 is only called in rm_gc_wait_vars1/8.
+
+In fail_filter_handle/15 a comment says "ignoring handled instance" and then
+indeed skips handling the \exam{FV} instantiation.
+
+In instantiate_op/16 we skip  setup_lt_normed/8 if we encountered the
+matching dyn_handled_wait_var_instance/4.
+
+Another fact: dyn_rm_gc_wait_vars/8. But that seems clear:assertion
+takes place only in rm_gc_wait_vars/8 and depends on the \exam{postpone_rm_gc}
+option being set. The entries are handled by postponed_rm_gc/0 where
+indeed the postponed entries are handled by rm_gc_wait_vars1/8.
+
+postponed_rm_gc/0 is called at the end of update_activity_times/1.
+This seems to be harmless?
+
+We should at least make sure that a duplicate handling of a \exam{wait_var}
+entry does not lead to erraneous results. That could be the case if we would
+derive another delay if \exam{e < f}. We need to be able to detect such
+situations!
+
+
+
 \subsection{Runtime Algorithm Predicates}
 
 \begin{description}
@@ -695,7 +719,9 @@ Although we know \arg{AnteHolds} is true starting from \arg{TMin}, we also know
 that no \arg{LitData} literal not having \arg{FVL} instantiation is true
 starting from the current handled time.
 
-We need to check that \arg{TMin} is not relevant! Indeed, see update_activity_time1/2 for the \exam{wait_var} term. \arg{TMin} is only used to characterize
+We need to check that \arg{TMin} is not relevant!
+Indeed it is not: see update_activity_time1/2 for the \exam{wait_var} term.
+\arg{TMin} is only used to characterize
 the \arg{Removed} argument for identifying the current activity.
 So, ... TODO: later remove the unnecessary \arg{TMin} argument from
 \exam{wait_var} terms.
@@ -729,6 +755,37 @@ update_activity_times1(ResultTime) :-
     ).
 \end{code}
 \footnote{ResultTime is the current/new, just updated HandledTime.}
+
+Times involved in \exam{wait} entries:
+\begin{description}
+\item[TStart]from what time do we need new true LitData
+\item[TEnd]up to what time does \arg{AnteHolds} hold, for \exam{wait_var}
+\item[THandle]At or before what HandledTime should \exam{wait} entry be
+updated.
+\item[TFirstResult]First time that consequent could become true, see activity_min_result_time/2.
+\end{description}
+
+As we cannot efficiently select those wait facts with \exam{T < HandledTime},
+we could inspect all wait entries and calculate relevant times each time.
+
+\subsection{wait\_var}
+
+\exam{TStart}: We should or could, start inspecting the wait entry as soon as
+new values are available from that time. Alternatively we could wait till
+\exam{TStart + g}. So, \exam{THandle} could be \exam{TStart}, or \exam{TStart +
+g}.
+
+The first time the consequent should become true:
+\exam{TStart + g + e}
+
+At this time, we store
+\exam{wait_var(Id, IdTerm, HT, TMin, FV, FVL, LitData, ToDoAnte, AnteHolds, THolds, ConseRId, PV, Delay)}.
+
+As shown elsewhere, \arg{TMin} is not relevant, HT is the time up to which
+we looked at LitData, FVL, and up to where there is no value available and from
+where the value is unknown/blank.
+
+
 
 \section{So far}
 
@@ -936,7 +993,8 @@ although it seems hard to determine the next HandledTime.
 Possibly there could be more options even. The \exam{wait} entries should
 not be linked to a new HandledTime value?
 
-The \exam{wait} entries should be defined independent from \exam{HandledTime}.
+The \exam{wait} entries should be defined independent from \exam{HandledTime},
+as they are now.
 
 \exam{wait_var} is linked to one \exam{LitData} entry. Of \exam{FV} and
 \exam{FVL} we know that no value is known before TStart. We know that
