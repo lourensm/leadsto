@@ -288,6 +288,8 @@ verifying waitvar FV,FVL aspects</span></a></div>
 bugje-nondeterminism</span></a></div>
 <div class="toc-h3"><a class="sec" href="#sec:8.3"><span class="sec-nr">8.3</span> <span class="sec-title">analyse 
 case</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:9"><span class="sec-nr">9</span> <span class="sec-title">wait_true</span></a></div>
+<div class="toc-h2"><a class="sec" href="#sec:10"><span class="sec-nr">10</span> <span class="sec-title">wait_fired</span></a></div>
 </div>
 
 <p>
@@ -1080,7 +1082,7 @@ set_state, handle_fired</code> sequence in
 <a id="idx:runspecrest0:117"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">13<span class="fn-text">Why 
 not fire immediately?</span></sup> After <a id="idx:schedulefire3:118"></a><span class="pred-ext">schedule_fire/3</span> 
 we do <a id="idx:setupltwaitfired6:119"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
-If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:120"></a><span class="pred-ext">setup_lt_wait_true/5</span>.
+If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:120"></a><a class="pred" href="#setup_lt_wait_true/5">setup_lt_wait_true/5</a>.
 
 <p><a id="idx:setupltwaitfired6:121"></a><span class="pred-ext">setup_lt_wait_fired/6</span> 
 stores a <a id="idx:waitfired5:122"></a><span class="pred-ext">wait_fired/5</span> 
@@ -1567,6 +1569,54 @@ we somehow depend on a known state of the future over one <code>wait</code>
 batch? Let us postpone this.
 </ul>
 
+<p>
+
+<h2><a id="sec:9"><span class="sec-nr">9</span> <span class="sec-title">wait_true</span></a></h2>
+
+<p>Where will it be set, what are the variables?
+
+<dl class="latex">
+<dt class="pubdef"><a id="setup_lt_wait_true/5"><strong>setup_lt_wait_true</strong>(<var>TMin, 
+THolds, AnteHolds, ConseRId, Delay</var>)</a></dt>
+<dd class="defbody">
+We know that <var>AnteHolds</var> holds between <var>TMin</var> and <var>THolds</var>, 
+there are no more literals in the Antecedent, but the interval
+<code><var>THolds</var> - <var>TMin</var> &lt; g</code>. Only called by <a id="idx:setupltconse6:183"></a><a class="pred" href="#setup_lt_conse/6">setup_lt_conse/6</a> 
+which is called by <code>update_new_true_range(ListToHold = [],..)</code> 
+and by
+<code>setup_lt_normed(TodoAnte=[],..)</code>. <a id="idx:setupltnormed8:184"></a><a class="pred" href="#setup_lt_normed/8">setup_lt_normed/8</a> 
+is called at different places and if <code>TodoAnte []</code> leads to 
+calling
+<a id="idx:setupltnotgroundfv13:185"></a><a class="pred" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a>.
+<a id="idx:setupltwaittrue5:186"></a><a class="pred" href="#setup_lt_wait_true/5">setup_lt_wait_true/5</a> 
+calls <code>set_wait1(THolds, wait_true(TMin, THolds, AnteHolds, 
+CnseRId, Delay)</code>.
+
+<p>We know <code><var>THolds</var> - <var>TMin</var> &lt; g</code>. 
+Probably <var>TMin</var> &lt; <code>THandledCurrent</code> which puts a 
+maximum value on <var>THolds</var> &lt; <code>THandledCurrent + g</code>.
+
+<pre class="code">
+activity_min_result_time(wait_true(TMin, THolds, _AnteHolds, _ConseRId, Delay),RT) :-
+        !,efgh0(Delay, E, _F, G, _H),
+        RT is TMin + G + E.
+</pre>
+
+<p>We set <code>TWait</code> to <var>THolds</var> so that as soon as new 
+values come available at <code>THandled</code> &gt; <code>TWait</code>, 
+we reinvestigate and update the
+<code>wait_true</code> consequences.
+
+<p></dd>
+</dl>
+
+<code>update_activity_time1(wait_true(...),..)</code> simply calls
+<a id="idx:updatenewtruerange7:187"></a><span class="pred-ext">update_new_true_range/7</span>.
+
+<p>
+
+<h2><a id="sec:10"><span class="sec-nr">10</span> <span class="sec-title">wait_fired</span></a></h2>
+
 <h1><a id="document-index">Index</a></h1>
 
 <dl>
@@ -1780,12 +1830,14 @@ batch? Let us postpone this.
 <dd>
 <a class="idx" href="#idx:setuplt6:63">2.2.3</a> <a class="idx" href="#idx:setuplt6:70">3.4</a> <a class="idx" href="#idx:setuplt6:71">3.4</a> <a class="idx" href="#idx:setuplt6:73">3.4</a> <a class="idx" href="#idx:setuplt6:127">4.6</a> <a class="idx" href="#idx:setuplt6:128">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_conse/6">setup_lt_conse/6</a></dt>
+<dd>
+<a class="idx" href="#idx:setupltconse6:183">9</a></dd>
 <dt>setup_lt_internal/6</dt>
 <dd>
 <a class="idx" href="#idx:setupltinternal6:60">2.2.3</a></dd>
 <dt><a class="idx" href="#setup_lt_normed/8">setup_lt_normed/8</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltnormed8:64">2.2.3</a> <a class="idx" href="#idx:setupltnormed8:74">3.4</a> <a class="idx" href="#idx:setupltnormed8:75">3.4</a> <a class="idx" href="#idx:setupltnormed8:92">4.5</a> <a class="idx" href="#idx:setupltnormed8:126">4.6</a> <a class="idx" href="#idx:setupltnormed8:130">4.6</a> <a class="idx" href="#idx:setupltnormed8:143">4.6</a></dd>
+<a class="idx" href="#idx:setupltnormed8:64">2.2.3</a> <a class="idx" href="#idx:setupltnormed8:74">3.4</a> <a class="idx" href="#idx:setupltnormed8:75">3.4</a> <a class="idx" href="#idx:setupltnormed8:92">4.5</a> <a class="idx" href="#idx:setupltnormed8:126">4.6</a> <a class="idx" href="#idx:setupltnormed8:130">4.6</a> <a class="idx" href="#idx:setupltnormed8:143">4.6</a> <a class="idx" href="#idx:setupltnormed8:184">9</a></dd>
 <dt>setup_lt_notground/9</dt>
 <dd>
 <a class="idx" href="#idx:setupltnotground9:114">4.6</a> <a class="idx" href="#idx:setupltnotground9:125">4.6</a></dd>
@@ -1794,16 +1846,16 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:setupltnotground1default12:144">4.6</a> <a class="idx" href="#idx:setupltnotground1default12:150">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltnotgroundfv13:115">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:124">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:135">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:139">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:146">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:149">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:151">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:161">8.3</a></dd>
+<a class="idx" href="#idx:setupltnotgroundfv13:115">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:124">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:135">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:139">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:146">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:149">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:151">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:161">8.3</a> <a class="idx" href="#idx:setupltnotgroundfv13:185">9</a></dd>
 <dt>setup_lt_wait_fired/6</dt>
 <dd>
 <a class="idx" href="#idx:setupltwaitfired6:119">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:121">4.6</a></dd>
 <dt>setup_lt_wait_g/12</dt>
 <dd>
 <a class="idx" href="#idx:setupltwaitg12:103">4.5</a></dd>
-<dt>setup_lt_wait_true/5</dt>
+<dt><a class="idx" href="#setup_lt_wait_true/5">setup_lt_wait_true/5</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltwaittrue5:120">4.6</a></dd>
+<a class="idx" href="#idx:setupltwaittrue5:120">4.6</a> <a class="idx" href="#idx:setupltwaittrue5:186">9</a></dd>
 <dt><a class="idx" href="#setup_lt_wait_var/12">setup_lt_wait_var/12</a></dt>
 <dd>
 <a class="idx" href="#idx:setupltwaitvar12:76">3.4</a> <a class="idx" href="#idx:setupltwaitvar12:145">4.6</a> <a class="idx" href="#idx:setupltwaitvar12:171">8.3</a></dd>
@@ -1845,7 +1897,7 @@ batch? Let us postpone this.
 <a class="idx" href="#idx:updatelitsfired8:104">4.5</a></dd>
 <dt>update_new_true_range/7</dt>
 <dd>
-<a class="idx" href="#idx:updatenewtruerange7:105">4.5</a></dd>
+<a class="idx" href="#idx:updatenewtruerange7:105">4.5</a> <a class="idx" href="#idx:updatenewtruerange7:187">9</a></dd>
 <dt>update_retrace1/12</dt>
 <dd>
 <a class="idx" href="#idx:updateretrace112:106">4.5</a> <a class="idx" href="#idx:updateretrace112:107">4.5</a></dd>

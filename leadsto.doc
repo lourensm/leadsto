@@ -1067,6 +1067,40 @@ It could be that we somehow depend on a known state of the future over
 one \exam{wait} batch? Let us postpone this.
 \end{itemize}
 
+\section{wait_true}
 
+Where will it be set, what are the variables?
+
+\begin{description}
+\predicate{setup_lt_wait_true}{5}{TMin, THolds, AnteHolds, ConseRId, Delay}
+We know that \arg{AnteHolds} holds between \arg{TMin} and \arg{THolds},
+there are no more literals in the Antecedent, but the interval
+\exam{\arg{THolds} - \arg{TMin} < g}. Only called by setup_lt_conse/6 which is
+called by \exam{update_new_true_range(ListToHold = [],..)} and by
+\exam{setup_lt_normed(TodoAnte=[],..)}. setup_lt_normed/8 is called at
+different places and if \exam{TodoAnte \= []} leads to calling
+setup_lt_notground_fv/13.
+setup_lt_wait_true/5 calls \exam{set_wait1(THolds,
+wait_true(TMin, THolds, AnteHolds, CnseRId, Delay)}.
+
+We know \exam{\arg{THolds} - \arg{TMin} < g}.
+Probably \arg{TMin} < \exam{THandledCurrent} which puts a maximum value
+on \arg{THolds} < \exam{THandledCurrent + g}.
+\begin{code}
+activity_min_result_time(wait_true(TMin, THolds, _AnteHolds, _ConseRId, Delay),RT) :-
+	!,efgh0(Delay, E, _F, G, _H),
+	RT is TMin + G + E.
+\end{code}
+
+We set \exam{TWait} to \arg{THolds} so that as soon as new values come available
+at \exam{THandled} > \exam{TWait}, we reinvestigate and update the
+\exam{wait_true} consequences.
+
+\end{description}
+\exam{update_activity_time1(wait_true(...),..)} simply calls
+update_new_true_range/7.
+
+\section{wait_fired}
 
 \end{document}
+
