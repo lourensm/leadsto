@@ -1101,6 +1101,52 @@ at \exam{THandled} > \exam{TWait}, we reinvestigate and update the
 update_new_true_range/7.
 
 \section{wait_fired}
+\begin{description}
+\predicate{setup_lt_wait_fired}{6}{THolds, THandled, AnteHolds, ConseRId, Delay, Removed}
+The \arg{AnteHolds} antecedent holds between some \exam{TMin} and \arg{THolds}.
+This has lead to the rule having fired using schedule_fire/3.
+\arg{THandled} is very confusing: It is not \exam{THandled} encountered everywhere else, but \exam{\arg{THandled} = T4} where \exam{T4 = THolds + D + H} where
+\exam{D} is the delay set. So \arg{THandled} is the time up to where the
+rule has just fired.
 
+setup_lt_wait_fired/6:
+\begin{code}
+setup_lt_wait_fired(THolds, TFired, AnteHolds, ConseRId, Delay, Removed) :-
+        set_wait1(THolds, TFired, AnteHolds, ConseRId, Delay).
+\end{code}
+setup_t_wait_fired/6 is called by setup_lt_conse/6 if the timing values
+lead to firing. Also by \exam{update_lits_fired([], ..)}. And
+update_lits_fired/8 is the update_activity_time1/2 action for \exam{wait_fired}.
+\predicate{update_lits_fired}{8}{AnteHolds, THoldsPrev, TFired, HoldLits, ConseRId, Delay, THoldsNew, Removed}
+Declarative semantics: In the range THoldsPrev, THoldsNew,
+the literals \arg{HoldLits} hold. \arg{AnteHolds} and \arg{HoldLits} together
+represent the antecedent. But currently \arg{AnteHolds} is reversed compared to the order in the rule.~\footnote{Why?}
+
+The predicate examines \arg{AnteHolds} a literal at a time until
+a maximal true interval is arrived at and then the consequent is fired
+between \arg{TFired} and \exam{\arg{TFired} + \arg{THoldsNew} -
+\arg{THoldsPrev}}
+and after that setup_lt_wait_fired/6 is called.
+
+If during analysis of \arg{AnteHolds} we find that we cannot extend the time
+interval past \exam{HandledTime}, we call check_continue_fire/5 that determines
+up to what time the rest of the Antecedent holds and then fires the rule
+for that time period without calling setup_lt_wait_fired/6.
+But... also update_retrace1/12 is called, that tests what needs to be
+done with this Antecedent instantiation, be it update_new_true_range/7,
+update_mid_true_range/11, setup_lt_wait_g/12.
+
+Depending on a fix, this may lead to setup_lt_wait_g/12 being called with
+\exam{TWait} > \exam{HandledTime}.
+
+\end{description}
+\begin{code}
+activity_min_result_Time(wait_fired(_THolds, TFired, _AnteH, _Conse, Delay),RT):-
+        RT = TFired.
+\end{code}
+This seems to be different from the other choices. We could probably decide
+to analyse this entry when \exam{HandledTime > THolds}.
+We need a more strict definition of \exam{HandledTime} here, see discussion
+elsewhere.
 \end{document}
 

@@ -1011,7 +1011,7 @@ which is called only by <a id="idx:getnewtholds15:102"></a><a class="pred" href=
 when the currently inspected <var>AnteHolds</var>
 <code>ds_lh</code> term fails from <var>Tholds</var>. Also called by <a id="idx:setupltwaitg12:103"></a><span class="pred-ext">setup_lt_wait_g/12</span>:
 <ul class="latex">
-<li>called by <a id="idx:updatelitsfired8:104"></a><span class="pred-ext">update_lits_fired/8</span> 
+<li>called by <a id="idx:updatelitsfired8:104"></a><a class="pred" href="#update_lits_fired/8">update_lits_fired/8</a> 
 but preceded by an implementation error.
 <li>by <a id="idx:updatenewtruerange7:105"></a><span class="pred-ext">update_new_true_range/7</span> 
 when from <code>Tlo</code> the current Literal is blank. If there the 
@@ -1081,10 +1081,10 @@ why postpone?</span></sup> They are fired by the <code>repeat,
 set_state, handle_fired</code> sequence in
 <a id="idx:runspecrest0:117"></a><span class="pred-ext">runspec_rest/0</span>.&nbsp;<sup class="fn">13<span class="fn-text">Why 
 not fire immediately?</span></sup> After <a id="idx:schedulefire3:118"></a><span class="pred-ext">schedule_fire/3</span> 
-we do <a id="idx:setupltwaitfired6:119"></a><span class="pred-ext">setup_lt_wait_fired/6</span>. 
+we do <a id="idx:setupltwaitfired6:119"></a><a class="pred" href="#setup_lt_wait_fired/6">setup_lt_wait_fired/6</a>. 
 If <code>THolds &lt; TMin + G</code> we call <a id="idx:setupltwaittrue5:120"></a><a class="pred" href="#setup_lt_wait_true/5">setup_lt_wait_true/5</a>.
 
-<p><a id="idx:setupltwaitfired6:121"></a><span class="pred-ext">setup_lt_wait_fired/6</span> 
+<p><a id="idx:setupltwaitfired6:121"></a><a class="pred" href="#setup_lt_wait_fired/6">setup_lt_wait_fired/6</a> 
 stores a <a id="idx:waitfired5:122"></a><span class="pred-ext">wait_fired/5</span> 
 fact.&nbsp;<sup class="fn">14<span class="fn-text">It is confusing that 
 two implementations of this waiting are present in the code, depending 
@@ -1617,6 +1617,73 @@ we reinvestigate and update the
 
 <h2><a id="sec:10"><span class="sec-nr">10</span> <span class="sec-title">wait_fired</span></a></h2>
 
+<dl class="latex">
+<dt class="pubdef"><a id="setup_lt_wait_fired/6"><strong>setup_lt_wait_fired</strong>(<var>THolds, 
+THandled, AnteHolds, ConseRId, Delay, Removed</var>)</a></dt>
+<dd class="defbody">
+The <var>AnteHolds</var> antecedent holds between some <code>TMin</code> 
+and <var>THolds</var>. This has lead to the rule having fired using <a id="idx:schedulefire3:188"></a><span class="pred-ext">schedule_fire/3</span>.
+<var>THandled</var> is very confusing: It is not <code>THandled</code> 
+encountered everywhere else, but <code><var>THandled</var> = T4</code> 
+where <code>T4 = THolds + D + H</code> where
+<code>D</code> is the delay set. So <var>THandled</var> is the time up 
+to where the rule has just fired.
+
+<p><a id="idx:setupltwaitfired6:189"></a><a class="pred" href="#setup_lt_wait_fired/6">setup_lt_wait_fired/6</a>:
+
+<pre class="code">
+setup_lt_wait_fired(THolds, TFired, AnteHolds, ConseRId, Delay, Removed) :-
+        set_wait1(THolds, TFired, AnteHolds, ConseRId, Delay).
+</pre>
+
+<p><a id="idx:setuptwaitfired6:190"></a><span class="pred-ext">setup_t_wait_fired/6</span> 
+is called by <a id="idx:setupltconse6:191"></a><a class="pred" href="#setup_lt_conse/6">setup_lt_conse/6</a> 
+if the timing values lead to firing. Also by <code>update_lits_fired([], 
+..)</code>. And
+<a id="idx:updatelitsfired8:192"></a><a class="pred" href="#update_lits_fired/8">update_lits_fired/8</a> 
+is the <a id="idx:updateactivitytime12:193"></a><span class="pred-ext">update_activity_time1/2</span> 
+action for <code>wait_fired</code>.
+</dd>
+<dt class="pubdef"><a id="update_lits_fired/8"><strong>update_lits_fired</strong>(<var>AnteHolds, 
+THoldsPrev, TFired, HoldLits, ConseRId, Delay, THoldsNew, Removed</var>)</a></dt>
+<dd class="defbody">
+Declarative semantics: In the range THoldsPrev, THoldsNew, the literals <var>HoldLits</var> 
+hold. <var>AnteHolds</var> and <var>HoldLits</var> together represent 
+the antecedent. But currently <var>AnteHolds</var> is reversed compared 
+to the order in the rule.&nbsp;<sup class="fn">18<span class="fn-text">Why?</span></sup>
+
+<p>The predicate examines <var>AnteHolds</var> a literal at a time until 
+a maximal true interval is arrived at and then the consequent is fired 
+between <var>TFired</var> and <code><var>TFired</var> + <var>THoldsNew</var> 
+- <var>THoldsPrev</var></code> and after that <a id="idx:setupltwaitfired6:194"></a><a class="pred" href="#setup_lt_wait_fired/6">setup_lt_wait_fired/6</a> 
+is called.
+
+<p>If during analysis of <var>AnteHolds</var> we find that we cannot 
+extend the time interval past <code>HandledTime</code>, we call <a id="idx:checkcontinuefire5:195"></a><span class="pred-ext">check_continue_fire/5</span> 
+that determines up to what time the rest of the Antecedent holds and 
+then fires the rule for that time period without calling <a id="idx:setupltwaitfired6:196"></a><a class="pred" href="#setup_lt_wait_fired/6">setup_lt_wait_fired/6</a>. 
+But... also <a id="idx:updateretrace112:197"></a><span class="pred-ext">update_retrace1/12</span> 
+is called, that tests what needs to be done with this Antecedent 
+instantiation, be it <a id="idx:updatenewtruerange7:198"></a><span class="pred-ext">update_new_true_range/7</span>,
+<a id="idx:updatemidtruerange11:199"></a><span class="pred-ext">update_mid_true_range/11</span>, <a id="idx:setupltwaitg12:200"></a><span class="pred-ext">setup_lt_wait_g/12</span>.
+
+<p>Depending on a fix, this may lead to <a id="idx:setupltwaitg12:201"></a><span class="pred-ext">setup_lt_wait_g/12</span> 
+being called with
+<code>TWait</code> &gt; <code>HandledTime</code>.
+
+<p></dd>
+</dl>
+
+<pre class="code">
+activity_min_result_Time(wait_fired(_THolds, TFired, _AnteH, _Conse, Delay),RT):-
+        RT = TFired.
+</pre>
+
+<p>This seems to be different from the other choices. We could probably 
+decide to analyse this entry when <code>HandledTime &gt; THolds</code>. 
+We need a more strict definition of <code>HandledTime</code> here, see 
+discussion elsewhere.
+
 <h1><a id="document-index">Index</a></h1>
 
 <dl>
@@ -1631,6 +1698,9 @@ we reinvestigate and update the
 <dt><a class="idx" href="#atom_trace/3">atom_trace/3</a></dt>
 <dd>
 <a class="idx" href="#idx:atomtrace3:14">2.2.1</a> <a class="idx" href="#idx:atomtrace3:17">2.2.1</a></dd>
+<dt>check_continue_fire/5</dt>
+<dd>
+<a class="idx" href="#idx:checkcontinuefire5:195">10</a></dd>
 <dt>check_fire_isolated/5</dt>
 <dd>
 <a class="idx" href="#idx:checkfireisolated5:142">4.6</a></dd>
@@ -1813,7 +1883,7 @@ we reinvestigate and update the
 <dt><a class="idx" href="#savetracesetup/3">savetracesetup/3</a></dt>
 <dt>schedule_fire/3</dt>
 <dd>
-<a class="idx" href="#idx:schedulefire3:116">4.6</a> <a class="idx" href="#idx:schedulefire3:118">4.6</a></dd>
+<a class="idx" href="#idx:schedulefire3:116">4.6</a> <a class="idx" href="#idx:schedulefire3:118">4.6</a> <a class="idx" href="#idx:schedulefire3:188">10</a></dd>
 <dt>set_wait1_var/14</dt>
 <dd>
 <a class="idx" href="#idx:setwait1var14:164">8.3</a> <a class="idx" href="#idx:setwait1var14:168">8.3</a></dd>
@@ -1831,7 +1901,7 @@ we reinvestigate and update the
 <a class="idx" href="#idx:setuplt6:63">2.2.3</a> <a class="idx" href="#idx:setuplt6:70">3.4</a> <a class="idx" href="#idx:setuplt6:71">3.4</a> <a class="idx" href="#idx:setuplt6:73">3.4</a> <a class="idx" href="#idx:setuplt6:127">4.6</a> <a class="idx" href="#idx:setuplt6:128">4.6</a></dd>
 <dt><a class="idx" href="#setup_lt_conse/6">setup_lt_conse/6</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltconse6:183">9</a></dd>
+<a class="idx" href="#idx:setupltconse6:183">9</a> <a class="idx" href="#idx:setupltconse6:191">10</a></dd>
 <dt>setup_lt_internal/6</dt>
 <dd>
 <a class="idx" href="#idx:setupltinternal6:60">2.2.3</a></dd>
@@ -1847,12 +1917,12 @@ we reinvestigate and update the
 <dt><a class="idx" href="#setup_lt_notground_fv/13">setup_lt_notground_fv/13</a></dt>
 <dd>
 <a class="idx" href="#idx:setupltnotgroundfv13:115">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:124">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:135">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:139">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:146">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:149">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:151">4.6</a> <a class="idx" href="#idx:setupltnotgroundfv13:161">8.3</a> <a class="idx" href="#idx:setupltnotgroundfv13:185">9</a></dd>
-<dt>setup_lt_wait_fired/6</dt>
+<dt><a class="idx" href="#setup_lt_wait_fired/6">setup_lt_wait_fired/6</a></dt>
 <dd>
-<a class="idx" href="#idx:setupltwaitfired6:119">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:121">4.6</a></dd>
+<a class="idx" href="#idx:setupltwaitfired6:119">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:121">4.6</a> <a class="idx" href="#idx:setupltwaitfired6:189">10</a> <a class="idx" href="#idx:setupltwaitfired6:194">10</a> <a class="idx" href="#idx:setupltwaitfired6:196">10</a></dd>
 <dt>setup_lt_wait_g/12</dt>
 <dd>
-<a class="idx" href="#idx:setupltwaitg12:103">4.5</a></dd>
+<a class="idx" href="#idx:setupltwaitg12:103">4.5</a> <a class="idx" href="#idx:setupltwaitg12:200">10</a> <a class="idx" href="#idx:setupltwaitg12:201">10</a></dd>
 <dt><a class="idx" href="#setup_lt_wait_true/5">setup_lt_wait_true/5</a></dt>
 <dd>
 <a class="idx" href="#idx:setupltwaittrue5:120">4.6</a> <a class="idx" href="#idx:setupltwaittrue5:186">9</a></dd>
@@ -1865,6 +1935,9 @@ we reinvestigate and update the
 <dt><a class="idx" href="#setup_rt_intervals/0">setup_rt_intervals/0</a></dt>
 <dd>
 <a class="idx" href="#idx:setuprtintervals0:30">2.2.3</a> <a class="idx" href="#idx:setuprtintervals0:31">2.2.3</a> <a class="idx" href="#idx:setuprtintervals0:47">2.2.3</a></dd>
+<dt>setup_t_wait_fired/6</dt>
+<dd>
+<a class="idx" href="#idx:setuptwaitfired6:190">10</a></dd>
 <dt>setup_unknown_or_cwa/2</dt>
 <dd>
 <a class="idx" href="#idx:setupunknownorcwa2:4">2.1</a> <a class="idx" href="#idx:setupunknownorcwa2:48">2.2.3</a></dd>
@@ -1885,22 +1958,25 @@ we reinvestigate and update the
 <a class="idx" href="#idx:uat1:182">8.3</a></dd>
 <dt>update_activity_time1/2</dt>
 <dd>
-<a class="idx" href="#idx:updateactivitytime12:152">4.6</a></dd>
+<a class="idx" href="#idx:updateactivitytime12:152">4.6</a> <a class="idx" href="#idx:updateactivitytime12:193">10</a></dd>
 <dt>update_activity_times/1</dt>
 <dd>
 <a class="idx" href="#idx:updateactivitytimes1:99">4.5</a> <a class="idx" href="#idx:updateactivitytimes1:180">8.3</a> <a class="idx" href="#idx:updateactivitytimes1:181">8.3</a></dd>
 <dt>update_activity_times1/1</dt>
 <dd>
 <a class="idx" href="#idx:updateactivitytimes11:67">3.3</a></dd>
-<dt>update_lits_fired/8</dt>
+<dt><a class="idx" href="#update_lits_fired/8">update_lits_fired/8</a></dt>
 <dd>
-<a class="idx" href="#idx:updatelitsfired8:104">4.5</a></dd>
+<a class="idx" href="#idx:updatelitsfired8:104">4.5</a> <a class="idx" href="#idx:updatelitsfired8:192">10</a></dd>
+<dt>update_mid_true_range/11</dt>
+<dd>
+<a class="idx" href="#idx:updatemidtruerange11:199">10</a></dd>
 <dt>update_new_true_range/7</dt>
 <dd>
-<a class="idx" href="#idx:updatenewtruerange7:105">4.5</a> <a class="idx" href="#idx:updatenewtruerange7:187">9</a></dd>
+<a class="idx" href="#idx:updatenewtruerange7:105">4.5</a> <a class="idx" href="#idx:updatenewtruerange7:187">9</a> <a class="idx" href="#idx:updatenewtruerange7:198">10</a></dd>
 <dt>update_retrace1/12</dt>
 <dd>
-<a class="idx" href="#idx:updateretrace112:106">4.5</a> <a class="idx" href="#idx:updateretrace112:107">4.5</a></dd>
+<a class="idx" href="#idx:updateretrace112:106">4.5</a> <a class="idx" href="#idx:updateretrace112:107">4.5</a> <a class="idx" href="#idx:updateretrace112:197">10</a></dd>
 <dt>update_sorts/0</dt>
 <dd>
 <a class="idx" href="#idx:updatesorts0:27">2.2.3</a></dd>
